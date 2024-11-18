@@ -4,6 +4,7 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using GameNetcodeStuff;
 using HarmonyLib;
+using LethalLib.Extras;
 using LethalLib.Modules;
 using Rats;
 using System;
@@ -24,6 +25,8 @@ namespace Rats
         private readonly Harmony harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
         public static PlayerControllerB localPlayer { get { return GameNetworkManager.Instance.localPlayerController; } }
         public static bool IsServerOrHost { get { return NetworkManager.Singleton.IsServer || NetworkManager.Singleton.IsHost; } }
+        public static PlayerControllerB PlayerFromId(ulong id) { return StartOfRound.Instance.allPlayerScripts[StartOfRound.Instance.ClientPlayerList[id]]; }
+
 
         public static AssetBundle? ModAssets;
 
@@ -68,8 +71,12 @@ namespace Rats
             LoggerInstance.LogDebug("Registering enemy...");
             Enemies.RegisterEnemy(Rat, null, null, RatTN, RatTK);
 
-            //SpawnableMapObject sewer = ModAssets.LoadAsset<SewerGrate>("Assets/ModAssets/RatSpawn.asset");
-            //LethalLib.Modules.MapObjects.RegisterMapObject(sewer);
+            SpawnableMapObjectDef RatSpawn = ModAssets.LoadAsset<SpawnableMapObjectDef>("Assets/ModAssets/RatSpawn.asset");
+            if (RatSpawn == null) { LoggerInstance.LogError("Error: Couldnt get RatSpawn from assets"); return; }
+            LoggerInstance.LogDebug("Registering rat spawn network prefab...");
+            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(RatSpawn.spawnableMapObject.prefabToSpawn);
+            LoggerInstance.LogDebug($"Registering RatSpawn");
+            MapObjects.RegisterMapObject(RatSpawn, Levels.LevelTypes.All, (level) => RatSpawn.spawnableMapObject.numberToSpawn);
 
             // Finished
             Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");

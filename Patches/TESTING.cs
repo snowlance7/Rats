@@ -21,7 +21,7 @@ using static Rats.Plugin;
 
 namespace Rats
 {
-    //[HarmonyPatch]
+    [HarmonyPatch]
     internal class TESTING : MonoBehaviour
     {
         private static ManualLogSource logger = Plugin.LoggerInstance;

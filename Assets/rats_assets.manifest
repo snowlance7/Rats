@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3646943295
+CRC: 1252072362
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: fe085559d60f11fe38a4f82b45bcbd64
+    Hash: 481161b018f56aa38193b1ff61932814
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 928b21178ad99be22113120be7c88de5
+    Hash: d768e84d6900f52cc3cb909f1503962b
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: fe085559d60f11fe38a4f82b45bcbd64
+    Hash: 481161b018f56aa38193b1ff61932814
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -36,12 +36,20 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 82
   Script: {instanceID: 0}
+- Class: 90
+  Script: {instanceID: 0}
 - Class: 91
   Script: {instanceID: 0}
 - Class: 95
   Script: {instanceID: 0}
 - Class: 114
   Script: {fileID: -1316427704, guid: 30534a6f96417e1578491dec35947abb, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 9541d86e2fd84c1d9990edf0852d74ab, type: 3}
+- Class: 114
+  Script: {fileID: -41463191, guid: 490d78382e3f68e479e9d9756fa918c3, type: 3}
+- Class: 114
+  Script: {fileID: -148027567, guid: 490d78382e3f68e479e9d9756fa918c3, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: 65d3fcb39dd67306e9bb17a603308070, type: 3}
 - Class: 114
@@ -53,16 +61,24 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 11500000, guid: 6d7127b8f98ca8ec9896b384a71d39a2, type: 3}
 - Class: 114
+  Script: {fileID: 11500000, guid: 0e80ae96b3eb9177eea5c8f9dadbcda1, type: 3}
+- Class: 114
   Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
 - Class: 114
-  Script: {fileID: -41463191, guid: 490d78382e3f68e479e9d9756fa918c3, type: 3}
+  Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
 - Class: 114
-  Script: {fileID: -148027567, guid: 490d78382e3f68e479e9d9756fa918c3, type: 3}
+  Script: {fileID: 11500000, guid: d3cecf05b78b173605122a700874719c, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: f2c662b0f92d7236699123213e2fb9f4, type: 3}
 - Class: 115
+  Script: {instanceID: 0}
+- Class: 128
   Script: {instanceID: 0}
 - Class: 137
   Script: {instanceID: 0}
 - Class: 195
+  Script: {instanceID: 0}
+- Class: 224
   Script: {instanceID: 0}
 - Class: 241
   Script: {instanceID: 0}
@@ -76,10 +92,50 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: Assembly-CSharp
   ClassName: EnemyBehaviourState
 - AssemblyName: Assembly-CSharp
+  ClassName: InteractEvent
+- AssemblyName: Assembly-CSharp
   ClassName: NavSizeLimit
 - AssemblyName: Assembly-CSharp
   ClassName: SpawnableMapObject
+- AssemblyName: Unity.TextMeshPro
+  ClassName: TMPro.FaceInfo_Legacy
+- AssemblyName: Unity.TextMeshPro
+  ClassName: TMPro.FontAssetCreationSettings
+- AssemblyName: Unity.TextMeshPro
+  ClassName: TMPro.KerningTable
+- AssemblyName: Unity.TextMeshPro
+  ClassName: TMPro.TMP_Character
+- AssemblyName: Unity.TextMeshPro
+  ClassName: TMPro.TMP_FontFeatureTable
+- AssemblyName: Unity.TextMeshPro
+  ClassName: TMPro.TMP_FontWeightPair
+- AssemblyName: Unity.TextMeshPro
+  ClassName: TMPro.TMP_GlyphAdjustmentRecord
+- AssemblyName: Unity.TextMeshPro
+  ClassName: TMPro.TMP_GlyphPairAdjustmentRecord
+- AssemblyName: Unity.TextMeshPro
+  ClassName: TMPro.TMP_GlyphValueRecord
+- AssemblyName: Unity.TextMeshPro
+  ClassName: TMPro.VertexGradient
+- AssemblyName: UnityEngine.CoreModule
+  ClassName: UnityEngine.Events.ArgumentCache
+- AssemblyName: UnityEngine.CoreModule
+  ClassName: UnityEngine.Events.PersistentCallGroup
+- AssemblyName: UnityEngine.CoreModule
+  ClassName: UnityEngine.Events.PersistentListenerMode
+- AssemblyName: UnityEngine.TextCoreFontEngineModule
+  ClassName: UnityEngine.TextCore.FaceInfo
+- AssemblyName: UnityEngine.TextCoreFontEngineModule
+  ClassName: UnityEngine.TextCore.Glyph
+- AssemblyName: UnityEngine.TextCoreFontEngineModule
+  ClassName: UnityEngine.TextCore.GlyphMetrics
+- AssemblyName: UnityEngine.TextCoreFontEngineModule
+  ClassName: UnityEngine.TextCore.GlyphRect
+- AssemblyName: UnityEngine.UI
+  ClassName: UnityEngine.UI.MaskableGraphic/CullStateChangedEvent
 Assets:
 - Assets/ModAssets/RatEnemy.asset
+- Assets/ModAssets/Bestiary/SCP4666TK.asset
 - Assets/ModAssets/RatSpawn.asset
+- Assets/ModAssets/Bestiary/SCP4666TN.asset
 Dependencies: []

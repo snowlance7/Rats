@@ -3,39 +3,204 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using JetBrains.Annotations;
+using Unity.Netcode;
+using BepInEx.Logging;
+using static Rats.Plugin;
+using TMPro;
+using System.Collections;
+using GameNetcodeStuff;
+using UnityEngine.AI;
 
 namespace Rats
 {
-    internal class SewerGrate : MonoBehaviour
+    internal class SewerGrate : NetworkBehaviour
     {
+        private static ManualLogSource logger = LoggerInstance;
+        public static List<SewerGrate> Nests = new List<SewerGrate>();
+
 #pragma warning disable 0649
         public RatAI RatPrefab = null!;
+        public TextMeshPro TerminalCode = null!;
+        public TerminalAccessibleObject TerminalAccessibleObj = null!;
 #pragma warning restore 0649
+
+        EnemyVent? ClosestVentToNest = null!;
+
+        public Dictionary<PlayerControllerB, int> PlayerThreatCounter = new Dictionary<PlayerControllerB, int>();
+        public Dictionary<EnemyAI, int> EnemyThreatCounter = new Dictionary<EnemyAI, int>();
+        public static Dictionary<EnemyAI, int> EnemyHitCount = new Dictionary<EnemyAI, int>();
+        public List<RatAI> MusterRats = new List<RatAI>();
+        public List<RatAI> ScoutRats = new List<RatAI>();
+        public List<RatAI> DefenseRats = new List<RatAI>();
+
+
+        public bool Mustering { get { return musterTimer > 0f; } }
+        public bool CanMuster { get { return musterCooldown <= 0f; } }
+        public RatAI? LeadMusterRat;
+        float musterCooldown;
+        float musterTimer;
 
         float timeSinceSpawnRat;
         float nextRatSpawnTime;
+        public bool open = true;
+        bool codeOnGrateSet = false;
+        int food;
 
         // Config Values
-        float minRatSpawnTime = 10f;
-        float maxRatSpawnTime = 30f;
+        bool hideCodeOnTerminal = true;
+        float minRatSpawnTime = 15f;
+        float maxRatSpawnTime = 40f;
+        float musterTimeLength = 10f;
+        float musterCooldownLength = 60f;
+        int foodToSpawnRat = 5;
+        int maxRats = 50;
 
         public void Start()
         {
-            nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
+            if (IsServerOrHost)
+            {
+                logger.LogDebug("Sewer grate spawned at: " + transform.position);
+                Nests.Add(this);
+                nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
+            }
         }
 
         public void Update()
         {
-            timeSinceSpawnRat += Time.deltaTime;
-
-            if (timeSinceSpawnRat > nextRatSpawnTime)
+            if (IsServerOrHost)
             {
-                timeSinceSpawnRat = 0f;
-                nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
+                if (!codeOnGrateSet)
+                {
+                    if (TerminalAccessibleObj.objectCode != "")
+                    {
+                        codeOnGrateSet = true;
+                        TerminalCode.text = TerminalAccessibleObj.objectCode;
+                        if (hideCodeOnTerminal)
+                        {
+                            TerminalAccessibleObj.mapRadarText.text = "??";
+                        }
+                    }
+                }
 
+                if (open)
+                {
+                    timeSinceSpawnRat += Time.unscaledDeltaTime;
+
+                    if (timeSinceSpawnRat > nextRatSpawnTime)
+                    {
+                        timeSinceSpawnRat = 0f;
+                        nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
+
+                        SpawnRat();
+                    }
+                }
+
+
+                if (musterTimer > 0f)
+                {
+                    musterTimer -= Time.unscaledDeltaTime;
+
+                    if (musterTimer <= 0f)
+                    {
+                        foreach (var rat in MusterRats)
+                        {
+                            rat.StopTasks();
+                            rat.SwitchToBehaviourStateCustom(RatAI.State.Attacking);
+                        }
+                        musterCooldown = musterCooldownLength;
+                        LeadMusterRat = null;
+                    }
+                }
+
+                if (musterCooldown > 0f)
+                {
+                    musterCooldown -= Time.unscaledDeltaTime;
+                }
+            }
+        }
+
+        public EnemyVent? GetClosestVentToNest(int areaMask)
+        {
+            if (IsServerOrHost)
+            {
+                Vector3 pos = RoundManager.Instance.GetNavMeshPosition(transform.position, RoundManager.Instance.navHit, 1.75f);
+
+                if (ClosestVentToNest != null)
+                {
+                    // Make sure current vent is still accessible
+                    Vector3 _closestVentPos = RoundManager.Instance.GetNavMeshPosition(ClosestVentToNest.floorNode.transform.position, RoundManager.Instance.navHit, 1.75f);
+                    if (NavMesh.CalculatePath(pos, _closestVentPos, areaMask, new NavMeshPath()))
+                    {
+                        return ClosestVentToNest;
+                    }
+                }
+
+                // Not accessible so find new vent
+                float mostOptimalDistance = 2000f;
+                EnemyVent? targetVent = null;
+                foreach (var vent in RoundManager.Instance.allEnemyVents)
+                {
+                    Vector3 ventPos = RoundManager.Instance.GetNavMeshPosition(vent.floorNode.transform.position, RoundManager.Instance.navHit, 1.75f);
+                    float distance = Vector3.Distance(pos, ventPos);
+                    if (NavMesh.CalculatePath(pos, ventPos, areaMask, new NavMeshPath()) && distance < mostOptimalDistance)
+                    {
+                        mostOptimalDistance = distance;
+                        targetVent = vent;
+                    }
+                }
+                return targetVent;
+            }
+
+            // No vent found
+            return null;
+        }
+
+        public void StartMusterTimer()
+        {
+            if (IsServerOrHost)
+            {
+                musterTimer = musterTimeLength;
+            }
+        }
+
+        public void AddFood(int amount = 1)
+        {
+            food += amount;
+
+            int ratsToSpawn = food / foodToSpawnRat;
+            int remainingFood = food % foodToSpawnRat;
+
+            food = remainingFood;
+            SpawnRats(ratsToSpawn);
+        }
+
+        void SpawnRats(int amount)
+        {
+            if (amount == 0) { return; }
+            for (int i = 0; i < amount; i++)
+            {
+                SpawnRat();
+            }
+        }
+
+        void SpawnRat()
+        {
+            if (GameObject.FindObjectsOfType<RatAI>().Length < maxRats)
+            {
                 RatAI rat = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
                 rat.NetworkObject.Spawn(true);
             }
+        }
+
+        public void ToggleVent()
+        {
+            open = !open;
+        }
+
+        public override void OnDestroy()
+        {
+            Nests.Remove(this);
+            base.OnDestroy();
         }
     }
 }
