@@ -20,7 +20,7 @@ namespace Rats
 
 #pragma warning disable 0649
         public RatAI RatPrefab = null!;
-        public TextMeshPro TerminalCode = null!;
+        public TextMeshPro[] TerminalCodes = null!;
         public TerminalAccessibleObject TerminalAccessibleObj = null!;
         public AISearchRoutine RatSearchRoutine = null!;
 #pragma warning restore 0649
@@ -75,7 +75,7 @@ namespace Rats
                     if (TerminalAccessibleObj.objectCode != "")
                     {
                         codeOnGrateSet = true;
-                        TerminalCode.text = TerminalAccessibleObj.objectCode;
+                        SetCodes();
                         if (hideCodeOnTerminal)
                         {
                             TerminalAccessibleObj.mapRadarText.text = "??";
@@ -116,6 +116,14 @@ namespace Rats
                 {
                     rallyCooldown -= Time.unscaledDeltaTime;
                 }
+            }
+        }
+
+        void SetCodes()
+        {
+            foreach(var tmp in TerminalCodes)
+            {
+                tmp.text = TerminalAccessibleObj.objectCode;
             }
         }
 
