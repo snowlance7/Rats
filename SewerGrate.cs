@@ -22,6 +22,7 @@ namespace Rats
         public RatAI RatPrefab = null!;
         public TextMeshPro TerminalCode = null!;
         public TerminalAccessibleObject TerminalAccessibleObj = null!;
+        public AISearchRoutine RatSearchRoutine = null!;
 #pragma warning restore 0649
 
         EnemyVent? ClosestVentToNest = null!;
@@ -29,16 +30,15 @@ namespace Rats
         public Dictionary<PlayerControllerB, int> PlayerThreatCounter = new Dictionary<PlayerControllerB, int>();
         public Dictionary<EnemyAI, int> EnemyThreatCounter = new Dictionary<EnemyAI, int>();
         public static Dictionary<EnemyAI, int> EnemyHitCount = new Dictionary<EnemyAI, int>();
-        public List<RatAI> MusterRats = new List<RatAI>();
+        public List<RatAI> RallyRats = new List<RatAI>();
         public List<RatAI> ScoutRats = new List<RatAI>();
         public List<RatAI> DefenseRats = new List<RatAI>();
 
-
-        public bool Mustering { get { return musterTimer > 0f; } }
-        public bool CanMuster { get { return musterCooldown <= 0f; } }
-        public RatAI? LeadMusterRat;
-        float musterCooldown;
-        float musterTimer;
+        public bool IsRallying { get { return rallyTimer > 0f; } }
+        public bool CanRally { get { return rallyCooldown <= 0f; } }
+        public RatAI? LeadRallyRat;
+        float rallyCooldown;
+        float rallyTimer;
 
         float timeSinceSpawnRat;
         float nextRatSpawnTime;
@@ -50,11 +50,11 @@ namespace Rats
         bool hideCodeOnTerminal = true;
         float minRatSpawnTime = 15f;
         float maxRatSpawnTime = 40f;
-        float musterTimeLength = 10f;
-        float musterCooldownLength = 60f;
+        float rallyTimeLength = 10f;
+        float rallyCooldownLength = 60f;
         int foodToSpawnRat = 5;
         int maxRats = 50;
-
+        // TODO: Fix error where leaving with ship causes crashing
         public void Start()
         {
             if (IsServerOrHost)
@@ -62,6 +62,7 @@ namespace Rats
                 logger.LogDebug("Sewer grate spawned at: " + transform.position);
                 Nests.Add(this);
                 nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
+                //open = false; // TESTING
             }
         }
 
@@ -96,25 +97,24 @@ namespace Rats
                 }
 
 
-                if (musterTimer > 0f)
+                if (rallyTimer > 0f)
                 {
-                    musterTimer -= Time.unscaledDeltaTime;
+                    rallyTimer -= Time.unscaledDeltaTime;
 
-                    if (musterTimer <= 0f)
+                    if (rallyTimer <= 0f)
                     {
-                        foreach (var rat in MusterRats)
+                        foreach (var rat in RallyRats)
                         {
-                            rat.StopTasks();
                             rat.SwitchToBehaviourStateCustom(RatAI.State.Attacking);
                         }
-                        musterCooldown = musterCooldownLength;
-                        LeadMusterRat = null;
+                        rallyCooldown = rallyCooldownLength;
+                        LeadRallyRat = null;
                     }
                 }
 
-                if (musterCooldown > 0f)
+                if (rallyCooldown > 0f)
                 {
-                    musterCooldown -= Time.unscaledDeltaTime;
+                    rallyCooldown -= Time.unscaledDeltaTime;
                 }
             }
         }
@@ -155,11 +155,11 @@ namespace Rats
             return null;
         }
 
-        public void StartMusterTimer()
+        public void StartRallyTimer()
         {
             if (IsServerOrHost)
             {
-                musterTimer = musterTimeLength;
+                rallyTimer = rallyTimeLength;
             }
         }
 
