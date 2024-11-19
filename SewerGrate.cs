@@ -48,8 +48,8 @@ namespace Rats
 
         // Config Values
         bool hideCodeOnTerminal = true;
-        float minRatSpawnTime = 15f;
-        float maxRatSpawnTime = 40f;
+        float minRatSpawnTime = 5f;
+        float maxRatSpawnTime = 30f;
         float rallyTimeLength = 10f;
         float rallyCooldownLength = 60f;
         int foodToSpawnRat = 5;

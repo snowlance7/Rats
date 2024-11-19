@@ -66,19 +66,19 @@ namespace Rats
         // Constants
 
         // Config Values
-        float attackCooldown = 3f;
+        float pounceAttackCooldown = 5f;
         float sickRatChance = 0.1f;
         float defenseRadius = 5f;
-        float sewerGrateAttackRadius = 5f;
+        //float sewerGrateAttackRadius = 5f;
         float timeToIncreaseThreat = 3f;
         int threatToAttackPlayer = 100;
         int threatToAttackEnemy = 50;
         int highThreatToAttackPlayer = 200;
         int highThreatToAttackEnemy = 100;
-        float swarmRadius = 10f;
+        float swarmRadius = 5f;
         bool canVent = true;
         bool defenseRats = true;
-        int maxDefenseRats = 5;
+        int maxDefenseRats = 10;
         bool scoutRats = true;
         int maxScoutRats = 10;
         int ratsNeededToAttack = 10;
@@ -179,12 +179,6 @@ namespace Rats
                 return;
             };
 
-            if (currentBehaviourStateIndex != (int)State.Attacking && Nest != null && agent.enabled && Vector3.Distance(transform.position, Nest.transform.position) < defenseRadius && TargetPlayerNearNest())
-            {
-                SwitchToBehaviourStateCustom(State.Attacking);
-                return;
-            }
-
             switch (currentBehaviourStateIndex)
             {
                 case (int)State.Roaming:
@@ -245,14 +239,14 @@ namespace Rats
                     SwitchToBehaviourStateCustom(State.Roaming);
                     return;
                 case (int)State.Attacking:
-                    if (!rallyRat && RatTypeState == RatType.DefenseRat && Vector3.Distance(Nest.transform.position, transform.position) > defenseRadius * 2)
+                    if (!rallyRat && RatTypeState == RatType.DefenseRat && Vector3.Distance(Nest.transform.position, transform.position) > defenseRadius)
                     {
                         SwitchToBehaviourStateCustom(State.Roaming);
                         return;
                     }
                     if (targetPlayer != null)
                     {
-                        if (Vector3.Distance(targetPlayer.transform.position, transform.position) > distanceToLoseRats * 2 && !rallyRat)
+                        if (Vector3.Distance(targetPlayer.transform.position, transform.position) > distanceToLoseRats && !rallyRat)
                         {
                             // Target too far, return to nest
                             targetPlayer = null;
@@ -279,7 +273,7 @@ namespace Rats
                     }
                     if (targetEnemy != null)
                     {
-                        if (Vector3.Distance(targetEnemy.transform.position, transform.position) > distanceToLoseRats)
+                        if (Vector3.Distance(targetEnemy.transform.position, transform.position) > distanceToLoseRats * 2)
                         {
                             // Target too far, return to nest
                             targetEnemy = null;
@@ -344,8 +338,9 @@ namespace Rats
 
         void TryPounce(Vector3 pouncePosition)
         {
-            if (Vector3.Distance(transform.position, pouncePosition) < 3f && timeSincePlayerCollision > attackCooldown && !inSpecialAnimation)
+            if (Vector3.Distance(transform.position, pouncePosition) < 3f && timeSincePlayerCollision > pounceAttackCooldown && !inSpecialAnimation)
             {
+                logIfDebug("Attempting pounce");
                 TurnCompass.LookAt(pouncePosition);
 
                 Vector3 forwardDirection = transform.TransformDirection(Vector3.forward).normalized * 2;
@@ -430,7 +425,7 @@ namespace Rats
         {
             if (timeSinceAddThreat > timeToIncreaseThreat)
             {
-                PlayerControllerB player = CheckLineOfSightForPlayer(); // TODO: check if this works
+                PlayerControllerB player = CheckLineOfSightForPlayer(60f, 60, 5); // TODO: check if this works
                 if (player != null)
                 {
                     AddThreat(player);
@@ -774,30 +769,26 @@ namespace Rats
             KillEnemyOnOwnerClient();
         }
 
-        public override void OnCollideWithPlayer(Collider other) // This only runs on client
+        bool PlayerIsNearNest(PlayerControllerB player)
+        {
+            return Nest != null && Vector3.Distance(transform.position, player.transform.position) <= defenseRadius;
+        }
+
+        public override void OnCollideWithPlayer(Collider other) // TODO: Fix collider, make sure player is being collided with and make sure this works // TODO: Causing errors???
         {
             base.OnCollideWithPlayer(other);
             if (isEnemyDead) { return; }
-            if (timeSincePlayerCollision > attackCooldown)
+            if (timeSincePlayerCollision > 1f)
             {
-                timeSincePlayerCollision = 0f;
-                if (currentBehaviourStateIndex == (int)State.Attacking)
+                PlayerControllerB player = MeetsStandardPlayerCollisionConditions(other);
+                if (player != null && PlayerIsTargetable(player))
                 {
-                    PlayerControllerB player = MeetsStandardPlayerCollisionConditions(other);
-                    if (player != null && PlayerIsTargetable(player) && player == targetPlayer)
+                    timeSincePlayerCollision = 0f;
+                    if (currentBehaviourStateIndex == (int)State.Attacking || PlayerIsNearNest(player))
                     {
                         rallyRat = false;
                         int deathAnim = UnityEngine.Random.Range(0, 2) == 1 ? 7 : 0;
                         player.DamagePlayer(1, true, true, CauseOfDeath.Mauling, deathAnim);
-                    }
-                }
-                else
-                {
-                    PlayerControllerB player = MeetsStandardPlayerCollisionConditions(other);
-                    if (player != null && PlayerIsTargetable(player))
-                    {
-                        timeSinceAddThreat = 0f;
-                        AddThreatServerRpc(player.actualClientId);
                     }
                 }
             }
