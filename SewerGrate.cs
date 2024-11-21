@@ -19,7 +19,7 @@ namespace Rats
         public static List<SewerGrate> Nests = new List<SewerGrate>();
 
 #pragma warning disable 0649
-        public RatAI RatPrefab = null!;
+        public GameObject RatPrefab = null!;
         public TextMeshPro[] TerminalCodes = null!;
         public TerminalAccessibleObject TerminalAccessibleObj = null!;
         public AISearchRoutine RatSearchRoutine = null!;
@@ -28,8 +28,10 @@ namespace Rats
         EnemyVent? ClosestVentToNest = null!;
 
         public Dictionary<PlayerControllerB, int> PlayerThreatCounter = new Dictionary<PlayerControllerB, int>();
+        public static Dictionary<PlayerControllerB, int> PlayerFoodAmount = new Dictionary<PlayerControllerB, int>();
         public Dictionary<EnemyAI, int> EnemyThreatCounter = new Dictionary<EnemyAI, int>();
         public static Dictionary<EnemyAI, int> EnemyHitCount = new Dictionary<EnemyAI, int>();
+        public static Dictionary<EnemyAI, int> EnemyFoodAmount = new Dictionary<EnemyAI, int>();
         public List<RatAI> RallyRats = new List<RatAI>();
         public List<RatAI> ScoutRats = new List<RatAI>();
         public List<RatAI> DefenseRats = new List<RatAI>();
@@ -52,7 +54,8 @@ namespace Rats
         float maxRatSpawnTime = 30f;
         float rallyTimeLength = 10f;
         float rallyCooldownLength = 60f;
-        int foodToSpawnRat = 5;
+        int foodToSpawnRat = 10;
+        int enemyFoodPerHPPoint = 10;
         int maxRats = 50;
         // TODO: Fix error where leaving with ship causes crashing
         public void Start()
@@ -68,21 +71,21 @@ namespace Rats
 
         public void Update()
         {
-            if (IsServerOrHost)
+            if (!codeOnGrateSet)
             {
-                if (!codeOnGrateSet)
+                if (TerminalAccessibleObj.objectCode != "")
                 {
-                    if (TerminalAccessibleObj.objectCode != "")
+                    codeOnGrateSet = true;
+                    SetCodes();
+                    if (hideCodeOnTerminal)
                     {
-                        codeOnGrateSet = true;
-                        SetCodes();
-                        if (hideCodeOnTerminal)
-                        {
-                            TerminalAccessibleObj.mapRadarText.text = "??";
-                        }
+                        TerminalAccessibleObj.mapRadarText.text = "??";
                     }
                 }
+            }
 
+            if (IsServerOrHost)
+            {
                 if (open)
                 {
                     timeSinceSpawnRat += Time.unscaledDeltaTime;
@@ -163,6 +166,13 @@ namespace Rats
             return null;
         }
 
+        public void AddEnemyFoodAmount(EnemyAI enemy)
+        {
+            int maxHP = enemy.enemyType.enemyPrefab.GetComponent<EnemyAI>().enemyHP;
+            int foodAmount = maxHP * enemyFoodPerHPPoint;
+            EnemyFoodAmount.Add(enemy, foodAmount);
+        }
+
         public void StartRallyTimer()
         {
             if (IsServerOrHost)
@@ -195,8 +205,8 @@ namespace Rats
         {
             if (GameObject.FindObjectsOfType<RatAI>().Length < maxRats)
             {
-                RatAI rat = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
-                rat.NetworkObject.Spawn(true);
+                GameObject ratObj = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
+                ratObj.GetComponentInChildren<NetworkObject>().Spawn(destroyWithScene: true);
             }
         }
 
