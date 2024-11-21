@@ -22,7 +22,7 @@ namespace Rats.Patches
         {
             if (IsServerOrHost)
             {
-                SewerGrate.PlayerFoodAmount.Clear();
+                //SewerGrate.PlayerFoodAmount.Clear();
                 SewerGrate.EnemyFoodAmount.Clear();
                 SewerGrate.EnemyHitCount.Clear();
             }

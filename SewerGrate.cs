@@ -22,13 +22,12 @@ namespace Rats
         public GameObject RatPrefab = null!;
         public TextMeshPro[] TerminalCodes = null!;
         public TerminalAccessibleObject TerminalAccessibleObj = null!;
-        public AISearchRoutine RatSearchRoutine = null!;
 #pragma warning restore 0649
 
         EnemyVent? ClosestVentToNest = null!;
 
         public Dictionary<PlayerControllerB, int> PlayerThreatCounter = new Dictionary<PlayerControllerB, int>();
-        public static Dictionary<PlayerControllerB, int> PlayerFoodAmount = new Dictionary<PlayerControllerB, int>();
+        //public static Dictionary<PlayerControllerB, int> PlayerFoodAmount = new Dictionary<PlayerControllerB, int>();
         public Dictionary<EnemyAI, int> EnemyThreatCounter = new Dictionary<EnemyAI, int>();
         public static Dictionary<EnemyAI, int> EnemyHitCount = new Dictionary<EnemyAI, int>();
         public static Dictionary<EnemyAI, int> EnemyFoodAmount = new Dictionary<EnemyAI, int>();
@@ -36,6 +35,7 @@ namespace Rats
         public List<RatAI> ScoutRats = new List<RatAI>();
         public List<RatAI> DefenseRats = new List<RatAI>();
 
+        public static int RatCount { get { return UnityEngine.GameObject.FindObjectsOfType<RatAI>().Length; } }
         public bool IsRallying { get { return rallyTimer > 0f; } }
         public bool CanRally { get { return rallyCooldown <= 0f; } }
         public RatAI? LeadRallyRat;
@@ -56,7 +56,7 @@ namespace Rats
         float rallyCooldownLength = 60f;
         int foodToSpawnRat = 10;
         int enemyFoodPerHPPoint = 10;
-        int maxRats = 50;
+        int maxRats = 30;
         // TODO: Fix error where leaving with ship causes crashing
         public void Start()
         {
@@ -65,7 +65,7 @@ namespace Rats
                 logger.LogDebug("Sewer grate spawned at: " + transform.position);
                 Nests.Add(this);
                 nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
-                //open = false; // TESTING
+                open = false; // TESTING
             }
         }
 
@@ -86,7 +86,7 @@ namespace Rats
 
             if (IsServerOrHost)
             {
-                if (open)
+                if (open && RatCount < maxRats)
                 {
                     timeSinceSpawnRat += Time.unscaledDeltaTime;
 
@@ -134,6 +134,7 @@ namespace Rats
         {
             if (IsServerOrHost)
             {
+                if (StartOfRound.Instance.shipIsLeaving) { return null; }
                 Vector3 pos = RoundManager.Instance.GetNavMeshPosition(transform.position, RoundManager.Instance.navHit, 1.75f);
 
                 if (ClosestVentToNest != null)
@@ -189,6 +190,7 @@ namespace Rats
             int remainingFood = food % foodToSpawnRat;
 
             food = remainingFood;
+            logger.LogDebug("Spawning rats from food: " + ratsToSpawn);
             SpawnRats(ratsToSpawn);
         }
 
