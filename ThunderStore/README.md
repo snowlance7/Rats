@@ -1,5 +1,9 @@
 # Rats Mod
 
+![Gathering Food](https://imgur.com/aBnca3P.gif)
+![Rat Chase](https://imgur.com/JXKzikz.gif)
+![Rat Venting](https://imgur.com/gAWqA56.gif)
+
 ## Behavior
 
 <details>
@@ -30,7 +34,7 @@
 
 ## Contact
 
-For issues and suggestions visit the [github](https://github.com/snowlance7/Rats) or [Modding Discord](https://discord.com/channels/1168655651455639582/1309390403459354715).
+This is currently in beta! For issues or suggestions visit the [github](https://github.com/snowlance7/Rats) or [Modding Discord](https://discord.com/channels/1168655651455639582/1309390403459354715).
 
 ## For collaboration or queries
 
@@ -42,5 +46,5 @@ For issues and suggestions visit the [github](https://github.com/snowlance7/Rats
 ## Credit
 
 - Dev general for the coding help as always
-- "Drainage grate" (https://skfb.ly/ouBVu) by Museum of Engineering and Technology, Krakow is licensed under CC Attribution-NonCommercial-ShareAlike (http://creativecommons.org/licenses/by-nc-sa/4.0/).
-- "Rat Animated" (https://skfb.ly/oEq7y) by Shintokin is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+- [Drainage grate](https://skfb.ly/ouBVu)
+- [Rat Animated](https://skfb.ly/oEq7y)
