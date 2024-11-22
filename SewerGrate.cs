@@ -1,15 +1,11 @@
-﻿using UnityEngine;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using JetBrains.Annotations;
-using Unity.Netcode;
-using BepInEx.Logging;
-using static Rats.Plugin;
-using TMPro;
-using System.Collections;
+﻿using BepInEx.Logging;
 using GameNetcodeStuff;
+using System.Collections.Generic;
+using TMPro;
+using Unity.Netcode;
+using UnityEngine;
 using UnityEngine.AI;
+using static Rats.Plugin;
 
 namespace Rats
 {
@@ -50,17 +46,25 @@ namespace Rats
 
         // Config Values
         bool hideCodeOnTerminal = true;
-        float minRatSpawnTime = 5f;
+        float minRatSpawnTime = 10f;
         float maxRatSpawnTime = 30f;
         float rallyTimeLength = 10f;
         float rallyCooldownLength = 60f;
-        int foodToSpawnRat = 10;
+        int foodToSpawnRat = 5;
         int enemyFoodPerHPPoint = 10;
-        int maxRats = 30;
+        int maxRats = 40;
         public void Start()
         {
             logger.LogDebug("Sewer grate spawned at: " + transform.position);
             Nests.Add(this);
+            
+            hideCodeOnTerminal = configHideCodeOnTerminal.Value;
+            minRatSpawnTime = configMinRatSpawnTime.Value;
+            maxRatSpawnTime = configMaxRatSpawnTime.Value;
+            foodToSpawnRat = configFoodToSpawnRat.Value;
+            enemyFoodPerHPPoint = configEnemyFoodPerHPPoint.Value;
+            maxRats = configMaxRats.Value;
+
 
             if (IsServerOrHost)
             {
@@ -190,7 +194,7 @@ namespace Rats
             int remainingFood = food % foodToSpawnRat;
 
             food = remainingFood;
-            logger.LogDebug("Spawning rats from food: " + ratsToSpawn);
+            //logger.LogDebug("Spawning rats from food: " + ratsToSpawn);
             SpawnRats(ratsToSpawn);
         }
 

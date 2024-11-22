@@ -1,22 +1,11 @@
-﻿using BepInEx.Logging;
-using GameNetcodeStuff;
-using HandyCollections.Heap;
-using HarmonyLib;
-using Steamworks.Data;
+﻿using GameNetcodeStuff;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using Unity.Netcode;
-using Unity.Netcode.Components;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UIElements;
-using static Netcode.Transports.Facepunch.FacepunchTransport;
 using static Rats.Plugin;
-using static Steamworks.InventoryItem;
-using static UnityEngine.LightAnchor;
 
 // Cheese to lure the rats away from the grate so the player can block it
 // Rats will scout and do a normal search, if they see a player after 20 seconds, they will add a counter to the threatcounter, when max threat, they will run back to sewer and gather rats they touch and get defending rats and swarm around the player for 20 seconds, any rats nearby will also swarm. then attack.
@@ -25,8 +14,7 @@ namespace Rats
 {
     internal class RatAI : EnemyAI
     {
-        public static bool testing = true; // TESTING
-        public static bool eat = false;
+        public static bool testing = false; // TESTING
 
 #pragma warning disable 0649
         public GameObject NestPrefab = null!;
@@ -79,7 +67,7 @@ namespace Rats
         const float stuckTimeFailsafe = 2f;
 
         // Config Values
-        float pounceAttackCooldown = 5f;
+        //float pounceAttackCooldown = 5f;
         //float sickRatChance = 0.1f;
         float defenseRadius = 5f;
         float timeToIncreaseThreat = 3f;
@@ -89,12 +77,9 @@ namespace Rats
         //int highThreatToAttackEnemy = 100;
         float swarmRadius = 10f;
         bool canVent = true;
-        bool defenseRats = true;
         int maxDefenseRats = 10;
-        bool scoutRats = true;
-        int maxScoutRats = 10;
-        int ratsNeededToAttack = 10;
-        float distanceToLoseRats = 15f;
+        int ratsNeededToAttack = 5;
+        float distanceToLoseRats = 25f;
         int enemyHitsToDoDamage = 10;
         int playerFoodAmount = 30;
         int ratDamage = 2;
@@ -194,6 +179,20 @@ namespace Rats
             {
                 Debug.LogError($"Error when initializing enemy variables for {base.gameObject.name} : {arg}");
             }
+
+            defenseRadius = configDefenseRadius.Value;
+            timeToIncreaseThreat = configTimeToIncreaseThreat.Value;
+            threatToAttackPlayer = configThreatToAttackPlayer.Value;
+            threatToAttackEnemy = configThreatToAttackEnemy.Value;
+            swarmRadius = configSwarmRadius.Value;
+            canVent = configCanVent.Value;
+            maxDefenseRats = configMaxDefenseRats.Value;
+            ratsNeededToAttack = configRatsNeededToAttack.Value;
+            distanceToLoseRats = configDistanceNeededToLoseRats.Value;
+            enemyHitsToDoDamage = configEnemyHitsToDoDamage.Value;
+            playerFoodAmount = configPlayerFoodAmount.Value;
+            ratDamage = configRatDamage.Value;
+
 
             logIfDebug($"Rat spawned");
             HottestRat();
@@ -418,10 +417,10 @@ namespace Rats
                             SwitchToBehaviourStateCustom(State.Roaming);
                             return;
                         }
-                        if (NearbyRatCount(swarmRadius) <= (int)(ratsNeededToAttack / 2) && !rallyRat)
+                        if (NearbyRatCount(swarmRadius) <= ratsNeededToAttack / 3/* && !rallyRat*/)
                         {
                             // Check if rats are defending base, keep attacking if player is near base
-                            if (!TargetPlayerNearNest())
+                            if (!IsPlayerNearANest(targetPlayer))
                             {
                                 // Rats lose confidence and run away
                                 targetPlayer = null;
@@ -441,7 +440,7 @@ namespace Rats
                             SwitchToBehaviourStateCustom(State.Roaming);
                             return;
                         }
-                        if (NearbyRatCount(swarmRadius) <= (int)(ratsNeededToAttack / 3))
+                        if (NearbyRatCount(swarmRadius) <= ratsNeededToAttack / 3)
                         {
                             // Rats lose confidence and run away
                             targetEnemy = null;
@@ -488,6 +487,7 @@ namespace Rats
             position = RoundManager.Instance.GetNavMeshPosition(position, RoundManager.Instance.navHit, 1.75f);
             finalDestination = position;
             path1 = new NavMeshPath();
+            if (agent.enabled == false) { return false; }
             if (!agent.CalculatePath(position, path1)
                 || Vector3.Distance(path1.corners[path1.corners.Length - 1], RoundManager.Instance.GetNavMeshPosition(position, RoundManager.Instance.navHit, 2.7f)) > 1.55f)
             {
@@ -588,7 +588,7 @@ namespace Rats
         {
             if (timeSinceAddThreat > timeToIncreaseThreat)
             {
-                if (eat && CheckLineOfSightForDeadBody())
+                if (CheckLineOfSightForDeadBody())
                 {
                     StopRoutines();
                     grabbingBody = true;
@@ -674,7 +674,7 @@ namespace Rats
             {
                 float distance = Vector3.Distance(pos, vent.floorNode.transform.position);
 
-                if (CalculatePath(pos, vent.floorNode.transform.position) && distance < mostOptimalDistance)
+                if (agent.enabled && CalculatePath(pos, vent.floorNode.transform.position) && distance < mostOptimalDistance)
                 {
                     mostOptimalDistance = distance;
                     targetVent = vent;
@@ -690,6 +690,7 @@ namespace Rats
             Vector3 to = RoundManager.Instance.GetNavMeshPosition(toPos, RoundManager.Instance.navHit, 1.75f);
 
             path1 = new NavMeshPath();
+            if (!agent.enabled) { return false; }
             return NavMesh.CalculatePath(from, to, agent.areaMask, path1) && Vector3.Distance(path1.corners[path1.corners.Length - 1], RoundManager.Instance.GetNavMeshPosition(to, RoundManager.Instance.navHit, 2.7f)) <= 1.55f; // TODO: Test this
         }
 
@@ -798,7 +799,7 @@ namespace Rats
                 float timeStuck = 0f;
                 TargetRandomNode();
                 Vector3 position = RoundManager.Instance.GetNavMeshPosition(targetNode.position, RoundManager.Instance.navHit, 1.75f, agent.areaMask);
-                while (SetDestinationToPosition(position))
+                while (agent.enabled && SetDestinationToPosition(position))
                 {
                     yield return new WaitForSeconds(AIIntervalTime);
                     if (Vector3.Distance(transform.position, position) < 1f || timeStuck > stuckTimeFailsafe)
@@ -826,7 +827,7 @@ namespace Rats
                 if (player == null || player.isPlayerDead) { break; }
                 float timeStuck = 0f;
                 Vector3 position = RoundManager.Instance.GetRandomNavMeshPositionInRadius(player.transform.position, radius, RoundManager.Instance.navHit);
-                while (SetDestinationToPosition(position, true))
+                while (agent.enabled && SetDestinationToPosition(position, true))
                 {
                     yield return new WaitForSeconds(AIIntervalTime);
                     if (Vector3.Distance(transform.position, position) < 1f || timeStuck > stuckTimeFailsafe)
@@ -855,7 +856,7 @@ namespace Rats
             {
                 float timeStuck = 0f;
                 Vector3 position = RoundManager.Instance.GetRandomNavMeshPositionInRadius(enemy.transform.position, radius, RoundManager.Instance.navHit);
-                while (SetDestinationToPosition(position, true))
+                while (agent.enabled && SetDestinationToPosition(position, true))
                 {
                     yield return new WaitForSeconds(AIIntervalTime);
                     if (Vector3.Distance(transform.position, position) < 1f || timeStuck > stuckTimeFailsafe)
@@ -885,7 +886,7 @@ namespace Rats
                 float timeStuck = 0f;
                 Vector3 pos = position;
                 pos = RoundManager.Instance.GetRandomNavMeshPositionInRadius(pos, radius, RoundManager.Instance.navHit);
-                while (SetDestinationToPosition(pos, true))
+                while (agent.enabled && SetDestinationToPosition(pos, true))
                 {
                     yield return new WaitForSeconds(AIIntervalTime);
                     if (Vector3.Distance(transform.position, pos) < 1f || timeStuck > stuckTimeFailsafe)
@@ -912,7 +913,7 @@ namespace Rats
                 float timeStuck = 0f;
                 TargetRandomNode();
                 Vector3 position = targetNode.transform.position;
-                while (SetDestinationToPosition(position))
+                while (agent.enabled && SetDestinationToPosition(position))
                 {
                     yield return new WaitForSeconds(AIIntervalTime);
                     if (Vector3.Distance(transform.position, position) < 1f || timeStuck > stuckTimeFailsafe)
@@ -1120,7 +1121,7 @@ namespace Rats
                     return;
                 }*/
 
-                if (Nest.EnemyThreatCounter[enemy] > threatToAttackPlayer || enemy.isEnemyDead)
+                if (Nest.EnemyThreatCounter[enemy] > threatToAttackEnemy || enemy.isEnemyDead)
                 {
                     SetTarget(enemy);
                     SwitchToBehaviourStateCustom(State.Swarming);

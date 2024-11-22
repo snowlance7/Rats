@@ -21,7 +21,7 @@ using static Rats.Plugin;
 
 namespace Rats
 {
-    [HarmonyPatch]
+    //[HarmonyPatch]
     internal class TESTING : MonoBehaviour
     {
         private static ManualLogSource logger = Plugin.LoggerInstance;
@@ -38,13 +38,10 @@ namespace Rats
         {
             string msg = __instance.chatTextField.text;
             string[] args = msg.Split(" ");
-            logger.LogDebug(msg);
+            //logger.LogDebug(msg);
 
             switch (args[0])
             {
-                case "/eat":
-                    RatAI.eat = !RatAI.eat;
-                    break;
                 case "/testing":
 
                     RatAI.testing = bool.Parse(args[1]);

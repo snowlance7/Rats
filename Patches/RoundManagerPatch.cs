@@ -12,10 +12,8 @@ using System.Diagnostics.CodeAnalysis;
 namespace Rats.Patches
 {
     [HarmonyPatch(typeof(RoundManager))]
-    internal class RoundManagerPatch // FOR SPAWNING ITEMS IN SCPDUNGEON
+    internal class RoundManagerPatch
     {
-        private static ManualLogSource logger = Plugin.LoggerInstance;
-
         [HarmonyPostfix]
         [HarmonyPatch(nameof(RoundManager.DespawnPropsAtEndOfRound))]
         public static void DespawnPropsAtEndOfRoundPostfix(RoundManager __instance) // SCPFlow

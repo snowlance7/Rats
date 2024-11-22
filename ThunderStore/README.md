@@ -30,7 +30,7 @@
 
 ## Contact
 
-For issues and suggestions visit the [github](https://github.com/snowlance7/Rats) or [Modding Discord]().
+For issues and suggestions visit the [github](https://github.com/snowlance7/Rats) or [Modding Discord](https://discord.com/channels/1168655651455639582/1309390403459354715).
 
 ## For collaboration or queries
 
