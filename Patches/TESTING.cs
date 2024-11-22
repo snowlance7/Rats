@@ -42,9 +42,12 @@ namespace Rats
 
             switch (args[0])
             {
-                case "/nest":
+                case "/eat":
+                    RatAI.eat = !RatAI.eat;
+                    break;
+                case "/testing":
 
-                    
+                    RatAI.testing = bool.Parse(args[1]);
 
                     break;
                 case "/enemies":

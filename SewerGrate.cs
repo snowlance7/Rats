@@ -57,15 +57,15 @@ namespace Rats
         int foodToSpawnRat = 10;
         int enemyFoodPerHPPoint = 10;
         int maxRats = 30;
-        // TODO: Fix error where leaving with ship causes crashing
         public void Start()
         {
+            logger.LogDebug("Sewer grate spawned at: " + transform.position);
+            Nests.Add(this);
+
             if (IsServerOrHost)
             {
-                logger.LogDebug("Sewer grate spawned at: " + transform.position);
-                Nests.Add(this);
                 nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
-                open = false; // TESTING
+                //open = false; // TESTING
             }
         }
 
@@ -100,7 +100,7 @@ namespace Rats
                 }
 
 
-                if (rallyTimer > 0f)
+                /*if (rallyTimer > 0f)
                 {
                     rallyTimer -= Time.unscaledDeltaTime;
 
@@ -118,7 +118,7 @@ namespace Rats
                 if (rallyCooldown > 0f)
                 {
                     rallyCooldown -= Time.unscaledDeltaTime;
-                }
+                }*/
             }
         }
 
@@ -220,6 +220,7 @@ namespace Rats
         public override void OnDestroy()
         {
             Nests.Remove(this);
+            StopAllCoroutines();
             base.OnDestroy();
         }
     }

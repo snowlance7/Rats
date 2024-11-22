@@ -2,23 +2,35 @@
 
 ## Behavior
 
+<details>
+<summary>Spoilers</summary>
 
+- **Rat Nest:** A sewer grate can spawn on any map as a map hazard which will spawn rats every x - x seconds.
+- **Rat Types:** Each rat will either defend the nest or scout the dungeon. If a player gets too close to the nest, they will damage the player.
+- **Enemy Vents:** If a scout rat cant get to a desired location, it will try to crawl through the vents to get to that location.
+- **Lost Rats:** If a rat cannot get to the nest, even by vents, it will roam at random. These rats will never attack the player or enemies. They are only aggressive when part of a colony.
+- **Colony Threat System:** Each time a rat sees a player or enemy, they will add 1 to a threat counter. When that reaches a threshold (100 for players and 50 for enemies by default) they will start swarming the threat.
+- **Swarming:** When enough rats are swarming a target, they will begin attacking the target, dealing 2 damage each bite.
+- **Rat Food:** If a rat finds a player corpse it will attempt to drag the corpse back to the nest. They will rip food off of enemies depending on the enemies HP. By default, player corpses give 30 food and enemies give `10 * enemyHP` food. For every 10 food brought back to the nest, it will spawn a rat.
+- **Rat Control:** You can stop rats from spawning at a nest by finding the terminal code located on the nest. Inputing this code into the terminal will open/close the grate.
+
+</details>
 
 ## Planned features
 
 - Rat king
-- Diseased rats that can make the player get sick, lowering stamina and making them cough, etc
-- Rallying: If a player or enemies threat level is high enough, a rat will return to the nest and rally any nearby rats to form a kill squad to hunt down their target
-- Outside rats: Chance for the rat nest to spawn outside with a different model (a burrow or debree)
-- More rat types: Maybe different rat types like brute rat with more hp and mother rat that spawns more rats
-- Better models and textures
-- Rat items like cheese to lure them away, rat traps or nailgun turret
-- Optimizations so there can be more rats with less performance issues if possible
-- More configs for performance
+- Diseased rats that can make the player get sick, lowering stamina and making them cough, etc.
+- Rallying: If a player or enemies threat level is high enough, a rat will return to the nest and rally any nearby rats to form a kill squad to hunt down their target.
+- Outside rats: Chance for rat nests to spawn outside as vain shrouds. Keeping these under control will require weed killer or traps.
+- More rat types?
+- Better models, textures and animations.
+- Rat items like cheese to lure them away, rat traps or a nailgun turret.
+- Optimizations so there can be more rats with less performance issues if possible.
+- More configs for performance.
 
 ## Contact
 
-For issues and suggestions visit the [github](https://github.com/snowlance7/SCP4666) or [Modding Discord]().
+For issues and suggestions visit the [github](https://github.com/snowlance7/Rats) or [Modding Discord]().
 
 ## For collaboration or queries
 
@@ -29,3 +41,6 @@ For issues and suggestions visit the [github](https://github.com/snowlance7/SCP4
 
 ## Credit
 
+- Dev general for the coding help as always
+- "Drainage grate" (https://skfb.ly/ouBVu) by Museum of Engineering and Technology, Krakow is licensed under CC Attribution-NonCommercial-ShareAlike (http://creativecommons.org/licenses/by-nc-sa/4.0/).
+- "Rat Animated" (https://skfb.ly/oEq7y) by Shintokin is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).

@@ -1,4 +1,4 @@
-﻿using GameNetcodeStuff;
+﻿/*using GameNetcodeStuff;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -107,7 +107,7 @@ namespace Rats
         public void SwitchToBehaviourStateCustom(State state)
         {
             if (currentBehaviourStateIndex == (int)state) { return; }
-            loggerIfDebug("Switching to state: " + state);
+            logIfDebug("Switching to state: " + state);
             StopRoutines();
             
             switch (state)
@@ -169,7 +169,7 @@ namespace Rats
             base.Start();
 
             RoundManager.Instance.SpawnedEnemies.Add(this);
-            loggerIfDebug($"Rat spawned");
+            logIfDebug($"Rat spawned");
             HottestRat();
 
             if (IsServerOrHost)
@@ -592,7 +592,7 @@ namespace Rats
 
             if (Nest.DefenseRats.Count() < maxDefenseRats)
             {
-                loggerIfDebug("Rat defense assigned");
+                logIfDebug("Rat defense assigned");
                 RatTypeState = RatType.DefenseRat;
                 Nest.DefenseRats.Add(this);
 
@@ -601,28 +601,12 @@ namespace Rats
                 SetStatus("Defending");
                 return;
             }
-            loggerIfDebug("Rat scout assigned");
+            logIfDebug("Rat scout assigned");
             RatTypeState = RatType.ScoutRat;
             Nest.ScoutRats.Add(this);
             ratCoroutine = StartCoroutine(ScoutCoroutine());
             SetStatus("Scouting");
-            return;/* TESTING
-            if (Nest.ScoutRats.Count() < maxScoutRats)
-            {
-                loggerIfDebug("Rat scout assigned");
-                RatTypeState = RatType.ScoutRat;
-                Nest.ScoutRats.Add(this);
-                ratCoroutine = StartCoroutine(ScoutCoroutine());
-                SetStatus("Scouting");
-                return;
-            }
-
-            
-
-            loggerIfDebug("Search rat assigned");
-            RatTypeState = RatType.SearchRat;
-            StartSearch(Nest.transform.position);
-            SetStatus("Searching");*/
+            return;
         }
 
         public override void ReachedNodeInSearch()
@@ -810,7 +794,7 @@ namespace Rats
         IEnumerator SwarmCoroutine(PlayerControllerB player, float radius)
         {
             yield return null;
-            loggerIfDebug("Starting swarm on player");
+            logIfDebug("Starting swarm on player");
             while (ratCoroutine != null && player != null)
             {
                 float timeStuck = 0f;
@@ -925,7 +909,7 @@ namespace Rats
 
         void TargetRandomNode()
         {
-            loggerIfDebug("Choosing new target node...");
+            logIfDebug("Choosing new target node...");
 
             GameObject[] nodes = !isOutside ? GameObject.FindGameObjectsWithTag("AINode") : GameObject.FindGameObjectsWithTag("OutsideAINode");
 
@@ -1002,7 +986,7 @@ namespace Rats
                 {
                     if (collidedEnemy != null && collidedEnemy.enemyType != enemyType && collidedEnemy.enemyType.canDie && !(stunNormalizedTimer > 0f))
                     {
-                        loggerIfDebug("Collided with: " + collidedEnemy.enemyType.enemyName);
+                        logIfDebug("Collided with: " + collidedEnemy.enemyType.enemyName);
                         timeSinceCollision = 0f;
 
                         if (collidedEnemy.isEnemyDead)
@@ -1080,17 +1064,17 @@ namespace Rats
                 PlaySqueakSFXClientRpc(true);
 
                 int threat = Nest.EnemyThreatCounter[enemy];
-                loggerIfDebug($"{enemy.enemyType.enemyName}: {threat} threat");
+                logIfDebug($"{enemy.enemyType.enemyName}: {threat} threat");
 
                 if (RatTypeState == RatType.DefenseRat) { return; }
 
-                /*if (threat > highThreatToAttackPlayer && Nest.LeadRallyRat == null && Nest.CanRally)
+                if (threat > highThreatToAttackPlayer && Nest.LeadRallyRat == null && Nest.CanRally)
                 {
-                    targetPlayer = player;
-                    Nest.LeadRallyRat = this;
-                    SwitchToBehaviourStateCustom(State.Rallying);
-                    return;
-                }*/
+                    //targetPlayer = player;
+                    //Nest.LeadRallyRat = this;
+                    //SwitchToBehaviourStateCustom(State.Rallying);
+                    //return;
+                }
 
                 if (Nest.EnemyThreatCounter[enemy] > threatToAttackPlayer || enemy.isEnemyDead)
                 {
@@ -1120,17 +1104,17 @@ namespace Rats
                 PlaySqueakSFXClientRpc(true);
 
                 int threat = Nest.PlayerThreatCounter[player];
-                loggerIfDebug($"{player.playerUsername}: {threat} threat");
+                logIfDebug($"{player.playerUsername}: {threat} threat");
 
                 if (RatTypeState == RatType.DefenseRat) { return; }
 
-                /*if (threat > highThreatToAttackPlayer && Nest.LeadRallyRat == null && Nest.CanRally)
+                if (threat > highThreatToAttackPlayer && Nest.LeadRallyRat == null && Nest.CanRally)
                 {
-                    targetPlayer = player;
-                    Nest.LeadRallyRat = this;
-                    SwitchToBehaviourStateCustom(State.Rallying);
-                    return;
-                }*/
+                    //targetPlayer = player;
+                    //Nest.LeadRallyRat = this;
+                    //SwitchToBehaviourStateCustom(State.Rallying);
+                    //return;
+                }
 
                 if (Nest.PlayerThreatCounter[player] > threatToAttackPlayer || player.isPlayerDead)
                 {
@@ -1152,7 +1136,7 @@ namespace Rats
             targetEnemy = enemy;
         }
 
-        void loggerIfDebug(string message)
+        void logIfDebug(string message)
         {
             if (testing)
             {
@@ -1180,7 +1164,7 @@ namespace Rats
 
                     if (player.isPlayerDead)
                     {
-                        loggerIfDebug("Collided with PLAYER BODY"); // Testing
+                        logIfDebug("Collided with PLAYER BODY"); // Testing
                         return;
                     }
 
@@ -1321,3 +1305,4 @@ namespace Rats
 }
 
 // TODO: statuses: shakecamera, playerstun, drunkness, fear, insanity
+*/
