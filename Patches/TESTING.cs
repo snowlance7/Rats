@@ -29,8 +29,7 @@ namespace Rats
         [HarmonyPostfix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.PingScan_performed))]
         public static void PingScan_performedPostFix()
         {
-            logger.LogDebug(StartOfRound.Instance.shipIsLeaving);
-            logger.LogDebug(SewerGrate.RatCount);
+
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.SubmitChat_performed))]

@@ -13,6 +13,8 @@ namespace Rats
     {
         private static ManualLogSource logger = LoggerInstance;
         public static List<SewerGrate> Nests = new List<SewerGrate>();
+        public static Dictionary<EnemyAI, int> EnemyHitCount = new Dictionary<EnemyAI, int>();
+        public static Dictionary<EnemyAI, int> EnemyFoodAmount = new Dictionary<EnemyAI, int>();
 
 #pragma warning disable 0649
         public GameObject RatPrefab = null!;
@@ -21,15 +23,12 @@ namespace Rats
 #pragma warning restore 0649
 
         EnemyVent? ClosestVentToNest = null!;
+        public int DefenseRatCount;
 
         public Dictionary<PlayerControllerB, int> PlayerThreatCounter = new Dictionary<PlayerControllerB, int>();
         //public static Dictionary<PlayerControllerB, int> PlayerFoodAmount = new Dictionary<PlayerControllerB, int>();
         public Dictionary<EnemyAI, int> EnemyThreatCounter = new Dictionary<EnemyAI, int>();
-        public static Dictionary<EnemyAI, int> EnemyHitCount = new Dictionary<EnemyAI, int>();
-        public static Dictionary<EnemyAI, int> EnemyFoodAmount = new Dictionary<EnemyAI, int>();
         public List<RatAI> RallyRats = new List<RatAI>();
-        public List<RatAI> ScoutRats = new List<RatAI>();
-        public List<RatAI> DefenseRats = new List<RatAI>();
 
         public static int RatCount { get { return UnityEngine.GameObject.FindObjectsOfType<RatAI>().Length; } }
         public bool IsRallying { get { return rallyTimer > 0f; } }
@@ -223,8 +222,10 @@ namespace Rats
 
         public override void OnDestroy()
         {
-            Nests.Remove(this);
+            EnemyFoodAmount.Clear();
+            EnemyHitCount.Clear();
             StopAllCoroutines();
+            Nests.Remove(this);
             base.OnDestroy();
         }
     }

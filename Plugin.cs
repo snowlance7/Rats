@@ -84,7 +84,7 @@ namespace Rats
             configThreatToAttackPlayer = Config.Bind("Rats", "Threat to Attack Player", 100, "The threat level at which rats begin attacking the player.");
             configThreatToAttackEnemy = Config.Bind("Rats", "Threat to Attack Enemy", 50, "The threat level at which rats begin attacking enemy entities.");
             configSwarmRadius = Config.Bind("Rats", "Swarm Radius", 10f, "The radius in which rats swarm around their target.");
-            configCanVent = Config.Bind("Rats", "Can Vent", true, "If set to true, allows rats to travel through vents.");
+            configCanVent = Config.Bind("Rats", "Can Vent", true, "If set to true, allows rats to travel through vents. This can also increase performance if set to false.");
             configMaxDefenseRats = Config.Bind("Rats", "Maximum Defense Rats", 10, "The maximum number of defense rats assigned to protect the nest.");
             configRatsNeededToAttack = Config.Bind("Rats", "Rats Needed to Attack", 5, "The minimum number of rats required to start an attack.");
             configDistanceNeededToLoseRats = Config.Bind("Rats", "Distance Needed to Lose Rats", 25f, "The distance the player must be from rats to lose them.");
