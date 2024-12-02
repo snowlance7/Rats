@@ -43,7 +43,7 @@ namespace Rats
             {
                 case "/testing":
 
-                    RatAI.testing = bool.Parse(args[1]);
+                    RatManager.testing = bool.Parse(args[1]);
 
                     break;
                 case "/enemies":

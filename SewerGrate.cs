@@ -1,20 +1,19 @@
 ﻿using BepInEx.Logging;
 using GameNetcodeStuff;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 using static Rats.Plugin;
+using static Rats.RatManager;
 
 namespace Rats
 {
-    internal class SewerGrate : NetworkBehaviour
+    public class SewerGrate : NetworkBehaviour
     {
         private static ManualLogSource logger = LoggerInstance;
-        public static List<SewerGrate> Nests = new List<SewerGrate>();
-        public static Dictionary<EnemyAI, int> EnemyHitCount = new Dictionary<EnemyAI, int>();
-        public static Dictionary<EnemyAI, int> EnemyFoodAmount = new Dictionary<EnemyAI, int>();
 
 #pragma warning disable 0649
         public GameObject RatPrefab = null!;
@@ -22,21 +21,12 @@ namespace Rats
         public TerminalAccessibleObject TerminalAccessibleObj = null!;
 #pragma warning restore 0649
 
-        EnemyVent? ClosestVentToNest = null!;
+        public static LungProp? Apparatus;
+        public EnemyVent? NestVent;
+
+        public bool accessible { get { return NestVent != null; } }
         public int DefenseRatCount;
-
-        public Dictionary<PlayerControllerB, int> PlayerThreatCounter = new Dictionary<PlayerControllerB, int>();
-        //public static Dictionary<PlayerControllerB, int> PlayerFoodAmount = new Dictionary<PlayerControllerB, int>();
-        public Dictionary<EnemyAI, int> EnemyThreatCounter = new Dictionary<EnemyAI, int>();
-        public List<RatAI> RallyRats = new List<RatAI>();
-
-        public static int RatCount { get { return UnityEngine.GameObject.FindObjectsOfType<RatAI>().Length; } }
-        public bool IsRallying { get { return rallyTimer > 0f; } }
-        public bool CanRally { get { return rallyCooldown <= 0f; } }
-        public RatAI? LeadRallyRat;
-        float rallyCooldown;
-        float rallyTimer;
-
+        public static Dictionary<EnemyAI, int> EnemyFoodAmount = [];
         float timeSinceSpawnRat;
         float nextRatSpawnTime;
         public bool open = true;
@@ -47,11 +37,10 @@ namespace Rats
         bool hideCodeOnTerminal = true;
         float minRatSpawnTime = 10f;
         float maxRatSpawnTime = 30f;
-        float rallyTimeLength = 10f;
-        float rallyCooldownLength = 60f;
         int foodToSpawnRat = 5;
         int enemyFoodPerHPPoint = 10;
         int maxRats = 40;
+
         public void Start()
         {
             logger.LogDebug("Sewer grate spawned at: " + transform.position);
@@ -63,7 +52,12 @@ namespace Rats
             foodToSpawnRat = configFoodToSpawnRat.Value;
             enemyFoodPerHPPoint = configEnemyFoodPerHPPoint.Value;
             maxRats = configMaxRats.Value;
+            IsLoggingEnabled = configEnableDebugging.Value;
 
+            if (Apparatus == null)
+            {
+                Apparatus = FindObjectsOfType<LungProp>().Where(x => x.isLungDocked).FirstOrDefault();
+            }
 
             if (IsServerOrHost)
             {
@@ -87,9 +81,11 @@ namespace Rats
                 }
             }
 
+            if (Apparatus != null && !Apparatus.isLungDocked) { open = true; }
+
             if (IsServerOrHost)
             {
-                if (open && RatCount < maxRats)
+                if (open && RatManager.Rats.Count < maxRats)
                 {
                     timeSinceSpawnRat += Time.unscaledDeltaTime;
 
@@ -101,27 +97,6 @@ namespace Rats
                         SpawnRat();
                     }
                 }
-
-
-                /*if (rallyTimer > 0f)
-                {
-                    rallyTimer -= Time.unscaledDeltaTime;
-
-                    if (rallyTimer <= 0f)
-                    {
-                        foreach (var rat in RallyRats)
-                        {
-                            rat.SwitchToBehaviourStateCustom(RatAI.State.Attacking);
-                        }
-                        rallyCooldown = rallyCooldownLength;
-                        LeadRallyRat = null;
-                    }
-                }
-
-                if (rallyCooldown > 0f)
-                {
-                    rallyCooldown -= Time.unscaledDeltaTime;
-                }*/
             }
         }
 
@@ -133,56 +108,11 @@ namespace Rats
             }
         }
 
-        public EnemyVent? GetClosestVentToNest(int areaMask)
-        {
-            if (IsServerOrHost)
-            {
-                if (StartOfRound.Instance.shipIsLeaving) { return null; }
-                Vector3 pos = RoundManager.Instance.GetNavMeshPosition(transform.position, RoundManager.Instance.navHit, 1.75f);
-
-                if (ClosestVentToNest != null)
-                {
-                    // Make sure current vent is still accessible
-                    Vector3 _closestVentPos = RoundManager.Instance.GetNavMeshPosition(ClosestVentToNest.floorNode.transform.position, RoundManager.Instance.navHit, 1.75f);
-                    if (NavMesh.CalculatePath(pos, _closestVentPos, areaMask, new NavMeshPath()))
-                    {
-                        return ClosestVentToNest;
-                    }
-                }
-
-                // Not accessible so find new vent
-                float mostOptimalDistance = 2000f;
-                EnemyVent? targetVent = null;
-                foreach (var vent in RoundManager.Instance.allEnemyVents)
-                {
-                    Vector3 ventPos = RoundManager.Instance.GetNavMeshPosition(vent.floorNode.transform.position, RoundManager.Instance.navHit, 1.75f);
-                    float distance = Vector3.Distance(pos, ventPos);
-                    if (NavMesh.CalculatePath(pos, ventPos, areaMask, new NavMeshPath()) && distance < mostOptimalDistance)
-                    {
-                        mostOptimalDistance = distance;
-                        targetVent = vent;
-                    }
-                }
-                return targetVent;
-            }
-
-            // No vent found
-            return null;
-        }
-
         public void AddEnemyFoodAmount(EnemyAI enemy)
         {
             int maxHP = enemy.enemyType.enemyPrefab.GetComponent<EnemyAI>().enemyHP;
             int foodAmount = maxHP * enemyFoodPerHPPoint;
             EnemyFoodAmount.Add(enemy, foodAmount);
-        }
-
-        public void StartRallyTimer()
-        {
-            if (IsServerOrHost)
-            {
-                rallyTimer = rallyTimeLength;
-            }
         }
 
         public void AddFood(int amount = 1)
@@ -193,7 +123,7 @@ namespace Rats
             int remainingFood = food % foodToSpawnRat;
 
             food = remainingFood;
-            //logger.LogDebug("Spawning rats from food: " + ratsToSpawn);
+            logIfDebug("Spawning rats from food: " + ratsToSpawn);
             SpawnRats(ratsToSpawn);
         }
 
@@ -211,21 +141,26 @@ namespace Rats
             if (GameObject.FindObjectsOfType<RatAI>().Length < maxRats)
             {
                 GameObject ratObj = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
-                ratObj.GetComponentInChildren<NetworkObject>().Spawn(destroyWithScene: true);
+                RatAI rat = ratObj.GetComponent<RatAI>();
+                rat.NetworkObject.Spawn(destroyWithScene: true);
+                rat.MainNest = this;
             }
         }
 
         public void ToggleVent()
         {
+            if (Apparatus != null && !Apparatus.isLungDocked) { return; }
             open = !open;
         }
 
         public override void OnDestroy()
         {
-            EnemyFoodAmount.Clear();
             EnemyHitCount.Clear();
+            EnemyThreatCounter.Clear();
+            PlayerThreatCounter.Clear();
+            EnemyFoodAmount.Clear();
+            Apparatus = null;
             StopAllCoroutines();
-            Nests.Remove(this);
             base.OnDestroy();
         }
     }
