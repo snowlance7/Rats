@@ -1,3 +1,6 @@
+## 1.1.1
+- Fixed target node error that could occur when the ship goes back to orbit
+
 ## 1.1.0
 - Taking the apparatus now opens all nests
 - Some optimizations to the rats

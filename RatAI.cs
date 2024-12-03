@@ -680,6 +680,7 @@ namespace Rats
             {
                 float timeStuck = 0f;
                 TargetRandomNode();
+                if (targetNode == null) { continue; }
                 Vector3 position = RoundManager.Instance.GetNavMeshPosition(targetNode.position, RoundManager.Instance.navHit, 1.75f, agent.areaMask);
                 if (!SetDestinationToPosition(position)) { continue; }
                 while (agent.enabled)
@@ -793,6 +794,7 @@ namespace Rats
             {
                 float timeStuck = 0f;
                 TargetRandomNode();
+                if (targetNode == null) { continue; }
                 Vector3 position = targetNode.transform.position;
                 if (!SetDestinationToPosition(position)) { continue; }
                 while (agent.enabled)
@@ -826,13 +828,21 @@ namespace Rats
 
         void TargetRandomNode()
         {
-            //logIfDebug("Choosing new target node...");
+            try
+            {
+                //logIfDebug("Choosing new target node...");
 
-            //GameObject[] nodes = !isOutside ? GameObject.FindGameObjectsWithTag("AINode") : GameObject.FindGameObjectsWithTag("OutsideAINode");
-            GameObject[] nodes = allAINodes;
+                //GameObject[] nodes = !isOutside ? GameObject.FindGameObjectsWithTag("AINode") : GameObject.FindGameObjectsWithTag("OutsideAINode");
+                GameObject[] nodes = allAINodes;
 
-            int randIndex = UnityEngine.Random.Range(0, nodes.Length);
-            targetNode = nodes[randIndex].transform;
+                int randIndex = UnityEngine.Random.Range(0, nodes.Length);
+                targetNode = nodes[randIndex].transform;
+            }
+            catch
+            {
+                targetNode = null;
+                return;
+            }
         }
 
         public override void HitEnemy(int force = 0, PlayerControllerB playerWhoHit = null!, bool playHitSFX = true, int hitID = -1)
