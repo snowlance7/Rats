@@ -13,7 +13,6 @@ namespace Rats
 {
     public static class RatManager
     {
-        private static ManualLogSource logger = LoggerInstance;
         public static bool testing = false; // TESTING
         //public static RatKingAI? RatKing { get; set; }
         public static List<RatAI> Rats = [];

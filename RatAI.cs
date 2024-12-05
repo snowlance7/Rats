@@ -17,8 +17,6 @@ namespace Rats
 {
     public class RatAI : EnemyAI
     {
-        private static ManualLogSource logger = LoggerInstance;
-
 #pragma warning disable 0649
         public ScanNodeProperties ScanNode = null!;
         public AudioClip[] SqueakSFX = null!;
@@ -169,11 +167,14 @@ namespace Rats
             ratDamage = configRatDamage.Value;
             ChristmasHat.SetActive(configHolidayRats.Value);
 
+            updateDestinationInterval = AIIntervalTime;
+            thisNetworkObject = NetworkObject;
             thisEnemyIndex = RoundManager.Instance.numberOfEnemiesInScene;
             RoundManager.Instance.numberOfEnemiesInScene++;
             allAINodes = RoundManager.Instance.insideAINodes;
             if (!RoundManager.Instance.SpawnedEnemies.Contains(this)) { RoundManager.Instance.SpawnedEnemies.Add(this); }
             path1 = new NavMeshPath();
+            serverPosition = base.transform.position;
             ventAnimationFinished = true;
             currentBehaviourStateIndex = (int)State.Tasking;
             HottestRat();
@@ -458,7 +459,7 @@ namespace Rats
 
         void HottestRat()
         {
-            if (UnityEngine.Random.Range(0f, 1f) < 0.05f)
+            if (UnityEngine.Random.Range(0f, 1f) < 0.01f)
             {
                 ScanNode.headerText = "HottestRat";
             }
@@ -937,7 +938,7 @@ namespace Rats
                                 if (SewerGrate.EnemyFoodAmount[collidedEnemy] <= 1)
                                 {
                                     holdingFood = SewerGrate.EnemyFoodAmount[collidedEnemy] == 1;
-                                    collidedEnemy.NetworkObject.Despawn(true);
+                                    RoundManager.Instance.DespawnEnemyOnServer(collidedEnemy.NetworkObject);
                                     return;
                                 }
                                 else

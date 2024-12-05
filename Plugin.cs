@@ -9,7 +9,9 @@ using LethalLib.Modules;
 using Rats;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Unity.Netcode;
 using UnityEngine;
@@ -20,15 +22,15 @@ namespace Rats
     [BepInDependency(LethalLib.Plugin.ModGUID)]
     public class Plugin : BaseUnityPlugin
     {
-        public static Plugin PluginInstance = null!;
-        public static ManualLogSource LoggerInstance = null!;
+        public static Plugin PluginInstance;
+        public static ManualLogSource LoggerInstance;
         private readonly Harmony harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
         public static PlayerControllerB localPlayer { get { return GameNetworkManager.Instance.localPlayerController; } }
         public static bool IsServerOrHost { get { return NetworkManager.Singleton.IsServer || NetworkManager.Singleton.IsHost; } }
         public static PlayerControllerB PlayerFromId(ulong id) { return StartOfRound.Instance.allPlayerScripts[StartOfRound.Instance.ClientPlayerList[id]]; }
 
 
-        public static AssetBundle ModAssets = null!;
+        public static AssetBundle ModAssets;
 
         public static bool IsLoggingEnabled;
 
@@ -42,8 +44,7 @@ namespace Rats
         public static ConfigEntry<bool> configEnableDebugging;
 
         // MainNest
-        public static ConfigEntry<float> configMinNests;
-        public static ConfigEntry<float> configMaxNests;
+        public static ConfigEntry<string> configSewerGrateSpawnWeightCurve;
         public static ConfigEntry<bool> configHideCodeOnTerminal;
         public static ConfigEntry<int> configMinRatSpawnTime;
         public static ConfigEntry<int> configMaxRatSpawnTime;
@@ -91,8 +92,7 @@ namespace Rats
             configEnableDebugging = Config.Bind("Debugging", "Enable Debugging", false, "Allows debug logs to show in the logs");
 
             // MainNest
-            configMinNests = Config.Bind("Nest", "Minimum Nests", 0f, "The minimum nests to spawn on a moon");
-            configMaxNests = Config.Bind("Nest", "Max Nests", 3f, "The maximum nests to spawn on a moon");
+            configSewerGrateSpawnWeightCurve = Config.Bind("Nest", "Spawn Weight Curve", "Vanilla - 0,0 ; 1,3 | Custom - 0,0 ; 1,3", "The MoonName - CurveSpawnWeight for the SewerGrate(Rat nest).");
             configHideCodeOnTerminal = Config.Bind("Nest", "Hide Code On Terminal", true, "If set to true, will make the code on the ship monitor for the nest be ??, requiring the player to find the nest physically to turn off its spawning.");
             configMinRatSpawnTime = Config.Bind("Nest", "Minimum Rat Spawn Time", 5, "The minimum time in seconds before a rat can spawn from the nest.");
             configMaxRatSpawnTime = Config.Bind("Nest", "Maximum Rat Spawn Time", 20, "The maximum time in seconds before a rat can spawn from the nest.");
@@ -131,6 +131,7 @@ namespace Rats
             EnemyType Rat = ModAssets.LoadAsset<EnemyType>("Assets/ModAssets/RatEnemy.asset");
             if (Rat == null) { LoggerInstance.LogError("Error: Couldnt get Rat from assets"); return; }
             LoggerInstance.LogDebug($"Got Rat prefab");
+            SewerGrate.RatEnemyType = Rat;
             TerminalNode RatTN = ModAssets.LoadAsset<TerminalNode>("Assets/ModAssets/Bestiary/RatTN.asset");
             TerminalKeyword RatTK = ModAssets.LoadAsset<TerminalKeyword>("Assets/ModAssets/Bestiary/RatTK.asset");
 
@@ -145,7 +146,10 @@ namespace Rats
             LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(RatSpawnPrefab.spawnableMapObject.prefabToSpawn);
 
             LoggerInstance.LogDebug($"Registering RatSpawn");
-            MapObjects.RegisterMapObject(RatSpawnPrefab, Levels.LevelTypes.All, (levels) => new AnimationCurve(new Keyframe(0, configMinNests.Value), new Keyframe(1, configMaxNests.Value)));
+            //MapObjects.RegisterMapObject(RatSpawnPrefab, Levels.LevelTypes.All, (levels) => RatSpawnPrefab.spawnableMapObject.numberToSpawn);
+            //MapObjects.RegisterMapObject(RatSpawnPrefab, Levels.LevelTypes.All, (levels) => new AnimationCurve(new Keyframe(0, configMinNests.Value), new Keyframe(1, configMaxNests.Value)));
+            RegisterInsideMapObjectWithConfig(RatSpawnPrefab, configSewerGrateSpawnWeightCurve.Value);
+
             // Finished
             Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
         }
@@ -154,6 +158,118 @@ namespace Rats
         {
             if (!IsLoggingEnabled) { return; }
             LoggerInstance.LogDebug(message);
+        }
+
+        // Xu's code for registering map objects with configs
+        protected void RegisterInsideMapObjectWithConfig(SpawnableMapObjectDef mapObjDef, string configString)
+        {
+            /*SpawnableMapObjectDef mapObjDef = ScriptableObject.CreateInstance<SpawnableMapObjectDef>();
+            mapObjDef.spawnableMapObject = new SpawnableMapObject
+            {
+                prefabToSpawn = prefab
+            };*/
+
+
+            (Dictionary<Levels.LevelTypes, string> spawnRateByLevelType, Dictionary<string, string> spawnRateByCustomLevelType) = ConfigParsingWithCurve(configString);
+
+
+            foreach (var entry in spawnRateByLevelType)
+            {
+                //AnimationCurve animationCurve = CreateCurveFromString(entry.Value, prefab.name);
+                AnimationCurve animationCurve = CreateCurveFromString(entry.Value, mapObjDef.spawnableMapObject.prefabToSpawn.name);
+                MapObjects.RegisterMapObject(mapObjDef, entry.Key, (level) => animationCurve);
+            }
+            foreach (var entry in spawnRateByCustomLevelType)
+            {
+                //AnimationCurve animationCurve = CreateCurveFromString(entry.Value, prefab.name);
+                AnimationCurve animationCurve = CreateCurveFromString(entry.Value, mapObjDef.spawnableMapObject.prefabToSpawn.name);
+                MapObjects.RegisterMapObject(mapObjDef, Levels.LevelTypes.None, new string[] { entry.Key }, (level) => animationCurve);
+            }
+        }
+        protected (Dictionary<Levels.LevelTypes, string> spawnRateByLevelType, Dictionary<string, string> spawnRateByCustomLevelType) ConfigParsingWithCurve(string configMoonRarity)
+        {
+            Dictionary<Levels.LevelTypes, string> spawnRateByLevelType = new();
+            Dictionary<string, string> spawnRateByCustomLevelType = new();
+            foreach (string entry in configMoonRarity.Split('|').Select(s => s.Trim()))
+            {
+                string[] entryParts = entry.Split('-').Select(s => s.Trim()).ToArray();
+
+                if (entryParts.Length != 2) continue;
+
+                string name = entryParts[0].ToLowerInvariant();
+
+                if (name == "custom")
+                {
+                    name = "modded";
+                }
+
+                if (System.Enum.TryParse(name, true, out Levels.LevelTypes levelType))
+                {
+                    spawnRateByLevelType[levelType] = entryParts[1];
+                }
+                else
+                {
+                    // Try appending "Level" to the name and re-attempt parsing
+                    string modifiedName = name + "level";
+                    if (System.Enum.TryParse(modifiedName, true, out levelType))
+                    {
+                        spawnRateByLevelType[levelType] = entryParts[1];
+                    }
+                    else
+                    {
+                        spawnRateByCustomLevelType[name] = entryParts[1];
+                    }
+                }
+            }
+            return (spawnRateByLevelType, spawnRateByCustomLevelType);
+        }
+
+        public AnimationCurve CreateCurveFromString(string keyValuePairs, string nameOfThing)
+        {
+            // Split the input string into individual key-value pairs
+            string[] pairs = keyValuePairs.Split(';').Select(s => s.Trim()).ToArray();
+            if (pairs.Length == 0)
+            {
+                if (int.TryParse(keyValuePairs, out int result))
+                {
+                    return new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, result));
+                }
+                else
+                {
+                    LoggerInstance.LogError($"Invalid key-value pairs format: {keyValuePairs}");
+                    return new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 0));
+                }
+            }
+            List<Keyframe> keyframes = new();
+
+            // Iterate over each pair and parse the key and value to create keyframes
+            foreach (string pair in pairs)
+            {
+                string[] splitPair = pair.Split(',').Select(s => s.Trim()).ToArray();
+                if (splitPair.Length == 2 &&
+                    float.TryParse(splitPair[0], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float time) &&
+                    float.TryParse(splitPair[1], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float value))
+                {
+                    keyframes.Add(new Keyframe(time, value));
+                }
+                else
+                {
+                    LoggerInstance.LogError($"Failed config for hazard: {nameOfThing}");
+                    LoggerInstance.LogError($"Split pair length: {splitPair.Length}");
+                    LoggerInstance.LogError($"Could parse first value: {float.TryParse(splitPair[0], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float key1)}, instead got: {key1}, with splitPair0 being: {splitPair[0]}");
+                    LoggerInstance.LogError($"Could parse second value: {float.TryParse(splitPair[1], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float value2)}, instead got: {value2}, with splitPair1 being: {splitPair[1]}");
+                    LoggerInstance.LogError($"Invalid key,value pair format: {pair}");
+                }
+            }
+
+            // Create the animation curve with the generated keyframes and apply smoothing
+            var curve = new AnimationCurve(keyframes.ToArray());
+            for (int i = 0; i < keyframes.Count; i++)
+            {
+                curve.SmoothTangents(i, 0.5f); // Adjust the smoothing as necessary
+            }
+
+            return curve;
         }
 
         private static void InitializeNetworkBehaviours()

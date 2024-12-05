@@ -13,12 +13,13 @@ namespace Rats
 {
     public class SewerGrate : NetworkBehaviour
     {
-        private static ManualLogSource logger = LoggerInstance;
+        public static EnemyType RatEnemyType = null!;
 
 #pragma warning disable 0649
         public GameObject RatPrefab = null!;
         public TextMeshPro[] TerminalCodes = null!;
         public TerminalAccessibleObject TerminalAccessibleObj = null!;
+        
 #pragma warning restore 0649
 
         public static LungProp? Apparatus;
@@ -43,7 +44,7 @@ namespace Rats
 
         public void Start()
         {
-            logger.LogDebug("Sewer grate spawned at: " + transform.position);
+            logIfDebug("Sewer grate spawned at: " + transform.position);
             Nests.Add(this);
             
             hideCodeOnTerminal = configHideCodeOnTerminal.Value;
@@ -138,11 +139,16 @@ namespace Rats
 
         void SpawnRat()
         {
-            if (GameObject.FindObjectsOfType<RatAI>().Length < maxRats)
+            if (RatManager.Rats.Count < maxRats)
             {
+                /*NetworkObject netObj = RoundManager.Instance.SpawnEnemyGameObject(transform.position, Quaternion.identity.y, -1, RatEnemyType);
+                RatAI rat = netObj.GetComponent<RatAI>();
+                rat.MainNest = this;*/
+                
                 GameObject ratObj = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
                 RatAI rat = ratObj.GetComponent<RatAI>();
                 rat.NetworkObject.Spawn(destroyWithScene: true);
+
                 rat.MainNest = this;
             }
         }
