@@ -54,7 +54,7 @@ namespace Rats
 
         // Rats
         public static ConfigEntry<float> configAIIntervalTime;
-        public static ConfigEntry<bool> configMakeLessSqueaks;
+        //public static ConfigEntry<bool> configMakeLessSqueaks;
         public static ConfigEntry<float> configDefenseRadius;
         public static ConfigEntry<float> configTimeToIncreaseThreat;
         public static ConfigEntry<int> configThreatToAttackPlayer;
@@ -101,7 +101,7 @@ namespace Rats
             configMaxRats = Config.Bind("Nest", "Maximum Rats", 40, "The maximum number of rats that can be on the map. Lowering this can improve performance.");
 
             // Rats
-            configMakeLessSqueaks = Config.Bind("Rats", "Make Less Squeaks", false, "If set to true, will make the rats squeak less, which can help with performance.");
+            //configMakeLessSqueaks = Config.Bind("Rats", "Make Less Squeaks", false, "If set to true, will make the rats squeak less, which can help with performance.");
             configAIIntervalTime = Config.Bind("Rats", "AI Interval Time", 0.3f, "The interval in which rats will update their AI (Changing position, doing complex calculations, etc). Setting this higher can improve performance but can also make the rats freeze in place more often while lower values makes them constantly moving but can decrease performance.");
             configDefenseRadius = Config.Bind("Rats", "Defense Radius", 5f, "The radius in which defense rats protect the nest.");
             configTimeToIncreaseThreat = Config.Bind("Rats", "Time to Increase Threat", 2.5f, "The time needed to add a threat point for a player when they are in line of sight of the rat.");
@@ -128,7 +128,7 @@ namespace Rats
             }
             LoggerInstance.LogDebug($"Got AssetBundle at: {Path.Combine(sAssemblyLocation, "rats_assets")}");
 
-            EnemyType Rat = ModAssets.LoadAsset<EnemyType>("Assets/ModAssets/RatEnemy.asset");
+            /*EnemyType Rat = ModAssets.LoadAsset<EnemyType>("Assets/ModAssets/RatEnemy.asset");
             if (Rat == null) { LoggerInstance.LogError("Error: Couldnt get Rat from assets"); return; }
             LoggerInstance.LogDebug($"Got Rat prefab");
             SewerGrate.RatEnemyType = Rat;
@@ -138,7 +138,7 @@ namespace Rats
             LoggerInstance.LogDebug("Registering enemy network prefab...");
             LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(Rat.enemyPrefab);
             LoggerInstance.LogDebug("Registering enemy...");
-            Enemies.RegisterEnemy(Rat, null, null, RatTN, RatTK);
+            Enemies.RegisterEnemy(Rat, null, null, RatTN, RatTK);*/
 
             SpawnableMapObjectDef RatSpawnPrefab = ModAssets.LoadAsset<SpawnableMapObjectDef>("Assets/ModAssets/RatSpawn.asset");
             if (RatSpawnPrefab == null) { LoggerInstance.LogError("Error: Couldnt get RatSpawnPrefab from assets"); return; }

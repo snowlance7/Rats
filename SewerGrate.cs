@@ -13,8 +13,6 @@ namespace Rats
 {
     public class SewerGrate : NetworkBehaviour
     {
-        public static EnemyType RatEnemyType = null!;
-
 #pragma warning disable 0649
         public GameObject RatPrefab = null!;
         public TextMeshPro[] TerminalCodes = null!;
@@ -141,15 +139,7 @@ namespace Rats
         {
             if (RatManager.Rats.Count < maxRats)
             {
-                /*NetworkObject netObj = RoundManager.Instance.SpawnEnemyGameObject(transform.position, Quaternion.identity.y, -1, RatEnemyType);
-                RatAI rat = netObj.GetComponent<RatAI>();
-                rat.MainNest = this;*/
-                
-                GameObject ratObj = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
-                RatAI rat = ratObj.GetComponent<RatAI>();
-                rat.NetworkObject.Spawn(destroyWithScene: true);
-
-                rat.MainNest = this;
+                SpawnRatClientRpc();
             }
         }
 
@@ -167,7 +157,22 @@ namespace Rats
             EnemyFoodAmount.Clear();
             Apparatus = null;
             StopAllCoroutines();
+
+            foreach (RatAI rat in RatManager.Rats)
+            {
+                UnityEngine.GameObject.Destroy(rat);
+            }
+
+            totalRatsSpawned = 0;
+
             base.OnDestroy();
+        }
+
+        [ClientRpc]
+        public void SpawnRatClientRpc()
+        {
+            GameObject ratObj = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
+            ratObj.GetComponent<RatAI>().MainNest = this;
         }
     }
 }

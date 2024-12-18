@@ -1,4 +1,4 @@
-﻿/*using BepInEx.Logging;
+﻿using BepInEx.Logging;
 using GameNetcodeStuff;
 using System;
 using System.Collections;
@@ -18,7 +18,7 @@ namespace Rats
 {
     public class RatKingAI : EnemyAI
     {
-        private static ManualLogSource logger = LoggerInstance;
+        /*private static ManualLogSource logger = LoggerInstance;
         public static RatKingAI? Instance { get; private set; }
         bool despawning = false;
 
@@ -71,7 +71,7 @@ namespace Rats
             Eating
         }
 
-        public void SwitchToBehaviourStateCustom(State state)
+        public void SwitchToBehaviorState(State state)
         {
             if (currentBehaviourStateIndex == (int)state) { return; }
 
@@ -445,7 +445,7 @@ namespace Rats
                 }
             }
 
-            SwitchToBehaviourStateCustom(State.Roaming);
+            SwitchToBehaviorState(State.Roaming);
         }
 
         IEnumerator SwarmCoroutine(PlayerControllerB player, float radius)
@@ -478,7 +478,7 @@ namespace Rats
                 }
             }
 
-            SwitchToBehaviourStateCustom(State.Roaming);
+            SwitchToBehaviorState(State.Roaming);
         }
 
         IEnumerator SwarmCoroutine(EnemyAI enemy, float radius)
@@ -509,7 +509,7 @@ namespace Rats
                 }
             }
 
-            SwitchToBehaviourStateCustom(State.Roaming);
+            SwitchToBehaviorState(State.Roaming);
         }
 
         IEnumerator SwarmCoroutine(Vector3 position, float radius)
@@ -542,7 +542,7 @@ namespace Rats
                 }
             }
 
-            SwitchToBehaviourStateCustom(State.Roaming);
+            SwitchToBehaviorState(State.Roaming);
         }
 
         IEnumerator ScoutCoroutine()
@@ -560,7 +560,7 @@ namespace Rats
                     if (!agent.hasPath || timeStuck > timeAgentStopped)
                     {
                         PlaySqueakSFXClientRpc();
-                        SwitchToBehaviourStateCustom(State.Roaming);
+                        SwitchToBehaviorState(State.Roaming);
                         ratCoroutine = null;
                         yield break;
                     }
@@ -572,7 +572,7 @@ namespace Rats
                 }
             }
 
-            SwitchToBehaviourStateCustom(State.Roaming);
+            SwitchToBehaviorState(State.Roaming);
         }
 
         void TargetRandomNode()
@@ -695,7 +695,7 @@ namespace Rats
                                 holdingFood = true;
                             }
 
-                            SwitchToBehaviourStateCustom(State.Roaming);
+                            SwitchToBehaviorState(State.Roaming);
                         }
                         else
                         {
@@ -753,7 +753,7 @@ namespace Rats
                 if (Nest.EnemyThreatCounter[enemy] > threatToAttackEnemy || enemy.isEnemyDead)
                 {
                     SetTarget(enemy);
-                    //SwitchToBehaviourStateCustom(State.Swarming);
+                    //SwitchToBehaviorState(State.Swarming);
                 }
             }
         }
@@ -785,7 +785,7 @@ namespace Rats
                 if (Nest.PlayerThreatCounter[player] > threatToAttackPlayer || player.isPlayerDead)
                 {
                     SetTarget(player);
-                    //SwitchToBehaviourStateCustom(State.Swarming);
+                    //SwitchToBehaviorState(State.Swarming);
                 }
             }
         }
@@ -1071,6 +1071,6 @@ namespace Rats
                 if (deactivate) { heldBody.DeactivateBody(setActive: false); }
                 heldBody = null;
             }
-        }
+        }*/
     }
-}*/
+}

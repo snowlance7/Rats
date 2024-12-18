@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1289232117
+CRC: 1411830995
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: e2987c22339dedfee1df3f4eeec38e38
+    Hash: e95707e6aee887cf18e8cacd3ea9a280
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 257257026d4ea5c7bf5e09967fc4b232
+    Hash: c9dbc706f00e30bbeb78f16c25152638
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: e2987c22339dedfee1df3f4eeec38e38
+    Hash: e95707e6aee887cf18e8cacd3ea9a280
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -53,25 +53,17 @@ ClassTypes:
 - Class: 114
   Script: {fileID: -148027567, guid: 490d78382e3f68e479e9d9756fa918c3, type: 3}
 - Class: 114
-  Script: {fileID: 11500000, guid: 65d3fcb39dd67306e9bb17a603308070, type: 3}
-- Class: 114
   Script: {fileID: 11500000, guid: 04f75356a7e9c978bddc7d568e58a50b, type: 3}
 - Class: 114
-  Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
-- Class: 114
   Script: {fileID: 11500000, guid: 3c36d0a92cbb1f26a39169ef0eae393a, type: 3}
-- Class: 114
-  Script: {fileID: 11500000, guid: 6d7127b8f98ca8ec9896b384a71d39a2, type: 3}
-- Class: 114
-  Script: {fileID: 11500000, guid: 0e80ae96b3eb9177eea5c8f9dadbcda1, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
 - Class: 114
-  Script: {fileID: 11500000, guid: d3cecf05b78b173605122a700874719c, type: 3}
-- Class: 114
   Script: {fileID: 11500000, guid: f2c662b0f92d7236699123213e2fb9f4, type: 3}
+- Class: 114
+  Script: {fileID: -819815532, guid: 490d78382e3f68e479e9d9756fa918c3, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 128
@@ -90,13 +82,7 @@ ClassTypes:
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
 - AssemblyName: Assembly-CSharp
-  ClassName: AISearchRoutine
-- AssemblyName: Assembly-CSharp
-  ClassName: EnemyBehaviourState
-- AssemblyName: Assembly-CSharp
   ClassName: InteractEvent
-- AssemblyName: Assembly-CSharp
-  ClassName: NavSizeLimit
 - AssemblyName: Assembly-CSharp
   ClassName: SpawnableMapObject
 - AssemblyName: Unity.TextMeshPro
@@ -136,8 +122,5 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: UnityEngine.UI
   ClassName: UnityEngine.UI.MaskableGraphic/CullStateChangedEvent
 Assets:
-- Assets/ModAssets/RatEnemy.asset
-- Assets/ModAssets/Bestiary/RatTK.asset
 - Assets/ModAssets/RatSpawn.asset
-- Assets/ModAssets/Bestiary/RatTN.asset
 Dependencies: []
