@@ -15,9 +15,11 @@ namespace Rats
     {
 #pragma warning disable 0649
         public GameObject RatPrefab = null!;
+        public GameObject RatKingPrefab = null!;
+        public GameObject JermaRatPrefab = null!;
+        public GameObject JermaRatKingPrefab = null!;
         public TextMeshPro[] TerminalCodes = null!;
         public TerminalAccessibleObject TerminalAccessibleObj = null!;
-        
 #pragma warning restore 0649
 
         public static LungProp? Apparatus;

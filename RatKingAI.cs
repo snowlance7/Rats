@@ -75,7 +75,7 @@ namespace Rats
         {
             if (currentBehaviourStateIndex == (int)state) { return; }
 
-            StopRoutines();
+            StopTaskRoutine();
 
             switch (state)
             {
@@ -89,7 +89,7 @@ namespace Rats
                     break;
             }
 
-            SwitchToBehaviourClientRpc((int)state);
+            SwitchToBehaviorClientRpc((int)state);
         }
 
         public override void OnNetworkSpawn()
@@ -287,7 +287,7 @@ namespace Rats
             {
                 if (CheckLineOfSightForDeadBody())
                 {
-                    StopRoutines();
+                    StopTaskRoutine();
                     grabbingBody = true;
                     return;
                 }
@@ -601,7 +601,7 @@ namespace Rats
             }
         }
 
-        public void StopRoutines()
+        public void StopTaskRoutine()
         {
             StopAllCoroutines();
             ratCoroutine = null;
@@ -609,7 +609,7 @@ namespace Rats
 
         public override void CancelSpecialAnimationWithPlayer()
         {
-            StopRoutines();
+            StopTaskRoutine();
         }
 
         public override void HitFromExplosion(float distance)
@@ -942,7 +942,7 @@ namespace Rats
         }
 
         [ClientRpc]
-        public new void SwitchToBehaviourClientRpc(int stateIndex)
+        public new void SwitchToBehaviorClientRpc(int stateIndex)
         {
             if (currentBehaviourStateIndex != stateIndex)
             {

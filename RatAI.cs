@@ -8,16 +8,14 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem.Utilities;
-using UnityEngine.Rendering.HighDefinition;
 using static Rats.Plugin;
-using static Rats.RatManager;
 
 // Cheese to lure the rats away from the grate so the player can block it
 // Rats will scout and do a normal search, if they see a player after 20 seconds, they will add a counter to the threatcounter, when max threat, they will run back to sewer and gather rats they touch and get defending rats and swarm around the player for 20 seconds, any rats nearby will also swarm. then attack.
 
 namespace Rats
 {
-    public class RatAI : MonoBehaviour
+    public class RatAI : NetworkBehaviour
     {
 #pragma warning disable 0649
         public ScanNodeProperties ScanNode = null!;
@@ -101,7 +99,6 @@ namespace Rats
         int enemyHitsToDoDamage = 10;
         int playerFoodAmount = 30;
         int ratDamage = 2;
-        bool makeLessSqueaks = false;
 
         RatType RatTypeState = RatType.Unassigned;
 
@@ -118,15 +115,6 @@ namespace Rats
             Tasking,
             Swarming,
             Attacking
-        }
-
-        public void StopTaskRoutine()
-        {
-            if (ratCoroutine != null)
-            {
-                StopCoroutine(ratCoroutine);
-                ratCoroutine = null;
-            }
         }
 
         public void SwitchToBehaviorState(State state)
@@ -179,13 +167,20 @@ namespace Rats
                     break;
             }
 
-            RoundManager.PlayRandomClip(creatureSFX, SqueakSFX, true, 1, -1);
-            currentBehaviorState = state;
+            SwitchToBehaviorClientRpc(state);
+        }
+
+        public void StopTaskRoutine()
+        {
+            if (ratCoroutine != null)
+            {
+                StopCoroutine(ratCoroutine);
+                ratCoroutine = null;
+            }
         }
 
         public void Start()
         {
-            //makeLessSqueaks = configMakeLessSqueaks.Value;
             AIIntervalTime = configAIIntervalTime.Value;
             defenseRadius = configDefenseRadius.Value;
             timeToIncreaseThreat = configTimeToIncreaseThreat.Value;
@@ -201,55 +196,25 @@ namespace Rats
             ratDamage = configRatDamage.Value;
             ChristmasHat.SetActive(configHolidayRats.Value);
 
-            thisEnemyIndex = totalRatsSpawned;
-            totalRatsSpawned++;
-            random = new System.Random(StartOfRound.Instance.randomMapSeed + thisEnemyIndex);
-            //updateDestinationInterval = AIIntervalTime;
-            //RoundManager.Instance.numberOfEnemiesInScene++;
-            path1 = new NavMeshPath();
+            thisEnemyIndex = RoundManager.Instance.numberOfEnemiesInScene;
+            RoundManager.Instance.numberOfEnemiesInScene++;
             allAINodes = RoundManager.Instance.insideAINodes;
-            isOutside = false;
+            path1 = new NavMeshPath();
+            currentBehaviorState = State.Tasking;
             HottestRat();
             RatManager.Rats.Add(this);
 
-            AssignRatType();
-            StartCoroutine(DoAIInterval());
+            if (IsServerOrHost)
+            {
+                AssignRatType();
+                StartCoroutine(DoAIInterval());
+            }
 
             logIfDebug($"Rat spawned");
         }
 
-        /*public void UpdateOld()
-        {
-            if (isEnemyDead || StartOfRound.Instance.allPlayersDead)
-            {
-                return;
-            };
-
-            if (updateDestinationInterval >= 0f)
-            {
-                updateDestinationInterval -= Time.deltaTime;
-            }
-            else
-            {
-                DoAIInterval();
-                updateDestinationInterval = AIIntervalTime;
-            }
-
-            timeSinceCollision += Time.deltaTime;
-            timeSinceAddThreat += Time.deltaTime;
-            creatureAnimator.SetBool("runBackwards", returningBodyToNest && stunNormalizedTimer <= 0f);
-
-            if (returningBodyToNest && heldBody != null)
-            {
-                TurnCompass.LookAt(heldBody.transform.position);
-                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(new Vector3(0f, TurnCompass.eulerAngles.y, 0f)), 10f * Time.deltaTime);
-            }
-        }*/
-
         public void Update()
         {
-            creatureAnimator.SetBool("runBackwards", returningBodyToNest);
-
             if (returningBodyToNest && heldBody != null)
             {
                 TurnCompass.LookAt(heldBody.transform.position);
@@ -287,8 +252,6 @@ namespace Rats
                             break;
                         }
 
-                        if (MainNest == null) { TryGetAnyNest(); }
-
                         if (MainNest != null && SetDestinationToPosition(MainNest.transform.position))
                         {
                             StopTaskRoutine();
@@ -324,7 +287,7 @@ namespace Rats
 
                         CheckForThreatsInLOS();
 
-                        break;
+                        yield break;
                     case State.Swarming:
                         agent.speed = 10f;
 
@@ -421,197 +384,20 @@ namespace Rats
             }
         }
 
-        /*public override void DoAIIntervalOld()
-        {
-            if (isEnemyDead || StartOfRound.Instance.allPlayersDead || stunNormalizedTimer > 0f)
-            {
-                return;
-            };
-
-            if (moveTowardsDestination)
-            {
-                agent.SetDestination(destination);
-            }
-
-            if (MainNest == null && currentBehaviourStateIndex != (int)State.Roaming) { SwitchToBehaviorState(State.Roaming); return; }
-
-            switch (currentBehaviourStateIndex)
-            {
-                case (int)State.Roaming:
-                    agent.speed = 5f;
-
-                    if (AtNest)
-                    {
-                        if (returningBodyToNest)
-                        {
-                            DropBody(true);
-                            MainNest.AddFood(playerFoodAmount);
-                        }
-                        SwitchToBehaviorState(State.Tasking);
-                        return;
-                    }
-
-                    if (MainNest == null) { TryGetAnyNest(); }
-
-                    if (MainNest != null && SetDestinationToPosition(MainNest.transform.position))
-                    {
-                        StopRoutines();
-                        SetStatus("Returning to nest");
-                    }
-                    else
-                    {
-                        if (returningBodyToNest)
-                        {
-                            DropBody();
-                        }
-                        Roam();
-                    }
-
-                    break;
-                case (int)State.Tasking:
-                    agent.speed = 5f;
-
-                    if (grabbingBody)
-                    {
-                        GrabbableObject deadBody = targetPlayer.deadBody.grabBodyObject;
-                        if (SetDestinationToPosition(deadBody.transform.position, true))
-                        {
-                            if (Vector3.Distance(transform.position, deadBody.transform.position) < 1f)
-                            {
-                                GrabBody();
-                                returningBodyToNest = true;
-                                SwitchToBehaviorState(State.Roaming);
-                            }
-                            return;
-                        }
-                    }
-
-                    CheckForThreatsInLOS();
-
-                    return;
-                case (int)State.Swarming:
-                    agent.speed = 10f;
-
-                    if (targetPlayer != null)
-                    {
-                        if (Vector3.Distance(targetPlayer.transform.position, transform.position) > distanceToLoseRats)
-                        {
-                            targetPlayer = null;
-                            SwitchToBehaviorState(State.Roaming);
-                            return;
-                        }
-                        if (NearbyRatCount(swarmRadius) >= ratsNeededToAttack)
-                        {
-                            SwitchToBehaviorState(State.Attacking);
-                            return;
-                        }
-
-                        return;
-                    }
-                    if (targetEnemy != null)
-                    {
-                        if (Vector3.Distance(targetEnemy.transform.position, transform.position) > distanceToLoseRats)
-                        {
-                            targetEnemy = null;
-                            SwitchToBehaviorState(State.Roaming);
-                            return;
-                        }
-                        if (NearbyRatCount(swarmRadius) >= ratsNeededToAttack)
-                        {
-                            SwitchToBehaviorState(State.Attacking);
-                            return;
-                        }
-
-                        return;
-                    }
-
-                    SwitchToBehaviorState(State.Roaming);
-
-                    return;
-                case (int)State.Attacking:
-                    agent.speed = 10f;
-
-                    if (targetPlayer != null)
-                    {
-                        if (Vector3.Distance(targetPlayer.transform.position, transform.position) > distanceToLoseRats)
-                        {
-                            // Target too far, return to nest
-                            targetPlayer = null;
-                            SwitchToBehaviorState(State.Roaming);
-                            return;
-                        }
-                        if (NearbyRatCount(swarmRadius) <= ratsNeededToAttack / 3)
-                        {
-                            // Check if rats are defending base, keep attacking if player is near base
-                            if (!IsPlayerNearANest(targetPlayer))
-                            {
-                                // Rats lose confidence and run away
-                                targetPlayer = null;
-                                SwitchToBehaviorState(State.Roaming);
-                                return;
-                            }
-                        }
-
-                        return;
-                    }
-                    if (targetEnemy != null)
-                    {
-                        if (Vector3.Distance(targetEnemy.transform.position, transform.position) > distanceToLoseRats * 2)
-                        {
-                            // Target too far, return to nest
-                            targetEnemy = null;
-                            SwitchToBehaviorState(State.Roaming);
-                            return;
-                        }
-                        if (NearbyRatCount(swarmRadius) <= ratsNeededToAttack / 3)
-                        {
-                            // Rats lose confidence and run away
-                            targetEnemy = null;
-                            SwitchToBehaviorState(State.Roaming);
-                            return;
-                        }
-
-                        return;
-                    }
-
-                    SwitchToBehaviorState(State.Roaming);
-
-                    break;
-
-                default:
-                    LoggerInstance.LogWarning("Invalid state: " + currentBehaviourStateIndex);
-                    break;
-            }
-        }*/
-
-        void TryGetAnyNest()
-        {
-            MainNest = RatManager.Nests.FirstOrDefault();
-        }
-
         void GrabBody()
         {
             if (targetPlayer != null && targetPlayer.deadBody != null)
             {
-                int limb = random.Next(0, targetPlayer.deadBody.bodyParts.Length);
-                GrabBody(targetPlayer, limb);
+                int limb = UnityEngine.Random.Range(0, targetPlayer.deadBody.bodyParts.Length);
+                GrabBodyClientRpc(targetPlayer.actualClientId, limb);
             }
         }
 
-        public void DropBody(bool deactivate = false)
+        void DropBody(bool deactivate = false)
         {
-            if (heldBody == null) { return; }
-            returningBodyToNest = false;
-            grabbingBody = false;
-            targetPlayer = null;
-
             if (heldBody != null)
             {
-                heldBody.attachedTo = null;
-                heldBody.attachedLimb = null;
-                heldBody.matchPositionExactly = false;
-                if (deactivate) { heldBody.DeactivateBody(setActive: false); }
-                heldBody = null;
+                DropBodyClientRpc(deactivate);
             }
         }
 
@@ -623,7 +409,7 @@ namespace Rats
             if (agent.enabled == false) { return false; }
             if (!agent.CalculatePath(position, path1))
             {
-                // Cant get to destination without vent1
+                // Cant get to destination without vent
                 if (canVent)
                 {
                     // Look for vents that rat can use
@@ -660,23 +446,26 @@ namespace Rats
 
         void HottestRat()
         {
-            if (random.Next(0, 100) < 1f)
+            if (UnityEngine.Random.Range(0f, 1f) < 0.01f)
             {
                 ScanNode.headerText = "HottestRat";
             }
         }
 
-        public EnemyAI? CheckLineOfSightForEnemy(int range)
+        bool CheckLineOfSightForDeadBody()
         {
-            foreach (EnemyAI enemy in RoundManager.Instance.SpawnedEnemies)
+            foreach (var player in StartOfRound.Instance.allPlayerScripts)
             {
-                if (enemy == RatKing || !enemy.enemyType.canDie) { continue; }
-                if (CheckLineOfSightForPosition(enemy.transform.position, 60, range, 5))
+                DeadBodyInfo deadBody = player.deadBody;
+                if (deadBody == null || deadBody.deactivated) { continue; }
+                path1 = new NavMeshPath();
+                if (CheckLineOfSightForPosition(deadBody.grabBodyObject.transform.position, 60, 60, 5) && agent.CalculatePath(RoundManager.Instance.GetNavMeshPosition(deadBody.grabBodyObject.transform.position, RoundManager.Instance.navHit, 1.75f), path1))
                 {
-                    return enemy;
+                    targetPlayer = deadBody.playerScript;
+                    return true;
                 }
             }
-            return null;
+            return false;
         }
 
         public bool CheckLineOfSightForPosition(Vector3 objectPosition, float width = 45f, int range = 60, float proximityAwareness = -1f, Transform overrideEye = null)
@@ -718,23 +507,7 @@ namespace Rats
                     }
                 }
             }
-            return null;
-        }
-
-        bool CheckLineOfSightForDeadBody()
-        {
-            foreach (var player in StartOfRound.Instance.allPlayerScripts)
-            {
-                DeadBodyInfo deadBody = player.deadBody;
-                if (deadBody == null || deadBody.deactivated) { continue; }
-                path1 = new NavMeshPath();
-                if (CheckLineOfSightForPosition(deadBody.grabBodyObject.transform.position, 60, 60, 5) && agent.CalculatePath(RoundManager.Instance.GetNavMeshPosition(deadBody.grabBodyObject.transform.position, RoundManager.Instance.navHit, 1.75f), path1))
-                {
-                    targetPlayer = deadBody.playerScript;
-                    return true;
-                }
-            }
-            return false;
+            return null!;
         }
 
         void CheckForThreatsInLOS()
@@ -764,7 +537,7 @@ namespace Rats
         int NearbyRatCount(float radius)
         {
             int count = 0;
-            foreach(var rat in RatManager.Rats)
+            foreach (var rat in RatManager.Rats)
             {
                 if (Vector3.Distance(transform.position, rat.transform.position) <= radius) // TODO: Just do a timer for each rat when they enter swarm mode before they attack the player. Have the timer be static so they all attack at once.
                 {
@@ -825,12 +598,94 @@ namespace Rats
             return targetVent;
         }
 
+        public EnemyAI? CheckLineOfSightForEnemy(int range)
+        {
+            foreach (EnemyAI enemy in RoundManager.Instance.SpawnedEnemies)
+            {
+                if (!enemy.enemyType.canDie) { continue; }
+                if (CheckLineOfSightForPosition(enemy.transform.position, 60, range, 5))
+                {
+                    return enemy;
+                }
+            }
+            return null;
+        }
+
+        public EnemyAI? GetClosestEnemy(float range)
+        {
+            EnemyAI? target = null;
+            float closestDistance = range;
+
+            foreach (EnemyAI enemy in RoundManager.Instance.SpawnedEnemies)
+            {
+                if (!enemy.enemyType.canDie) { continue; }
+                float distance = Vector3.Distance(transform.position, enemy.transform.position);
+                if (distance < closestDistance)
+                {
+                    target = enemy;
+                    closestDistance = distance;
+                }
+            }
+
+            return target;
+        }
+
+        bool TargetPlayerNearNest()
+        {
+            if (MainNest == null) { return false; }
+            foreach (PlayerControllerB player in StartOfRound.Instance.allPlayerScripts)
+            {
+                if (PlayerIsTargetable(player))
+                {
+                    if (Vector3.Distance(player.transform.position, MainNest.transform.position) < defenseRadius)
+                    {
+                        targetPlayer = player;
+                    }
+                }
+            }
+
+            return targetPlayer != null;
+        }
+
         void WarpToVent(EnemyVent fromVent, EnemyVent toVent)
         {
             OpenVents(fromVent, toVent);
             Vector3 warpPos = RoundManager.Instance.GetNavMeshPosition(ToVent!.floorNode.transform.position, RoundManager.Instance.navHit, 1.75f);
             transform.position = warpPos;
             agent.Warp(warpPos);
+        }
+
+        int GetVentIndex(EnemyVent? vent)
+        {
+            for (int i = 0; i < RoundManager.Instance.allEnemyVents.Length; i++)
+            {
+                if (RoundManager.Instance.allEnemyVents[i] == vent)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        void OpenVents(EnemyVent? vent, EnemyVent? vent2 = null)
+        {
+            if (vent == null) { return; }
+            int index = -1;
+            int index2 = -1;
+
+            if (!vent.ventIsOpen)
+            {
+                index = GetVentIndex(vent);
+            }
+
+            if (vent2 != null && !vent2.ventIsOpen)
+            {
+                index2 = GetVentIndex(vent2);
+            }
+
+            if (index == -1 && index2 == -1) { return; }
+
+            OpenVentsClientRpc(index, index2);
         }
 
         void SetStatus(string status)
@@ -863,7 +718,7 @@ namespace Rats
                     yield return new WaitForSeconds(AIIntervalTime);
                     if (!agent.hasPath || timeStuck > timeAgentStopped)
                     {
-                        PlaySqueakSFX(true);
+                        //PlaySqueakSFX(true);
                         break;
                     }
 
@@ -890,9 +745,9 @@ namespace Rats
                 while (agent.enabled)
                 {
                     yield return new WaitForSeconds(AIIntervalTime);
-                    if (!agent.hasPath || timeStuck > AIIntervalTime)
+                    if (!agent.hasPath || timeStuck > timeAgentStopped)
                     {
-                        PlaySqueakSFX();
+                        //PlaySqueakSFX();
                         break;
                     }
 
@@ -919,7 +774,7 @@ namespace Rats
                     yield return new WaitForSeconds(AIIntervalTime);
                     if (!agent.hasPath || timeStuck > timeAgentStopped)
                     {
-                        PlaySqueakSFX();
+                        //PlaySqueakSFX();
                         break;
                     }
 
@@ -948,7 +803,7 @@ namespace Rats
                     yield return new WaitForSeconds(AIIntervalTime);
                     if (!agent.hasPath || timeStuck > timeAgentStopped)
                     {
-                        PlaySqueakSFX();
+                        //PlaySqueakSFX();
                         break;
                     }
 
@@ -977,7 +832,7 @@ namespace Rats
                     yield return new WaitForSeconds(AIIntervalTime);
                     if (!agent.hasPath || timeStuck > timeAgentStopped)
                     {
-                        PlaySqueakSFX(true);
+                        //PlaySqueakSFX(true);
                         SwitchToBehaviorState(State.Roaming);
                         ratCoroutine = null;
                         yield break;
@@ -993,6 +848,14 @@ namespace Rats
             SwitchToBehaviorState(State.Roaming);
         }
 
+        /*void PlaySqueakSFX(bool longSqueak = false)
+        {
+            if (!configMakeLessSqueaks.Value)
+            {
+                PlaySqueakSFXClientRpc(longSqueak);
+            }
+        }*/
+
         void TargetRandomNode()
         {
             try
@@ -1002,13 +865,51 @@ namespace Rats
                 //GameObject[] nodes = !isOutside ? GameObject.FindGameObjectsWithTag("AINode") : GameObject.FindGameObjectsWithTag("OutsideAINode");
                 GameObject[] nodes = allAINodes;
 
-                int randIndex = random.Next(0, nodes.Length);
+                int randIndex = UnityEngine.Random.Range(0, nodes.Length);
                 targetNode = nodes[randIndex].transform;
             }
             catch
             {
                 targetNode = null;
                 return;
+            }
+        }
+
+        public void KillEnemyOnOwnerClient(bool overrideDestroy = false)
+        {
+            if (!base.IsOwner)
+            {
+                return;
+            }
+            bool flag = false;
+            if (overrideDestroy)
+            {
+                flag = true;
+            }
+            if (isEnemyDead)
+            {
+                return;
+            }
+            Debug.Log($"Kill enemy called! destroy: {flag}");
+            if (flag)
+            {
+                if (base.IsServer)
+                {
+                    Debug.Log("Kill enemy called on server, destroy true");
+                    KillEnemy(destroy: true);
+                }
+                else
+                {
+                    KillEnemyServerRpc(destroy: true);
+                }
+            }
+            else
+            {
+                KillEnemy();
+                if (base.NetworkObject.IsSpawned)
+                {
+                    KillEnemyServerRpc(destroy: false);
+                }
             }
         }
 
@@ -1021,23 +922,23 @@ namespace Rats
                 {
                     DropBody();
                     RoundManager.PlayRandomClip(creatureSFX, HitSFX, true, 1, -1);
-                    KillEnemy();
+                    KillEnemyOnOwnerClient();
                     return;
                 }
             }
         }
 
-        public void HitFromExplosion(float distance) // TODO: Implement this later
+        public void HitFromExplosion(float distance)
         {
             RoundManager.PlayRandomClip(creatureSFX, HitSFX, true, 1, -1);
-            KillEnemy();
+            KillEnemyOnOwnerClient();
         }
 
         public bool PlayerIsTargetable(PlayerControllerB playerScript)
         {
             if (playerScript == null) { return false; }
             if (playerScript.isPlayerDead) { return false; }
-            if (currentBehaviorState == State.Roaming) { return false; }
+            if (currentBehaviorState == (int)State.Roaming) { return false; }
             if (!playerScript.isPlayerControlled) { return false; }
             if (playerScript.inAnimationWithEnemy != null) { return false; }
             if (playerScript.sinkingValue >= 0.73f) { return false; }
@@ -1066,14 +967,13 @@ namespace Rats
             {
                 return null;
             }
-            PlayerControllerB component = other.gameObject.GetComponent<PlayerControllerB>();
-            if (component == null/* || component != GameNetworkManager.Instance.localPlayerController*/)
+            PlayerControllerB component = ((Component)(object)other).gameObject.GetComponent<PlayerControllerB>();
+            if (component == null || component != GameNetworkManager.Instance.localPlayerController)
             {
                 return null;
             }
             if (!PlayerIsTargetable(component))
             {
-                Debug.Log("Player is not targetable");
                 return null;
             }
             return component;
@@ -1089,62 +989,65 @@ namespace Rats
                 if (player == null) { return; }
                 if (currentBehaviorState == State.Attacking || IsPlayerNearANest(player))
                 {
-                    int deathAnim = random.Next(0, 2) == 1 ? 7 : 0;
-                    player.DamagePlayer(ratDamage, true, false, CauseOfDeath.Mauling, deathAnim);
-                    PlayAttackSFX();
+                    int deathAnim = UnityEngine.Random.Range(0, 2) == 1 ? 7 : 0;
+                    player.DamagePlayer(ratDamage, true, true, CauseOfDeath.Mauling, deathAnim);
+                    PlayAttackSFXServerRpc();
                 }
             }
         }
 
         public void OnCollideWithEnemy(Collider other, EnemyAI? collidedEnemy = null)
         {
-            if (isEnemyDead || currentBehaviorState == State.Roaming || MainNest == null) { return; }
-            if (timeSinceCollision > 1f)
+            if (IsServerOrHost)
             {
-                if (collidedEnemy != null && collidedEnemy.enemyType.canDie)
+                if (isEnemyDead || currentBehaviorState == State.Roaming || MainNest == null) { return; }
+                if (timeSinceCollision > 1f)
                 {
-                    logIfDebug("Collided with: " + collidedEnemy.enemyType.enemyName);
-                    timeSinceCollision = 0f;
-
-                    if (collidedEnemy.isEnemyDead)
+                    if (collidedEnemy != null && collidedEnemy.enemyType.canDie)
                     {
-                        if (SewerGrate.EnemyFoodAmount.ContainsKey(collidedEnemy))
+                        logIfDebug("Collided with: " + collidedEnemy.enemyType.enemyName);
+                        timeSinceCollision = 0f;
+
+                        if (collidedEnemy.isEnemyDead)
                         {
-                            if (SewerGrate.EnemyFoodAmount[collidedEnemy] <= 1)
+                            if (SewerGrate.EnemyFoodAmount.ContainsKey(collidedEnemy))
                             {
-                                holdingFood = SewerGrate.EnemyFoodAmount[collidedEnemy] == 1;
-                                RoundManager.Instance.DespawnEnemyOnServer(collidedEnemy.NetworkObject);
-                                return;
+                                if (SewerGrate.EnemyFoodAmount[collidedEnemy] <= 1)
+                                {
+                                    holdingFood = SewerGrate.EnemyFoodAmount[collidedEnemy] == 1;
+                                    RoundManager.Instance.DespawnEnemyOnServer(collidedEnemy.NetworkObject);
+                                    return;
+                                }
+                                else
+                                {
+                                    SewerGrate.EnemyFoodAmount[collidedEnemy] -= 1;
+                                    holdingFood = true;
+                                }
                             }
                             else
                             {
+                                RatManager.EnemyHitCount.Remove(collidedEnemy);
+                                MainNest.AddEnemyFoodAmount(collidedEnemy);
                                 SewerGrate.EnemyFoodAmount[collidedEnemy] -= 1;
                                 holdingFood = true;
                             }
+
+                            SwitchToBehaviorState(State.Roaming);
                         }
                         else
                         {
-                            RatManager.EnemyHitCount.Remove(collidedEnemy);
-                            MainNest.AddEnemyFoodAmount(collidedEnemy);
-                            SewerGrate.EnemyFoodAmount[collidedEnemy] -= 1;
-                            holdingFood = true;
-                        }
+                            if (!RatManager.EnemyHitCount.ContainsKey(collidedEnemy))
+                            {
+                                RatManager.EnemyHitCount.Add(collidedEnemy, enemyHitsToDoDamage);
+                            }
 
-                        SwitchToBehaviorState(State.Roaming);
-                    }
-                    else
-                    {
-                        if (!RatManager.EnemyHitCount.ContainsKey(collidedEnemy))
-                        {
-                            RatManager.EnemyHitCount.Add(collidedEnemy, enemyHitsToDoDamage);
-                        }
+                            RatManager.EnemyHitCount[collidedEnemy] -= 1;
 
-                        RatManager.EnemyHitCount[collidedEnemy] -= 1;
-
-                        if (RatManager.EnemyHitCount[collidedEnemy] <= 0)
-                        {
-                            collidedEnemy.HitEnemy(1, null, true);
-                            RatManager.EnemyHitCount[collidedEnemy] = enemyHitsToDoDamage;
+                            if (RatManager.EnemyHitCount[collidedEnemy] <= 0)
+                            {
+                                collidedEnemy.HitEnemy(1, null, true);
+                                RatManager.EnemyHitCount[collidedEnemy] = enemyHitsToDoDamage;
+                            }
                         }
                     }
                 }
@@ -1177,7 +1080,7 @@ namespace Rats
                     RatManager.EnemyThreatCounter.Add(enemy, amount);
                 }
 
-                PlaySqueakSFX();
+                //PlaySqueakSFXClientRpc();
 
                 int threat = RatManager.EnemyThreatCounter[enemy];
                 logIfDebug($"{enemy.enemyType.enemyName}: {threat} threat");
@@ -1209,11 +1112,11 @@ namespace Rats
                     RatManager.PlayerThreatCounter.Add(player, amount);
                 }
 
-                PlaySqueakSFX();
+                PlaySqueakSFXClientRpc();
 
                 int threat = RatManager.PlayerThreatCounter[player];
                 logIfDebug($"{player.playerUsername}: {threat} threat");
-                
+
                 if (RatTypeState == RatType.DefenseRat) { return; }
 
                 if (RatManager.PlayerThreatCounter[player] > threatToAttackPlayer || player.isPlayerDead)
@@ -1240,7 +1143,15 @@ namespace Rats
         {
             if (destroy)
             {
-                UnityEngine.GameObject.Destroy(gameObject);
+                Debug.Log("Destroy enemy called");
+                if (base.IsServer)
+                {
+                    Debug.Log("Despawn network object in kill enemy called!");
+                    if (NetworkObject.IsSpawned)
+                    {
+                        NetworkObject.Despawn();
+                    }
+                }
             }
             else
             {
@@ -1249,16 +1160,9 @@ namespace Rats
                     ScanNode.gameObject.GetComponent<Collider>().enabled = false;
                 }
                 isEnemyDead = true;
-                try
+                if (creatureAnimator != null)
                 {
-                    if (creatureAnimator != null)
-                    {
-                        creatureAnimator.SetTrigger("KillEnemy");
-                    }
-                }
-                catch (Exception arg)
-                {
-                    Debug.LogError($"enemy did not have bool in animator in KillEnemy, error returned; {arg}");
+                    creatureAnimator.SetTrigger("KillEnemy");
                 }
                 StopAllCoroutines();
                 agent.enabled = false;
@@ -1267,10 +1171,24 @@ namespace Rats
             }
         }
 
-        public void OnDestroy()
+        public override void OnDestroy()
         {
             agent.enabled = false;
             StopAllCoroutines();
+
+            if (NetworkObject != null && NetworkObject.IsSpawned && IsSpawned)
+            {
+                NetworkObject.OnNetworkBehaviourDestroyed(this);
+            }
+            if (!m_VarInit)
+            {
+                InitializeVariables();
+            }
+            for (int i = 0; i < NetworkVariableFields.Count; i++)
+            {
+                NetworkVariableFields[i].Dispose();
+            }
+
             RatManager.Rats.Remove(this);
         }
 
@@ -1293,19 +1211,68 @@ namespace Rats
             destination = RoundManager.Instance.GetNavMeshPosition(position, RoundManager.Instance.navHit, -1f);
             return true;
         }
-
-        public bool Hit(int force, Vector3 hitDirection, PlayerControllerB playerWhoHit = null, bool playHitSFX = false, int hitID = -1)
+        public void HitEnemyOnLocalClient(int force = 1, Vector3 hitDirection = default(Vector3), PlayerControllerB playerWhoHit = null, bool playHitSFX = false, int hitID = -1)
         {
-            HitEnemy(force, playerWhoHit, playHitSFX, hitID);
-            return true;
+            Debug.Log($"Local client hit enemy {((Component)(object)agent).transform.name} with force of {force}.");
+            int playerWhoHit2 = -1;
+            if (playerWhoHit != null)
+            {
+                playerWhoHit2 = (int)playerWhoHit.playerClientId;
+                HitEnemy(force, playerWhoHit, playHitSFX);
+            }
+            HitEnemyServerRpc(force, playerWhoHit2, playHitSFX);
         }
 
-        public void PlayAttackSFX()
+        // RPC's
+
+        [ServerRpc(RequireOwnership = false)]
+        public void HitEnemyServerRpc(int force, int playerWhoHit, bool playHitSFX)
+        {
+            HitEnemyClientRpc(force, playerWhoHit, playHitSFX);
+        }
+
+        [ClientRpc]
+        public void HitEnemyClientRpc(int force, int playerWhoHit, bool playHitSFX)
+        {
+            if (playerWhoHit == (int)localPlayer.actualClientId) { return; }
+
+            if (playerWhoHit == -1)
+            {
+                HitEnemy(force, null, playHitSFX);
+            }
+            else
+            {
+                HitEnemy(force, StartOfRound.Instance.allPlayerScripts[playerWhoHit], playHitSFX);
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void PlayAttackSFXServerRpc()
+        {
+            if (IsServerOrHost)
+            {
+                PlayAttackSFXClientRpc();
+            }
+        }
+
+        [ClientRpc]
+        public void PlayAttackSFXClientRpc()
         {
             RoundManager.PlayRandomClip(creatureSFX, AttackSFX, true, 1, -1);
         }
 
-        public void PlaySqueakSFX(bool longSqueak = false)
+        [ClientRpc]
+        public void SwitchToBehaviorClientRpc(State state)
+        {
+            if (currentBehaviorState != state)
+            {
+                currentBehaviorState = state;
+                RoundManager.PlayRandomClip(creatureSFX, SqueakSFX, true, 1, -1);
+            }
+        }
+
+        [ClientRpc]
+        public void PlaySqueakSFXClientRpc(bool longSqueak = false)
         {
             if (longSqueak)
             {
@@ -1315,39 +1282,50 @@ namespace Rats
             RoundManager.PlayRandomClip(creatureSFX, HitSFX, true, 1, -1);
         }
 
-        public void OpenVents(EnemyVent vent1, EnemyVent vent2)
+        [ClientRpc]
+        public void OpenVentsClientRpc(int ventIndex, int ventIndex2)
         {
-            if (vent1 == null)
+            if (ventIndex != -1)
             {
-                RoundManager.Instance.RefreshEnemyVents();
-                if (vent1 == null)
+                EnemyVent vent = RoundManager.Instance.allEnemyVents[ventIndex];
+                if (vent == null)
                 {
-                    LoggerInstance.LogError("Cant get vent to open on client");
-                    return;
+                    RoundManager.Instance.RefreshEnemyVents();
+                    vent = RoundManager.Instance.allEnemyVents[ventIndex];
+                    if (vent == null)
+                    {
+                        LoggerInstance.LogError("Cant get vent to open on client");
+                        return;
+                    }
                 }
+                vent.ventIsOpen = true;
+                vent.ventAnimator.SetTrigger("openVent");
+                vent.lowPassFilter.lowpassResonanceQ = 0f;
             }
-            vent1.ventIsOpen = true;
-            vent1.ventAnimator.SetTrigger("openVent");
-            vent1.lowPassFilter.lowpassResonanceQ = 0f;
-
-            if (vent2 == null)
+            if (ventIndex2 != -1)
             {
-                RoundManager.Instance.RefreshEnemyVents();
-                if (vent2 == null)
+                EnemyVent vent = RoundManager.Instance.allEnemyVents[ventIndex2];
+                if (vent == null)
                 {
-                    LoggerInstance.LogError("Cant get vent to open on client");
-                    return;
+                    RoundManager.Instance.RefreshEnemyVents();
+                    vent = RoundManager.Instance.allEnemyVents[ventIndex2];
+                    if (vent == null)
+                    {
+                        LoggerInstance.LogError("Cant get vent to open on client");
+                        return;
+                    }
                 }
+                vent.ventIsOpen = true;
+                vent.ventAnimator.SetTrigger("openVent");
+                vent.lowPassFilter.lowpassResonanceQ = 0f;
             }
-            vent2.ventIsOpen = true;
-            vent2.ventAnimator.SetTrigger("openVent");
-            vent2.lowPassFilter.lowpassResonanceQ = 0f;
 
         }
 
-        public void GrabBody(PlayerControllerB player, int attachedLimbIndex)
+        [ClientRpc]
+        public void GrabBodyClientRpc(ulong clientId, int attachedLimbIndex)
         {
-            targetPlayer = player;
+            targetPlayer = PlayerFromId(clientId);
 
             if (targetPlayer != null && targetPlayer.deadBody != null)
             {
@@ -1362,9 +1340,47 @@ namespace Rats
             RoundManager.PlayRandomClip(creatureSFX, NibbleSFX, true, 1f, -1);
         }
 
-        internal void HitEnemyOnLocalClient(int force, Vector3 hitDirection, PlayerControllerB playerWhoHit, bool playHitSFX, int hitID)
+        [ClientRpc]
+        public void DropBodyClientRpc(bool deactivate)
         {
-            HitEnemy(force, playerWhoHit, playHitSFX, hitID);
+            returningBodyToNest = false;
+            grabbingBody = false;
+            targetPlayer = null;
+
+            if (heldBody != null)
+            {
+                heldBody.attachedTo = null;
+                heldBody.attachedLimb = null;
+                heldBody.matchPositionExactly = false;
+                if (deactivate) { heldBody.DeactivateBody(setActive: false); }
+                heldBody = null;
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void KillEnemyServerRpc(bool destroy)
+        {
+            if (!IsServerOrHost) { return; }
+
+            Debug.Log($"Kill enemy server rpc called with destroy {destroy}");
+            if (destroy)
+            {
+                KillEnemy(destroy);
+            }
+            else
+            {
+                KillEnemyClientRpc(destroy);
+            }
+        }
+
+        [ClientRpc]
+        public void KillEnemyClientRpc(bool destroy)
+        {
+            Debug.Log($"Kill enemy client rpc called; {destroy}");
+            if (!isEnemyDead)
+            {
+                KillEnemy(destroy);
+            }
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Rats
     public static class RatManager
     {
         public static int totalRatsSpawned;
-        public static bool testing = false; // TESTING
+        public static bool testing = true; // TESTING
         public static RatKingAI? RatKing;
         public static List<RatAI> Rats = [];
         public static List<SewerGrate> Nests = [];

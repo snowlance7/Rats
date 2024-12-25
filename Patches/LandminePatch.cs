@@ -1,4 +1,4 @@
-﻿/*using BepInEx.Logging;
+﻿using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
 
@@ -15,8 +15,12 @@ namespace Rats
         {
             foreach(var rat in RatManager.Rats)
             {
-                
+                float distance = Vector3.Distance(rat.transform.position, explosionPosition);
+                if (distance < damageRange)
+                {
+                    rat.HitFromExplosion(distance);
+                }
             }
         }
     }
-}*/
+}

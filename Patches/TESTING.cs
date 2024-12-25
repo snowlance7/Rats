@@ -21,7 +21,7 @@ using static Rats.Plugin;
 
 namespace Rats
 {
-    //[HarmonyPatch]
+    [HarmonyPatch]
     internal class TESTING : MonoBehaviour
     {
         private static ManualLogSource logger = Plugin.LoggerInstance;
@@ -29,7 +29,7 @@ namespace Rats
         [HarmonyPostfix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.PingScan_performed))]
         public static void PingScan_performedPostFix()
         {
-
+            //logger.LogDebug("were rats");
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.SubmitChat_performed))]
