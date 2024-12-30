@@ -22,10 +22,10 @@ namespace Rats
         public TerminalAccessibleObject TerminalAccessibleObj = null!;
 #pragma warning restore 0649
 
+        public static List<SewerGrate> Nests = [];
+        public static SewerGrate? MainNest;
         public static LungProp? Apparatus;
-        public EnemyVent? NestVent;
 
-        public bool accessible { get { return NestVent != null; } }
         public int DefenseRatCount;
         public static Dictionary<EnemyAI, int> EnemyFoodAmount = [];
         float timeSinceSpawnRat;
@@ -46,7 +46,12 @@ namespace Rats
         {
             logIfDebug("Sewer grate spawned at: " + transform.position);
             Nests.Add(this);
-            
+
+            if (MainNest == null)
+            {
+                MainNest = this;
+            }
+
             hideCodeOnTerminal = configHideCodeOnTerminal.Value;
             minRatSpawnTime = configMinRatSpawnTime.Value;
             maxRatSpawnTime = configMaxRatSpawnTime.Value;
@@ -82,11 +87,11 @@ namespace Rats
                 }
             }
 
-            if (Apparatus != null && !Apparatus.isLungDocked) { open = true; }
+            if (Apparatus != null && !Apparatus.isLungDocked) { open = true; } // TODO: Radiated rats???
 
             if (IsServerOrHost)
             {
-                if (open && RatManager.Rats.Count < maxRats)
+                if (open && SpawnedRats.Count < maxRats)
                 {
                     timeSinceSpawnRat += Time.unscaledDeltaTime;
 
@@ -139,7 +144,7 @@ namespace Rats
 
         void SpawnRat()
         {
-            if (RatManager.Rats.Count < maxRats)
+            if (RatManager.SpawnedRats.Count < maxRats)
             {
                 SpawnRatClientRpc();
             }
@@ -153,19 +158,25 @@ namespace Rats
 
         public override void OnDestroy()
         {
-            EnemyHitCount.Clear();
-            EnemyThreatCounter.Clear();
-            PlayerThreatCounter.Clear();
-            EnemyFoodAmount.Clear();
-            Apparatus = null;
-            StopAllCoroutines();
-
-            foreach (RatAI rat in RatManager.Rats)
+            if (this == MainNest)
             {
-                UnityEngine.GameObject.Destroy(rat);
-            }
+                EnemyHitCount.Clear();
+                EnemyThreatCounter.Clear();
+                PlayerThreatCounter.Clear();
+                EnemyFoodAmount.Clear();
+                Apparatus = null;
 
-            totalRatsSpawned = 0;
+                foreach (RatAI rat in SpawnedRats)
+                {
+                    rat.NetworkObject.Despawn(true);
+                }
+
+                totalRatsSpawned = 0;
+                SpawnedRats.Clear();
+
+                MainNest = null;
+                Nests.Clear();
+            }
 
             base.OnDestroy();
         }
@@ -174,7 +185,7 @@ namespace Rats
         public void SpawnRatClientRpc()
         {
             GameObject ratObj = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
-            ratObj.GetComponent<RatAI>().MainNest = this;
+            ratObj.GetComponent<RatAI>().Nest = this;
         }
     }
 }

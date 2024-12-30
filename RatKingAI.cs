@@ -9,18 +9,18 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem.Utilities;
 using static Rats.Plugin;
+using static Rats.RatAI;
 using static Rats.RatManager;
 
 // Cheese to lure the rats away from the grate so the player can block it
-// Rats will scout and do a normal search, if they see a player after 20 seconds, they will add a counter to the threatcounter, when max threat, they will run back to sewer and gather rats they touch and get defending rats and swarm around the player for 20 seconds, any rats nearby will also swarm. then attack.
+// SpawnedRats will scout and do a normal search, if they see a player after 20 seconds, they will add a counter to the threatcounter, when max threat, they will run back to sewer and gather rats they touch and get defending rats and swarm around the player for 20 seconds, any rats nearby will also swarm. then attack.
 
 namespace Rats
 {
     public class RatKingAI : EnemyAI
     {
-        /*private static ManualLogSource logger = LoggerInstance;
+        private static ManualLogSource logger = LoggerInstance;
         public static RatKingAI? Instance { get; private set; }
-        bool despawning = false;
 
 #pragma warning disable 0649
         public ScanNodeProperties ScanNode = null!;
@@ -31,6 +31,8 @@ namespace Rats
         public Transform TurnCompass = null!;
         public Transform RatMouth = null!;
 #pragma warning restore 0649
+
+        public List<RatAI> GuardRats = [];
 
         public SewerGrate Nest;
         DeadBodyInfo? heldBody;
@@ -62,11 +64,12 @@ namespace Rats
 
         float ratUpdateInterval = 0.2f;
         float ratUpdatePercentage = 0.2f;
+        internal int RatGuardCount;
 
         public enum State
         {
             Inactive,
-            Roaming,
+            Default,
             Attacking,
             Eating
         }
@@ -79,7 +82,7 @@ namespace Rats
 
             switch (state)
             {
-                case State.Roaming:
+                case State.Default:
                     break;
                 case State.Attacking:
                     break;
@@ -95,21 +98,28 @@ namespace Rats
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
-            if (!IsServerOrHost) { return; }
-            if (!despawning) { return; }
-            NetworkObject.Despawn(true);
+            if (Instance != null && Instance != this)
+            {
+                if (!IsServerOrHost) { return; }
+                logger.LogDebug("There is already a Rat King in the scene. Removing this one.");
+                NetworkObject.Despawn(true);
+                return;
+            }
+            Instance = this;
+            logger.LogDebug("Finished spawning SCP-4666");
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            base.OnNetworkDespawn();
+            if (Instance == this)
+            {
+                Instance = null;
+            }
         }
 
         public override void Start()
         {
-            if (Instance != null)
-            {
-                despawning = true;
-                return;
-            }
-
-            Instance = this;
-
             defenseRadius = configDefenseRadius.Value;
             timeToIncreaseThreat = configTimeToIncreaseThreat.Value;
             threatToAttackPlayer = configThreatToAttackPlayer.Value;
@@ -139,7 +149,7 @@ namespace Rats
             while (!StartOfRound.Instance.shipIsLeaving)
             {
                 yield return new WaitForSeconds(AIIntervalTime);
-                if (RatManager.Rats.Count <= 0) { break; }
+                if (RatManager.SpawnedRats.Count <= 0) { break; }
 
                 ratGroups.Clear();
                 groupCount = (int)(1 / ratUpdatePercentage);
@@ -159,7 +169,7 @@ namespace Rats
 
         public void RegisterRats()
         {
-            foreach (var rat in RatManager.Rats)
+            foreach (var rat in RatManager.SpawnedRats)
             {
                 // Assign the rat to a group based on round-robin
                 int groupIndex = ratGroups.Count > 0 ? (ratGroups.Sum(group => group.Count) % groupCount) : 0;
@@ -211,18 +221,13 @@ namespace Rats
                 agent.SetDestination(destination);
             }
 
-            foreach (var nest in Nests)
-            {
-                nest.NestVent = GetClosestVentToPosition(nest.transform.position);
-            }
-
             switch (currentBehaviourStateIndex)
             {
                 case (int)State.Inactive:
 
                     break;
 
-                case (int)State.Roaming:
+                case (int)State.Default:
 
                     break;
 
@@ -413,6 +418,33 @@ namespace Rats
             }
         }
 
+        public void AssignRatType(RatType ratType = RatType.Unassigned)
+        {
+            /*if (holdingFood && AtNest)
+            {
+                holdingFood = false;
+                Nest.AddFood();
+            }*/
+
+            if (Nest.DefenseRatCount < maxDefenseRats)
+            {
+                logIfDebug("Rat defense assigned");
+                RatTypeState = RatType.DefenseRat;
+                Nest.DefenseRatCount += 1;
+
+
+                ratCoroutine = StartCoroutine(SwarmCoroutine(Nest.transform.position, defenseRadius));
+                SetStatus("Defending");
+                return;
+            }
+
+            logIfDebug("Rat scout assigned");
+            RatTypeState = RatType.ScoutRat;
+            ratCoroutine = StartCoroutine(ScoutCoroutine());
+            SetStatus("Scouting");
+            return;
+        }
+
         void Roam()
         {
             if (ratCoroutine != null) { return; }
@@ -445,7 +477,7 @@ namespace Rats
                 }
             }
 
-            SwitchToBehaviorState(State.Roaming);
+            SwitchToBehaviorState(State.Default);
         }
 
         IEnumerator SwarmCoroutine(PlayerControllerB player, float radius)
@@ -478,7 +510,7 @@ namespace Rats
                 }
             }
 
-            SwitchToBehaviorState(State.Roaming);
+            SwitchToBehaviorState(State.Default);
         }
 
         IEnumerator SwarmCoroutine(EnemyAI enemy, float radius)
@@ -509,7 +541,7 @@ namespace Rats
                 }
             }
 
-            SwitchToBehaviorState(State.Roaming);
+            SwitchToBehaviorState(State.Default);
         }
 
         IEnumerator SwarmCoroutine(Vector3 position, float radius)
@@ -542,7 +574,7 @@ namespace Rats
                 }
             }
 
-            SwitchToBehaviorState(State.Roaming);
+            SwitchToBehaviorState(State.Default);
         }
 
         IEnumerator ScoutCoroutine()
@@ -560,7 +592,7 @@ namespace Rats
                     if (!agent.hasPath || timeStuck > timeAgentStopped)
                     {
                         PlaySqueakSFXClientRpc();
-                        SwitchToBehaviorState(State.Roaming);
+                        SwitchToBehaviorState(State.Default);
                         ratCoroutine = null;
                         yield break;
                     }
@@ -572,7 +604,7 @@ namespace Rats
                 }
             }
 
-            SwitchToBehaviorState(State.Roaming);
+            SwitchToBehaviorState(State.Default);
         }
 
         void TargetRandomNode()
@@ -622,7 +654,7 @@ namespace Rats
         {
             if (playerScript == null) { return false; }
             if (playerScript.isPlayerDead) { return false; }
-            if (currentBehaviourStateIndex == (int)State.Roaming) { return false; }
+            if (currentBehaviourStateIndex == (int)State.Default) { return false; }
             if (!playerScript.isPlayerControlled) { return false; }
             if (playerScript.inAnimationWithEnemy != null) { return false; }
             if (playerScript.sinkingValue >= 0.73f) { return false; }
@@ -663,7 +695,7 @@ namespace Rats
             base.OnCollideWithEnemy(other, collidedEnemy);
             if (IsServerOrHost)
             {
-                if (isEnemyDead || currentBehaviourStateIndex == (int)State.Roaming || Nest == null) { return; }
+                if (isEnemyDead || currentBehaviourStateIndex == (int)State.Default || Nest == null) { return; }
                 if (timeSinceCollision > 1f)
                 {
                     if (collidedEnemy != null && collidedEnemy.enemyType != this.enemyType && collidedEnemy.enemyType.canDie && !(stunNormalizedTimer > 0f))
@@ -695,7 +727,7 @@ namespace Rats
                                 holdingFood = true;
                             }
 
-                            SwitchToBehaviorState(State.Roaming);
+                            SwitchToBehaviorState(State.Default);
                         }
                         else
                         {
@@ -872,8 +904,8 @@ namespace Rats
                 }
                 StopAllCoroutines();
                 agent.enabled = false;
-                //Rats.Remove(this);
-                //if (RatTypeState == RatType.DefenseRat) { MainNest.DefenseRatCount -= 1; }
+                //SpawnedRats.Remove(this);
+                //if (RatTypeState == RatType.DefenseRat) { Nest.DefenseRatCount -= 1; }
             }
         }
 
@@ -900,7 +932,7 @@ namespace Rats
                 RoundManager.Instance.SpawnedEnemies.Remove(this);
             }
 
-            //Rats.Remove(this);
+            //SpawnedRats.Remove(this);
         }
 
         public new bool SetDestinationToPosition(Vector3 position, bool checkForPath = false)
@@ -1071,6 +1103,6 @@ namespace Rats
                 if (deactivate) { heldBody.DeactivateBody(setActive: false); }
                 heldBody = null;
             }
-        }*/
+        }
     }
 }

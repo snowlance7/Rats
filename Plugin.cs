@@ -43,7 +43,7 @@ namespace Rats
         // Debugging
         public static ConfigEntry<bool> configEnableDebugging;
 
-        // MainNest
+        // Nest
         public static ConfigEntry<string> configSewerGrateSpawnWeightCurve;
         public static ConfigEntry<bool> configHideCodeOnTerminal;
         public static ConfigEntry<int> configMinRatSpawnTime;
@@ -52,7 +52,7 @@ namespace Rats
         public static ConfigEntry<int> configEnemyFoodPerHPPoint;
         public static ConfigEntry<int> configMaxRats;
 
-        // Rats
+        // SpawnedRats
         public static ConfigEntry<float> configAIIntervalTime;
         //public static ConfigEntry<bool> configMakeLessSqueaks;
         public static ConfigEntry<float> configDefenseRadius;
@@ -91,7 +91,7 @@ namespace Rats
             // Debugging
             configEnableDebugging = Config.Bind("Debugging", "Enable Debugging", false, "Allows debug logs to show in the logs");
 
-            // MainNest
+            // Nest
             configSewerGrateSpawnWeightCurve = Config.Bind("Nest", "Spawn Weight Curve", "Vanilla - 0,0 ; 1,3 | Custom - 0,0 ; 1,3", "The MoonName - CurveSpawnWeight for the SewerGrate(Rat nest).");
             configHideCodeOnTerminal = Config.Bind("Nest", "Hide Code On Terminal", true, "If set to true, will make the code on the ship monitor for the nest be ??, requiring the player to find the nest physically to turn off its spawning.");
             configMinRatSpawnTime = Config.Bind("Nest", "Minimum Rat Spawn Time", 5, "The minimum time in seconds before a rat can spawn from the nest.");
@@ -100,8 +100,8 @@ namespace Rats
             configEnemyFoodPerHPPoint = Config.Bind("Nest", "Food Per HP Point", 10, "How much food points one HP will equal for enemies. ex: if 10 thumper will give 40 food points.");
             configMaxRats = Config.Bind("Nest", "Maximum Rats", 40, "The maximum number of rats that can be on the map. Lowering this can improve performance.");
 
-            // Rats
-            //configMakeLessSqueaks = Config.Bind("Rats", "Make Less Squeaks", false, "If set to true, will make the rats squeak less, which can help with performance.");
+            // SpawnedRats
+            //configMakeLessSqueaks = Config.Bind("SpawnedRats", "Make Less Squeaks", false, "If set to true, will make the rats squeak less, which can help with performance.");
             configAIIntervalTime = Config.Bind("Rats", "AI Interval Time", 0.3f, "The interval in which rats will update their AI (Changing position, doing complex calculations, etc). Setting this higher can improve performance but can also make the rats freeze in place more often while lower values makes them constantly moving but can decrease performance.");
             configDefenseRadius = Config.Bind("Rats", "Defense Radius", 5f, "The radius in which defense rats protect the nest.");
             configTimeToIncreaseThreat = Config.Bind("Rats", "Time to Increase Threat", 2.5f, "The time needed to add a threat point for a player when they are in line of sight of the rat.");

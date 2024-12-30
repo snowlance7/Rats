@@ -15,9 +15,7 @@ namespace Rats
     {
         public static int totalRatsSpawned;
         public static bool testing = true; // TESTING
-        public static RatKingAI? RatKing;
-        public static List<RatAI> Rats = [];
-        public static List<SewerGrate> Nests = [];
+        public static List<RatAI> SpawnedRats = [];
         public static List<EnemyVent> Vents { get { return RoundManager.Instance.allEnemyVents.ToList(); } }
         public static Dictionary<EnemyAI, int> EnemyHitCount = [];
         public static Dictionary<PlayerControllerB, int> PlayerThreatCounter = [];
