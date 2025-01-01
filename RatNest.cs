@@ -2,6 +2,7 @@
 using GameNetcodeStuff;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
@@ -11,7 +12,7 @@ using static Rats.RatManager;
 
 namespace Rats
 {
-    public class SewerGrate : NetworkBehaviour
+    public class RatNest : NetworkBehaviour
     {
 #pragma warning disable 0649
         public GameObject RatPrefab = null!;
@@ -20,17 +21,19 @@ namespace Rats
         public GameObject JermaRatKingPrefab = null!;
         public TextMeshPro[] TerminalCodes = null!;
         public TerminalAccessibleObject TerminalAccessibleObj = null!;
+        public GameObject RatNestMesh = null!;
 #pragma warning restore 0649
 
-        public static List<SewerGrate> Nests = [];
-        public static SewerGrate? MainNest;
+        public static List<RatNest> Nests = [];
         public static LungProp? Apparatus;
 
-        public int DefenseRatCount;
+        public bool IsOpen = true;
+        public bool IsRatKing = false;
+
+        public List<RatAI> DefenseRats = [];
         public static Dictionary<EnemyAI, int> EnemyFoodAmount = [];
         float timeSinceSpawnRat;
         float nextRatSpawnTime;
-        public bool open = true;
         bool codeOnGrateSet = false;
         int food;
 
@@ -47,11 +50,6 @@ namespace Rats
             logIfDebug("Sewer grate spawned at: " + transform.position);
             Nests.Add(this);
 
-            if (MainNest == null)
-            {
-                MainNest = this;
-            }
-
             hideCodeOnTerminal = configHideCodeOnTerminal.Value;
             minRatSpawnTime = configMinRatSpawnTime.Value;
             maxRatSpawnTime = configMaxRatSpawnTime.Value;
@@ -65,11 +63,15 @@ namespace Rats
                 Apparatus = FindObjectsOfType<LungProp>().Where(x => x.isLungDocked).FirstOrDefault();
             }
 
-            if (IsServerOrHost)
+            if (!IsServerOrHost) { return; }
+
+            if (RatKingAI.Instance == null)
             {
-                nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
-                //open = false; // TESTING
+                SpawnRatKing();
             }
+
+            nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
+            //IsOpen = false; // TESTING
         }
 
         public void Update()
@@ -87,11 +89,11 @@ namespace Rats
                 }
             }
 
-            if (Apparatus != null && !Apparatus.isLungDocked) { open = true; } // TODO: Radiated rats???
+            if (Apparatus != null && !Apparatus.isLungDocked) { IsOpen = true; } // TODO: Radiated rats???
 
             if (IsServerOrHost)
             {
-                if (open && SpawnedRats.Count < maxRats)
+                if (!IsRatKing && IsOpen && SpawnedRats.Count < maxRats)
                 {
                     timeSinceSpawnRat += Time.unscaledDeltaTime;
 
@@ -103,6 +105,19 @@ namespace Rats
                         SpawnRat();
                     }
                 }
+            }
+        }
+
+        void SpawnRatKing()
+        {
+            if (!IsServerOrHost) { return; }
+
+            if (RatKingAI.Instance == null)
+            {
+                Transform? node = GetRandomNode();
+                if (node == null) { LoggerInstance.LogError("node was null cant spawn rat king"); return; }
+                RatKingAI ratKing = GameObject.Instantiate(RatKingPrefab, node.transform.position, Quaternion.identity).GetComponent<RatKingAI>();
+                ratKing.NetworkObject.Spawn();
             }
         }
 
@@ -129,13 +144,13 @@ namespace Rats
             int remainingFood = food % foodToSpawnRat;
 
             food = remainingFood;
-            logIfDebug("Spawning rats from food: " + ratsToSpawn);
             SpawnRats(ratsToSpawn);
         }
 
         void SpawnRats(int amount)
         {
             if (amount == 0) { return; }
+            logIfDebug("Spawning rats from food: " + amount);
             for (int i = 0; i < amount; i++)
             {
                 SpawnRat();
@@ -150,15 +165,18 @@ namespace Rats
             }
         }
 
-        public void ToggleVent()
+        public void DisableNest() // TODO: Reset this in terminal settings
         {
+            LoggerInstance.LogDebug("Disabling nest");
+            if (!RatKingAI.Instance.IsActive) { RatKingAI.Instance.SetActive(); }
+            if (IsRatKing) { return; }
             if (Apparatus != null && !Apparatus.isLungDocked) { return; }
-            open = !open;
+            IsOpen = false;
         }
 
         public override void OnDestroy()
         {
-            if (this == MainNest)
+            if (IsRatKing)
             {
                 EnemyHitCount.Clear();
                 EnemyThreatCounter.Clear();
@@ -171,10 +189,8 @@ namespace Rats
                     rat.NetworkObject.Despawn(true);
                 }
 
-                totalRatsSpawned = 0;
                 SpawnedRats.Clear();
 
-                MainNest = null;
                 Nests.Clear();
             }
 

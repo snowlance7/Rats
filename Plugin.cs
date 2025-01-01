@@ -43,7 +43,7 @@ namespace Rats
         // Debugging
         public static ConfigEntry<bool> configEnableDebugging;
 
-        // Nest
+        // KingNest
         public static ConfigEntry<string> configSewerGrateSpawnWeightCurve;
         public static ConfigEntry<bool> configHideCodeOnTerminal;
         public static ConfigEntry<int> configMinRatSpawnTime;
@@ -91,7 +91,7 @@ namespace Rats
             // Debugging
             configEnableDebugging = Config.Bind("Debugging", "Enable Debugging", false, "Allows debug logs to show in the logs");
 
-            // Nest
+            // KingNest
             configSewerGrateSpawnWeightCurve = Config.Bind("Nest", "Spawn Weight Curve", "Vanilla - 0,0 ; 1,3 | Custom - 0,0 ; 1,3", "The MoonName - CurveSpawnWeight for the SewerGrate(Rat nest).");
             configHideCodeOnTerminal = Config.Bind("Nest", "Hide Code On Terminal", true, "If set to true, will make the code on the ship monitor for the nest be ??, requiring the player to find the nest physically to turn off its spawning.");
             configMinRatSpawnTime = Config.Bind("Nest", "Minimum Rat Spawn Time", 5, "The minimum time in seconds before a rat can spawn from the nest.");
@@ -131,7 +131,7 @@ namespace Rats
             /*EnemyType Rat = ModAssets.LoadAsset<EnemyType>("Assets/ModAssets/RatEnemy.asset");
             if (Rat == null) { LoggerInstance.LogError("Error: Couldnt get Rat from assets"); return; }
             LoggerInstance.LogDebug($"Got Rat prefab");
-            SewerGrate.RatEnemyType = Rat;
+            RatNest.RatEnemyType = Rat;
             TerminalNode RatTN = ModAssets.LoadAsset<TerminalNode>("Assets/ModAssets/Bestiary/RatTN.asset");
             TerminalKeyword RatTK = ModAssets.LoadAsset<TerminalKeyword>("Assets/ModAssets/Bestiary/RatTK.asset");
 
