@@ -15,6 +15,8 @@ using static Rats.RatAI;
 using static Rats.RatManager;
 
 // TODO: Rat king can spawn naturally or spawn when a sewer grate nest is sealed!
+// TODO: Set up calling/rallying rats around the king. He will only call when a player is in line of sight and has high threat
+// TODO: Rats who see a player with high threat will call to rat king if he isnt currently targetting a player. if player is high threat, rat king will not stop chasing player until they are out of the facility or dead.
 namespace Rats
 {
     public class RatKingAI : EnemyAI
@@ -29,6 +31,8 @@ namespace Rats
         public AudioClip[] AttackSFX = null!;
         public AudioClip[] HitSFX = null!;
         public AudioClip[] NibbleSFX = null!;
+        public AudioClip ScreamSFX = null!;
+        public AudioClip CallSFX = null!;
         public Transform TurnCompass = null!;
         public Transform RatMouth = null!;
         public RatNest NestPrefab = null!;
@@ -53,10 +57,6 @@ namespace Rats
         Coroutine? ratCoroutine;
 
         // Config Values
-        float timeToIncreaseThreat = 3f;
-        int threatToAttackPlayer = 100;
-        int threatToAttackEnemy = 50;
-        int playerFoodAmount = 30;
         int ratKingDamage = 10;
 
         float ratUpdateInterval = 0.2f;
@@ -67,7 +67,6 @@ namespace Rats
             Inactive,
             Roaming,
             Attacking,
-            Eating,
             Rampaging
         }
 
@@ -213,7 +212,7 @@ namespace Rats
 
         public override void DoAIInterval()
         {
-            if (isEnemyDead || StartOfRound.Instance.allPlayersDead || stunNormalizedTimer > 0f)
+            if (isEnemyDead || StartOfRound.Instance.allPlayersDead || stunNormalizedTimer > 0f || inSpecialAnimation)
             {
                 return;
             };
@@ -231,17 +230,26 @@ namespace Rats
 
                 case (int)State.Roaming:
 
+                    StartRoam();
+                    CheckForThreatsInLOS();
+
                     break;
 
                 case (int)State.Attacking:
 
-                    break;
-
-                case (int)State.Eating:
+                    if (targetPlayer)
 
                     break;
 
                 case (int)State.Rampaging:
+
+                    if (targetPlayer != null && SetDestinationToPosition(targetPlayer.transform.position, true))
+                    {
+                        StopRoam();
+                        break;
+                    }
+
+                    StartRoam();
 
                     break;
 
@@ -249,6 +257,44 @@ namespace Rats
                     LoggerInstance.LogWarning("Invalid state: " + currentBehaviourStateIndex);
                     break;
             }
+        }
+
+        public void StartRampage()
+        {
+            if (currentBehaviourStateIndex == (int)State.Rampaging) { return; }
+
+            foreach (var player in StartOfRound.Instance.allPlayerScripts)
+            {
+                if (!PlayerIsTargetable(player)) { continue; }
+                AddThreat(player, highThreatToAttackPlayer, false);
+            }
+
+            SwitchToBehaviourClientRpc((int)State.Rampaging);
+        }
+
+        public void SetInSpecialAnimationFalse()
+        {
+            inSpecialAnimation = false;
+        }
+
+        public void Rally(float radius)
+        {
+            foreach (var rat in SpawnedRats)
+            {
+                if (rat.currentRatType == RatType.DefenseRat) { return; }
+                if (Vector3.Distance(rat.transform.position, transform.position) > radius) { continue; }
+
+                rat.targetPlayer = targetPlayer;
+                rat.rallyRat = true;
+                rat.SwitchToBehaviorState(RatAI.State.Swarming);
+            }
+        }
+
+        public void AlertHighThreatPlayer(PlayerControllerB player) // Called from ratai
+        {
+            if (targetPlayer != null) { return; }
+            // TODO: Continue here
+
         }
 
         void GrabBody()
@@ -426,7 +472,7 @@ namespace Rats
             }
         }
 
-        void AddThreat(PlayerControllerB player, int amount = 1)
+        void AddThreat(PlayerControllerB player, int amount = 1, bool aggro = true)
         {
             if (player == null) { return; }
 
@@ -441,10 +487,12 @@ namespace Rats
                 RatManager.PlayerThreatCounter.Add(player, amount);
             }
 
-            PlaySqueakSFXClientRpc();
-
             int threat = RatManager.PlayerThreatCounter[player];
             logIfDebug($"{player.playerUsername}: {threat} threat");
+
+            if (!aggro) { return; }
+
+            PlaySqueakSFXClientRpc();
 
             if (RatManager.PlayerThreatCounter[player] > threatToAttackPlayer || player.isPlayerDead)
             {

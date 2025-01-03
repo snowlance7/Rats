@@ -30,6 +30,26 @@ namespace Rats
             VentWhenReturningToNest
         }
 
+        // Global Configs
+
+        public static float defenseRadius = 5f;
+        public static float timeToIncreaseThreat = 3f;
+        public static int threatToAttackPlayer = 100;
+        public static int threatToAttackEnemy = 50;
+        public static int highThreatToAttackPlayer = 250;
+        public static int enemyHitsToDoDamage = 10;
+        public static int playerFoodAmount = 30;
+
+        public static void InitConfigs()
+        {
+            defenseRadius = configDefenseRadius.Value;
+            timeToIncreaseThreat = configTimeToIncreaseThreat.Value;
+            threatToAttackPlayer = configThreatToAttackPlayer.Value;
+            threatToAttackEnemy = configThreatToAttackEnemy.Value;
+            enemyHitsToDoDamage = configEnemyHitsToDoDamage.Value;
+            playerFoodAmount = configPlayerFoodAmount.Value;
+        }
+
         public static EnemyVent? GetClosestVentToPosition(Vector3 pos)
         {
             float mostOptimalDistance = 2000f;
@@ -70,6 +90,11 @@ namespace Rats
             {
                 return null;
             }
+        }
+
+        public static int GetOpenNestCount()
+        {
+            return RatNest.Nests.Where(x => x.IsOpen).Count();
         }
     }
 }

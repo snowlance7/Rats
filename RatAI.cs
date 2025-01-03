@@ -25,6 +25,7 @@ namespace Rats
         public AudioClip[] AttackSFX;
         public AudioClip[] HitSFX;
         public AudioClip[] NibbleSFX;
+        public AudioClip CallSFX;
         public Transform RatMouth;
         public GameObject ChristmasHat;
 
@@ -34,6 +35,8 @@ namespace Rats
         public Transform eye;
         public int enemyHP;
         public AudioSource creatureSFX;
+        public AudioSource creatureVoice;
+        public NetworkAnimator networkAnimator;
 #pragma warning restore 0649
 
         public bool IsJermaRat;
@@ -46,6 +49,7 @@ namespace Rats
         bool isOutside;
         Transform? targetNode;
         //int thisEnemyIndex;
+        bool inSpecialAnimation;
 
         State currentBehaviorState = State.Routine;
 
@@ -67,6 +71,7 @@ namespace Rats
         private NavMeshPath path1;
         Coroutine? ratCoroutine;
         //bool sickRat;
+        public bool rallyRat;
 
         bool AtNest { get { return agent.enabled && Nest != null && Vector3.Distance(transform.position, Nest.transform.position) < 1f; } }
 
@@ -75,20 +80,13 @@ namespace Rats
 
         // Config Values
         //float sickRatChance = 0.1f;
-        float defenseRadius = 5f;
-        float timeToIncreaseThreat = 3f;
-        int threatToAttackPlayer = 100;
-        int threatToAttackEnemy = 50;
         float swarmRadius = 10f;
         bool canVent = true;
         int maxDefenseRats = 10;
-        int ratsNeededToAttack = 5;
         float distanceToLoseRats = 25f;
-        int enemyHitsToDoDamage = 10;
-        int playerFoodAmount = 30;
         int ratDamage = 2;
 
-        RatType currentRatType = RatType.Unassigned;
+        public RatType currentRatType = RatType.Unassigned;
         private bool walking;
         System.Random random;
 
@@ -118,17 +116,10 @@ namespace Rats
         public void Start()
         {
             AIIntervalTime = configAIIntervalTime.Value;
-            defenseRadius = configDefenseRadius.Value;
-            timeToIncreaseThreat = configTimeToIncreaseThreat.Value;
-            threatToAttackPlayer = configThreatToAttackPlayer.Value;
-            threatToAttackEnemy = configThreatToAttackEnemy.Value;
             swarmRadius = configSwarmRadius.Value;
             canVent = configCanVent.Value;
             maxDefenseRats = configMaxDefenseRats.Value;
-            ratsNeededToAttack = configRatsNeededToAttack.Value;
             distanceToLoseRats = configDistanceNeededToLoseRats.Value;
-            enemyHitsToDoDamage = configEnemyHitsToDoDamage.Value;
-            playerFoodAmount = configPlayerFoodAmount.Value;
             ratDamage = configRatDamage.Value;
             ChristmasHat.SetActive(configHolidayRats.Value);
 
@@ -151,7 +142,7 @@ namespace Rats
 
         public void Update()
         {
-            if (isEnemyDead || StartOfRound.Instance.allPlayersDead)
+            if (isEnemyDead || StartOfRound.Instance.allPlayersDead || inSpecialAnimation)
             {
                 return;
             };
@@ -248,7 +239,7 @@ namespace Rats
 
         public void DoAIInterval()
         {
-            if (isEnemyDead || StartOfRound.Instance.allPlayersDead)
+            if (isEnemyDead || StartOfRound.Instance.allPlayersDead || inSpecialAnimation)
             {
                 return;
             };
@@ -313,6 +304,7 @@ namespace Rats
 
                     if (targetPlayer != null)
                     {
+                        if (rallyRat) { return; }
                         if (Vector3.Distance(targetPlayer.transform.position, transform.position) > distanceToLoseRats)
                         {
                             // Target too far, return to nest
@@ -718,6 +710,7 @@ namespace Rats
                     DropBody();
                     RoundManager.PlayRandomClip(creatureSFX, HitSFX, true, 1, -1);
                     KillEnemyOnOwnerClient();
+                    if (IsServerOrHost && playerWhoHit != null) { AddThreat(playerWhoHit, 2); }
                     return;
                 }
             }
@@ -788,17 +781,18 @@ namespace Rats
 
         public void OnCollideWithPlayer(Collider other)
         {
+            rallyRat = false;
             if (isEnemyDead) { return; }
             if (timeSinceCollision > 1f)
             {
                 timeSinceCollision = 0f;
+                RoundManager.PlayRandomClip(creatureSFX, AttackSFX);
                 PlayerControllerB? player = MeetsStandardPlayerCollisionConditions(other);
                 if (player == null) { return; }
                 if (currentBehaviorState == State.Swarming || IsPlayerNearANest(player))
                 {
                     int deathAnim = UnityEngine.Random.Range(0, 2) == 1 ? 7 : 0;
                     player.DamagePlayer(ratDamage, true, true, CauseOfDeath.Mauling, deathAnim);
-                    PlayAttackSFXServerRpc();
                 }
             }
         }
@@ -869,6 +863,11 @@ namespace Rats
                     localPlayer.IncreaseFearLevelOverTime(0.8f);
                 }
             }
+
+            if (currentBehaviorState == State.Swarming)
+            {
+                RoundManager.PlayRandomClip(creatureSFX, AttackSFX);
+            }
         }
 
         void AddThreat(EnemyAI enemy, int amount = 1)
@@ -897,7 +896,8 @@ namespace Rats
 
                 if (RatManager.EnemyThreatCounter[enemy] > threatToAttackEnemy || enemy.isEnemyDead)
                 {
-                    SetTarget(enemy);
+                    targetPlayer = null;
+                    targetEnemy = enemy;
                     SwitchToBehaviorState(State.Swarming);
                 }
             }
@@ -927,24 +927,45 @@ namespace Rats
 
                 if (currentRatType == RatType.DefenseRat) { return; }
 
-                if (RatManager.PlayerThreatCounter[player] > threatToAttackPlayer || player.isPlayerDead)
+                if (threat > highThreatToAttackPlayer)
                 {
-                    SetTarget(player);
+                    if (RatKingAI.Instance.targetPlayer == null)
+                    {
+                        targetEnemy = null;
+                        targetPlayer = player;
+                        CallRatKing();
+                    }
+                }
+                if (threat > threatToAttackPlayer || player.isPlayerDead)
+                {
+                    targetEnemy = null;
+                    targetPlayer = player;
                     SwitchToBehaviorState(State.Swarming);
                 }
             }
         }
 
-        public void SetTarget(PlayerControllerB player)
+        void CallRatKing()
         {
-            targetEnemy = null;
-            targetPlayer = player;
+            StopTaskRoutine();
+            inSpecialAnimation = true;
+            agent.ResetPath();
+
+            networkAnimator.SetTrigger("call");
         }
 
-        public void SetTarget(EnemyAI enemy)
+        void FinishCallRatKingAnim() // Animation function "call" TODO: Set this up in unity
         {
-            targetPlayer = null;
-            targetEnemy = enemy;
+            inSpecialAnimation = false;
+            if (targetPlayer == null || !IsServerOrHost) { return; }
+            RatKingAI.Instance.AlertHighThreatPlayer(targetPlayer);
+            SwitchToBehaviorState(State.Swarming);
+        }
+
+        void PlayCallSFX() // Animation function "call" TODO: Set this up in unity
+        {
+            creatureVoice.PlayOneShot(CallSFX);
+            RoundManager.Instance.PlayAudibleNoise(transform.position);
         }
 
         /*public override void SetEnemyStunned(bool setToStunned, float setToStunTime = 1, PlayerControllerB? setStunnedByPlayer = null)
@@ -1086,21 +1107,6 @@ namespace Rats
             {
                 HitEnemy(force, StartOfRound.Instance.allPlayerScripts[playerWhoHit], playHitSFX, hitID);
             }
-        }
-
-        [ServerRpc(RequireOwnership = false)]
-        public void PlayAttackSFXServerRpc()
-        {
-            if (IsServerOrHost)
-            {
-                PlayAttackSFXClientRpc();
-            }
-        }
-
-        [ClientRpc]
-        public void PlayAttackSFXClientRpc()
-        {
-            RoundManager.PlayRandomClip(creatureSFX, AttackSFX, true, 1, -1);
         }
 
         [ClientRpc]

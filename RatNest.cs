@@ -89,21 +89,23 @@ namespace Rats
                 }
             }
 
-            if (Apparatus != null && !Apparatus.isLungDocked) { IsOpen = true; } // TODO: Radiated rats???
-
-            if (IsServerOrHost)
+            if (Apparatus != null && !Apparatus.isLungDocked)
             {
-                if (!IsRatKing && IsOpen && SpawnedRats.Count < maxRats)
+                // TODO: Radiated rats???
+            }
+
+            if (!IsServerOrHost) { return; }
+
+            if (!IsRatKing && IsOpen && SpawnedRats.Count < maxRats)
+            {
+                timeSinceSpawnRat += Time.unscaledDeltaTime;
+
+                if (timeSinceSpawnRat > nextRatSpawnTime)
                 {
-                    timeSinceSpawnRat += Time.unscaledDeltaTime;
+                    timeSinceSpawnRat = 0f;
+                    nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
 
-                    if (timeSinceSpawnRat > nextRatSpawnTime)
-                    {
-                        timeSinceSpawnRat = 0f;
-                        nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
-
-                        SpawnRat();
-                    }
+                    SpawnRat();
                 }
             }
         }
@@ -161,7 +163,8 @@ namespace Rats
         {
             if (RatManager.SpawnedRats.Count < maxRats)
             {
-                SpawnRatClientRpc();
+                GameObject ratObj = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
+                ratObj.GetComponent<NetworkObject>().Spawn();
             }
         }
 
@@ -170,8 +173,11 @@ namespace Rats
             LoggerInstance.LogDebug("Disabling nest");
             if (!RatKingAI.Instance.IsActive) { RatKingAI.Instance.SetActive(); }
             if (IsRatKing) { return; }
-            if (Apparatus != null && !Apparatus.isLungDocked) { return; }
             IsOpen = false;
+            if (GetOpenNestCount() <= 1)
+            {
+                RatKingAI.Instance.StartRampage();
+            }
         }
 
         public override void OnDestroy()
@@ -195,13 +201,6 @@ namespace Rats
             }
 
             base.OnDestroy();
-        }
-
-        [ClientRpc]
-        public void SpawnRatClientRpc()
-        {
-            GameObject ratObj = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
-            ratObj.GetComponent<RatAI>().Nest = this;
         }
     }
 }
