@@ -14,6 +14,7 @@ using static Rats.RatManager;
 using Unity.Netcode.Components;
 using static UnityEngine.ParticleSystem.PlaybackState;
 using UnityEngine.InputSystem.HID;
+using System.Threading;
 
 namespace Rats
 {
@@ -25,7 +26,7 @@ namespace Rats
         public AudioClip[] AttackSFX;
         public AudioClip[] HitSFX;
         public AudioClip[] NibbleSFX;
-        public AudioClip CallSFX;
+        public AudioClip[] ScreamSFX;
         public Transform RatMouth;
         public GameObject ChristmasHat;
 
@@ -66,6 +67,7 @@ namespace Rats
 
         float timeSinceCollision;
         float timeSinceAddThreat;
+        float spinTimer;
 
         Vector3 finalDestination;
         private NavMeshPath path1;
@@ -127,7 +129,7 @@ namespace Rats
             path1 = new NavMeshPath();
 
             currentBehaviorState = State.ReturnToNest;
-            Nest = GetClosestNest();
+            Nest = GetClosestNest(transform.position);
             HottestRat();
             RatManager.SpawnedRats.Add(this);
             random = new System.Random(StartOfRound.Instance.randomMapSeed * RatManager.SpawnedRats.Count);
@@ -183,7 +185,8 @@ namespace Rats
                 case State.ReturnToNest:
                     
                     ResetRatType();
-                    Nest = GetClosestNest();
+                    Nest = GetClosestNest(transform.position);
+                    SetStatus("Returning to nest");
 
                     break;
                 case State.Routine:
@@ -267,14 +270,27 @@ namespace Rats
 
                     if (Nest == null || !Nest.IsOpen)
                     {
-                        Nest = GetClosestNest();
-                        if (Nest == null) { LoggerInstance.LogError("Cant find a nest! This should not happen!"); return; } // TODO: Do rat spin
+                        Nest = GetClosestNest(transform.position, true);
+                        if (Nest == null)
+                        {
+                            Nest = GetClosestNest(transform.position);
+                            if (Nest == null) { Spin(); return; }
+                        }
                     }
 
-                    if (SetDestinationToPosition(Nest.transform.position))
+                    if (!SetDestinationToPosition(Nest.transform.position, true))
                     {
-                        StopTaskRoutine();
-                        SetStatus("Returning to nest");
+                        if (!canVent) { Spin(); return; }
+                        EnemyVent? vent = GetClosestVentToPosition(transform.position);
+                        if (vent == null) { Spin(); return; }
+                        if (Vector3.Distance(transform.position, vent.floorNode.position) < 1f)
+                        {
+                            WarpFromVent(vent, Nest.transform.position);
+                            return;
+                        }
+
+                        SetDestinationToPosition(vent.floorNode.position);
+                        return;
                     }
 
                     break;
@@ -338,6 +354,11 @@ namespace Rats
             }
         }
 
+        private void Spin()
+        {
+            // TODO: Set this up
+        }
+
         void AssignRatType(RatType ratType)
         {
             currentRatType = ratType;
@@ -364,23 +385,6 @@ namespace Rats
                 default:
                     break;
             }
-        }
-
-        RatNest GetClosestNest()
-        {
-            float closestDistance = 4000f;
-            RatNest? closestNest = RatKingAI.Instance.KingNest;
-
-            foreach (var nest in Nests)
-            {
-                if (!nest.IsOpen) { continue; }
-                float distance = Vector3.Distance(transform.position, nest.transform.position);
-                if (distance >= closestDistance) { continue; }
-                closestDistance = distance;
-                closestNest = nest;
-            }
-
-            return closestNest;
         }
 
         void GrabBody()
@@ -450,7 +454,7 @@ namespace Rats
             {
                 if (CheckLineOfSightForDeadBody())
                 {
-                    Nest = GetClosestNest();
+                    Nest = GetClosestNest(transform.position);
                     StopTaskRoutine();
                     grabbingBody = true;
                     return;
@@ -522,6 +526,14 @@ namespace Rats
                 }
             }
             return null;
+        }
+
+        void WarpFromVent(EnemyVent fromVent, Vector3 position)
+        {
+            OpenVents(fromVent);
+            Vector3 warpPos = RoundManager.Instance.GetNavMeshPosition(position, RoundManager.Instance.navHit, 1.75f);
+            transform.position = warpPos;
+            agent.Warp(warpPos);
         }
 
         void WarpToVent(EnemyVent fromVent, EnemyVent toVent)
@@ -964,8 +976,7 @@ namespace Rats
 
         void PlayCallSFX() // Animation function "call" TODO: Set this up in unity
         {
-            creatureVoice.PlayOneShot(CallSFX);
-            RoundManager.Instance.PlayAudibleNoise(transform.position);
+            RoundManager.PlayRandomClip(creatureVoice, ScreamSFX);
         }
 
         /*public override void SetEnemyStunned(bool setToStunned, float setToStunTime = 1, PlayerControllerB? setStunnedByPlayer = null)

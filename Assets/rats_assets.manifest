@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3811848629
+CRC: 1904600251
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 632ed6a8a60dcd533a464c5455ed9fd2
+    Hash: 7035844de230695140e03d604d33db1b
   TypeTreeHash:
     serializedVersion: 2
-    Hash: ec3366868d84f1ab705db5a943967b32
+    Hash: 44b333afeb6b727efb053c22be22b17f
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 632ed6a8a60dcd533a464c5455ed9fd2
+    Hash: 7035844de230695140e03d604d33db1b
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -53,17 +53,33 @@ ClassTypes:
 - Class: 114
   Script: {fileID: -819815532, guid: 490d78382e3f68e479e9d9756fa918c3, type: 3}
 - Class: 114
-  Script: {fileID: -148027567, guid: 490d78382e3f68e479e9d9756fa918c3, type: 3}
+  Script: {fileID: -818212457, guid: 490d78382e3f68e479e9d9756fa918c3, type: 3}
+- Class: 114
+  Script: {fileID: 1349644444, guid: 490d78382e3f68e479e9d9756fa918c3, type: 3}
+- Class: 114
+  Script: {fileID: -142638541, guid: 490d78382e3f68e479e9d9756fa918c3, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 65d3fcb39dd67306e9bb17a603308070, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: 04f75356a7e9c978bddc7d568e58a50b, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: c30496d6ae6d6f907456e10a94e01ec6, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: 3c36d0a92cbb1f26a39169ef0eae393a, type: 3}
 - Class: 114
+  Script: {fileID: 11500000, guid: 6d7127b8f98ca8ec9896b384a71d39a2, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 0e80ae96b3eb9177eea5c8f9dadbcda1, type: 3}
+- Class: 114
   Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: d3cecf05b78b173605122a700874719c, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: f2c662b0f92d7236699123213e2fb9f4, type: 3}
 - Class: 115
@@ -73,6 +89,8 @@ ClassTypes:
 - Class: 137
   Script: {instanceID: 0}
 - Class: 195
+  Script: {instanceID: 0}
+- Class: 213
   Script: {instanceID: 0}
 - Class: 224
   Script: {instanceID: 0}
@@ -84,9 +102,19 @@ ClassTypes:
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
 - AssemblyName: Assembly-CSharp
+  ClassName: AISearchRoutine
+- AssemblyName: Assembly-CSharp
+  ClassName: Battery
+- AssemblyName: Assembly-CSharp
+  ClassName: EnemyBehaviourState
+- AssemblyName: Assembly-CSharp
   ClassName: InteractEvent
 - AssemblyName: Assembly-CSharp
+  ClassName: NavSizeLimit
+- AssemblyName: Assembly-CSharp
   ClassName: SpawnableMapObject
+- AssemblyName: Unity.Netcode.Components
+  ClassName: Unity.Netcode.Components.NetworkAnimator/TransitionStateinfo
 - AssemblyName: Unity.TextMeshPro
   ClassName: TMPro.FaceInfo_Legacy
 - AssemblyName: Unity.TextMeshPro
@@ -124,5 +152,10 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: UnityEngine.UI
   ClassName: UnityEngine.UI.MaskableGraphic/CullStateChangedEvent
 Assets:
+- Assets/ModAssets/Bestiary/RatKingTK.asset
+- Assets/ModAssets/RatCrownItem.asset
+- Assets/ModAssets/JermaRatKingEnemy.asset
 - Assets/ModAssets/RatSpawn.asset
+- Assets/ModAssets/RatKingEnemy.asset
+- Assets/ModAssets/Bestiary/RatKingTN.asset
 Dependencies: []

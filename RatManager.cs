@@ -96,5 +96,23 @@ namespace Rats
         {
             return RatNest.Nests.Where(x => x.IsOpen).Count();
         }
+
+        public static RatNest GetClosestNest(Vector3 position, bool checkForPath = false)
+        {
+            float closestDistance = 4000f;
+            RatNest closestNest = RatKingAI.Instance.KingNest;
+
+            foreach (var nest in RatNest.Nests)
+            {
+                if (!nest.IsOpen) { continue; }
+                float distance = Vector3.Distance(position, nest.transform.position);
+                if (distance >= closestDistance) { continue; }
+                if (checkForPath && !CalculatePath(position, nest.transform.position)) { continue; }
+                closestDistance = distance;
+                closestNest = nest;
+            }
+
+            return closestNest;
+        }
     }
 }

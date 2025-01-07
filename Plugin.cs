@@ -43,6 +43,12 @@ namespace Rats
         // Debugging
         public static ConfigEntry<bool> configEnableDebugging;
 
+        // RatKing
+        public static ConfigEntry<bool> configEnableRatKing;
+        public static ConfigEntry<bool> configUseJermaRatKing;
+        public static ConfigEntry<string> configRatKingLevelRarities;
+        public static ConfigEntry<string> configRatKingCustomLevelRarities;
+
         // KingNest
         public static ConfigEntry<string> configSewerGrateSpawnWeightCurve;
         public static ConfigEntry<bool> configHideCodeOnTerminal;
@@ -53,6 +59,7 @@ namespace Rats
         public static ConfigEntry<int> configMaxRats;
 
         // SpawnedRats
+        public static ConfigEntry<bool> configUseJermaRats;
         public static ConfigEntry<float> configAIIntervalTime;
         //public static ConfigEntry<bool> configMakeLessSqueaks;
         public static ConfigEntry<float> configDefenseRadius;
@@ -86,10 +93,16 @@ namespace Rats
             // Configs
 
             // General
-            configHolidayRats = Config.Bind("General", "Holiday Rats", true, "Rats spawn with a santa hat");
+            configHolidayRats = Config.Bind("General", "Holiday Rats", false, "Rats spawn with a santa hat");
 
             // Debugging
             configEnableDebugging = Config.Bind("Debugging", "Enable Debugging", false, "Allows debug logs to show in the logs");
+
+            // RatKing
+            configUseJermaRatKing = Config.Bind("Rat King", "Use Jerma Rat King", false, "Uses a lower quality model for the rat king with no animations. Can help with performance if enabled.");
+            configEnableRatKing = Config.Bind("Rat King", "Enable Rat King", true, "Set to false to disable spawning the rat king.");
+            configRatKingLevelRarities = Config.Bind("Rat King Rarities", "Level Rarities", "ExperimentationLevel:5, AssuranceLevel:6, VowLevel:9, OffenseLevel:10, AdamanceLevel:10, MarchLevel:10, RendLevel:75, DineLevel:75, TitanLevel:75, ArtificeLevel:20, EmbrionLevel:25, Modded:15", "Rarities for each level. See default for formatting.");
+            configRatKingCustomLevelRarities = Config.Bind("Rat King Rarities", "Custom Level Rarities", "", "Rarities for modded levels. Same formatting as level rarities.");
 
             // KingNest
             configSewerGrateSpawnWeightCurve = Config.Bind("Nest", "Spawn Weight Curve", "Vanilla - 0,0 ; 1,3 | Custom - 0,0 ; 1,3", "The MoonName - CurveSpawnWeight for the SewerGrate(Rat nest).");
@@ -101,6 +114,7 @@ namespace Rats
             configMaxRats = Config.Bind("Nest", "Maximum Rats", 40, "The maximum number of rats that can be on the map. Lowering this can improve performance.");
 
             // SpawnedRats
+            configUseJermaRats = Config.Bind("Rats", "Use Jerma Rats", false, "Uses a lower quality model for the rats with no animations. Can help with performance if enabled.");
             //configMakeLessSqueaks = Config.Bind("SpawnedRats", "Make Less Squeaks", false, "If set to true, will make the rats squeak less, which can help with performance.");
             configAIIntervalTime = Config.Bind("Rats", "AI Interval Time", 0.3f, "The interval in which rats will update their AI (Changing position, doing complex calculations, etc). Setting this higher can improve performance but can also make the rats freeze in place more often while lower values makes them constantly moving but can decrease performance.");
             configDefenseRadius = Config.Bind("Rats", "Defense Radius", 5f, "The radius in which defense rats protect the nest.");
@@ -116,7 +130,6 @@ namespace Rats
             configPlayerFoodAmount = Config.Bind("Rats", "Player Food Amount", 30, "How much food points a player corpse gives when brought to the nest.");
             configRatDamage = Config.Bind("Rats", "Rat Damage", 2, "The damage dealt by a rat when attacking.");
 
-
             // Loading Assets
             string sAssemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
@@ -128,17 +141,18 @@ namespace Rats
             }
             LoggerInstance.LogDebug($"Got AssetBundle at: {Path.Combine(sAssemblyLocation, "rats_assets")}");
 
-            /*EnemyType Rat = ModAssets.LoadAsset<EnemyType>("Assets/ModAssets/RatEnemy.asset");
-            if (Rat == null) { LoggerInstance.LogError("Error: Couldnt get Rat from assets"); return; }
+            string ratKingPath = configUseJermaRatKing.Value ? "Assets/ModAssets/JermaRatKingEnemy.asset" : "Assets/ModAssets/RatKingEnemy.asset";
+            EnemyType RatKing = ModAssets.LoadAsset<EnemyType>(ratKingPath);
+            if (RatKing == null) { LoggerInstance.LogError("Error: Couldnt get Rat from assets"); return; }
             LoggerInstance.LogDebug($"Got Rat prefab");
-            RatNest.RatEnemyType = Rat;
-            TerminalNode RatTN = ModAssets.LoadAsset<TerminalNode>("Assets/ModAssets/Bestiary/RatTN.asset");
-            TerminalKeyword RatTK = ModAssets.LoadAsset<TerminalKeyword>("Assets/ModAssets/Bestiary/RatTK.asset");
+
+            TerminalNode RatTN = ModAssets.LoadAsset<TerminalNode>("Assets/ModAssets/Bestiary/RatKingTN.asset");
+            TerminalKeyword RatTK = ModAssets.LoadAsset<TerminalKeyword>("Assets/ModAssets/Bestiary/RatKingTK.asset");
 
             LoggerInstance.LogDebug("Registering enemy network prefab...");
-            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(Rat.enemyPrefab);
+            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(RatKing.enemyPrefab);
             LoggerInstance.LogDebug("Registering enemy...");
-            Enemies.RegisterEnemy(Rat, null, null, RatTN, RatTK);*/
+            Enemies.RegisterEnemy(RatKing, GetLevelRarities(configRatKingLevelRarities.Value), GetCustomLevelRarities(configRatKingCustomLevelRarities.Value), RatTN, RatTK);
 
             SpawnableMapObjectDef RatSpawnPrefab = ModAssets.LoadAsset<SpawnableMapObjectDef>("Assets/ModAssets/RatSpawn.asset");
             if (RatSpawnPrefab == null) { LoggerInstance.LogError("Error: Couldnt get RatSpawnPrefab from assets"); return; }
@@ -146,8 +160,6 @@ namespace Rats
             LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(RatSpawnPrefab.spawnableMapObject.prefabToSpawn);
 
             LoggerInstance.LogDebug($"Registering RatSpawn");
-            //MapObjects.RegisterMapObject(RatSpawnPrefab, Levels.LevelTypes.All, (levels) => RatSpawnPrefab.spawnableMapObject.numberToSpawn);
-            //MapObjects.RegisterMapObject(RatSpawnPrefab, Levels.LevelTypes.All, (levels) => new AnimationCurve(new Keyframe(0, configMinNests.Value), new Keyframe(1, configMaxNests.Value)));
             RegisterInsideMapObjectWithConfig(RatSpawnPrefab, configSewerGrateSpawnWeightCurve.Value);
 
             // Finished
@@ -270,6 +282,78 @@ namespace Rats
             }
 
             return curve;
+        }
+
+        public Dictionary<Levels.LevelTypes, int> GetLevelRarities(string levelsString)
+        {
+            try
+            {
+                Dictionary<Levels.LevelTypes, int> levelRaritiesDict = new Dictionary<Levels.LevelTypes, int>();
+
+                if (levelsString != null && levelsString != "")
+                {
+                    string[] levels = levelsString.Split(',');
+
+                    foreach (string level in levels)
+                    {
+                        string[] levelSplit = level.Split(':');
+                        if (levelSplit.Length != 2) { continue; }
+                        string levelType = levelSplit[0].Trim();
+                        string levelRarity = levelSplit[1].Trim();
+
+                        if (Enum.TryParse<Levels.LevelTypes>(levelType, out Levels.LevelTypes levelTypeEnum) && int.TryParse(levelRarity, out int levelRarityInt))
+                        {
+                            levelRaritiesDict.Add(levelTypeEnum, levelRarityInt);
+                        }
+                        else
+                        {
+                            LoggerInstance.LogError($"Error: Invalid level rarity: {levelType}:{levelRarity}");
+                        }
+                    }
+                }
+                return levelRaritiesDict;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Error: {e}");
+                return null!;
+            }
+        }
+
+        public Dictionary<string, int> GetCustomLevelRarities(string levelsString)
+        {
+            try
+            {
+                Dictionary<string, int> customLevelRaritiesDict = new Dictionary<string, int>();
+
+                if (levelsString != null)
+                {
+                    string[] levels = levelsString.Split(',');
+
+                    foreach (string level in levels)
+                    {
+                        string[] levelSplit = level.Split(':');
+                        if (levelSplit.Length != 2) { continue; }
+                        string levelType = levelSplit[0].Trim();
+                        string levelRarity = levelSplit[1].Trim();
+
+                        if (int.TryParse(levelRarity, out int levelRarityInt))
+                        {
+                            customLevelRaritiesDict.Add(levelType, levelRarityInt);
+                        }
+                        else
+                        {
+                            LoggerInstance.LogError($"Error: Invalid level rarity: {levelType}:{levelRarity}");
+                        }
+                    }
+                }
+                return customLevelRaritiesDict;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Error: {e}");
+                return null!;
+            }
         }
 
         private static void InitializeNetworkBehaviours()
