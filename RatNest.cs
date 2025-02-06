@@ -22,6 +22,7 @@ namespace Rats
         public TextMeshPro[] TerminalCodes = null!;
         public TerminalAccessibleObject TerminalAccessibleObj = null!;
         public GameObject RatNestMesh = null!;
+        public ScanNodeProperties ScanNode = null!;
 #pragma warning restore 0649
 
         public static List<RatNest> Nests = [];
@@ -47,7 +48,7 @@ namespace Rats
 
         public void Start()
         {
-            logIfDebug("Sewer grate spawned at: " + transform.position);
+            log("Sewer grate spawned at: " + transform.position);
             Nests.Add(this);
 
             hideCodeOnTerminal = configHideCodeOnTerminal.Value;
@@ -65,9 +66,9 @@ namespace Rats
 
             if (!IsServerOrHost) { return; }
 
-            if (RatKingAI.Instance == null)
+            if (RatManager.Instance == null)
             {
-                SpawnRatKing();
+                RatManager.Init();
             }
 
             nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
@@ -76,7 +77,13 @@ namespace Rats
 
         public void Update()
         {
-            if (!codeOnGrateSet)
+            /*if (IsRatKing)
+            {
+                transform.position = RatKingAI.Instance.NestTransform.position;
+                return;
+            }*/
+
+            if (!IsRatKing && !codeOnGrateSet)
             {
                 if (TerminalAccessibleObj.objectCode != "")
                 {
@@ -152,7 +159,7 @@ namespace Rats
         void SpawnRats(int amount)
         {
             if (amount == 0) { return; }
-            logIfDebug("Spawning rats from food: " + amount);
+            log("Spawning rats from food: " + amount);
             for (int i = 0; i < amount; i++)
             {
                 SpawnRat();
@@ -165,14 +172,15 @@ namespace Rats
             {
                 GameObject ratObj = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
                 ratObj.GetComponent<NetworkObject>().Spawn();
+                RatManager.Instance.RegisterRat(ratObj.GetComponent<RatAI>());
             }
         }
 
         public void DisableNest() // TODO: Reset this in terminal settings
         {
             LoggerInstance.LogDebug("Disabling nest");
-            if (!RatKingAI.Instance.IsActive) { RatKingAI.Instance.SetActive(); }
             if (IsRatKing) { return; }
+            if (RatKingAI.Instance == null) { SpawnRatKing(); }
             IsOpen = false;
             if (GetOpenNestCount() <= 1)
             {
@@ -182,25 +190,42 @@ namespace Rats
 
         public override void OnDestroy()
         {
-            if (IsRatKing)
+            EnemyHitCount.Clear();
+            EnemyThreatCounter.Clear();
+            PlayerThreatCounter.Clear();
+            EnemyFoodAmount.Clear();
+            Apparatus = null;
+
+            foreach (RatAI rat in SpawnedRats)
             {
-                EnemyHitCount.Clear();
-                EnemyThreatCounter.Clear();
-                PlayerThreatCounter.Clear();
-                EnemyFoodAmount.Clear();
-                Apparatus = null;
-
-                foreach (RatAI rat in SpawnedRats)
-                {
-                    rat.NetworkObject.Despawn(true);
-                }
-
-                SpawnedRats.Clear();
-
-                Nests.Clear();
+                rat.NetworkObject.Despawn(true);
             }
 
+            SpawnedRats.Clear();
+            if (RatManager.Instance != null)
+            {
+                Destroy(RatManager.Instance.gameObject);
+            }
+            Nests.Clear();
+
             base.OnDestroy();
+        }
+
+        [ClientRpc]
+        public void SetAsRatKingNestClientRpc()
+        {
+            IsRatKing = true;
+            IsOpen = true;
+            RatNestMesh.SetActive(false);
+            TerminalAccessibleObj.enabled = false;
+
+            foreach (var code in TerminalCodes)
+            {
+                code.enabled = false;
+            }
+
+            ScanNode.enabled = false;
+            RatKingAI.Instance.KingNest = this;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using BepInEx.Logging;
 using GameNetcodeStuff;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,24 +12,20 @@ using static UnityEngine.VFX.VisualEffectControlTrackController;
 
 namespace Rats
 {
-    public static class RatManager
+    public class RatManager : MonoBehaviour
     {
-        //public static int totalRatsSpawned;
-        public static bool testing = true; // TODO: TESTING
+        public static bool testing = true;
+
+        public static RatManager Instance { get; private set; }
+
         public static List<RatAI> SpawnedRats = [];
+        private List<List<RatAI>> ratGroups = new List<List<RatAI>>(); // Groups for batch updates
+        private float updateInterval = 0.2f; // Time between group updates
+
         public static List<EnemyVent> Vents { get { return RoundManager.Instance.allEnemyVents.ToList(); } }
         public static Dictionary<EnemyAI, int> EnemyHitCount = [];
         public static Dictionary<PlayerControllerB, int> PlayerThreatCounter = [];
         public static Dictionary<EnemyAI, int> EnemyThreatCounter = [];
-
-        public static VentSettings currentVentSettings = VentSettings.AlwaysVent;
-        public enum VentSettings
-        {
-            NoVenting,
-            AlwaysVent,
-            VentWhenNoPath,
-            VentWhenReturningToNest
-        }
 
         // Global Configs
 
@@ -48,6 +45,62 @@ namespace Rats
             threatToAttackEnemy = configThreatToAttackEnemy.Value;
             enemyHitsToDoDamage = configEnemyHitsToDoDamage.Value;
             playerFoodAmount = configPlayerFoodAmount.Value;
+        }
+
+        public static void Init()
+        {
+            if (Instance == null)
+            {
+                Instance = GameObject.Instantiate(new GameObject("RatManager")).AddComponent<RatManager>();
+            }
+        }
+
+        public void Start()
+        {
+            StartCoroutine(BatchUpdateRoutine());
+        }
+
+        public void RegisterRat(RatAI rat)
+        {
+            SpawnedRats.Add(rat);
+            RecalculateGroups();
+        }
+        public void RemoveRat(RatAI rat)
+        {
+            SpawnedRats.Remove(rat);
+            RecalculateGroups();
+        }
+
+        private void RecalculateGroups()
+        {
+            // Reset groups
+            ratGroups.Clear();
+            for (int i = 0; i < 5; i++) ratGroups.Add(new List<RatAI>());
+
+            // Distribute rats into groups
+            for (int i = 0; i < SpawnedRats.Count; i++)
+            {
+                int groupIndex = i % 5;
+                ratGroups[groupIndex].Add(SpawnedRats[i]);
+            }
+        }
+
+        private IEnumerator BatchUpdateRoutine()
+        {
+            int groupIndex = 0;
+            while (true)
+            {
+                if (ratGroups.Count > 0 && ratGroups[groupIndex].Count > 0)
+                {
+                    foreach (RatAI rat in ratGroups[groupIndex])
+                    {
+                        rat.DoAIInterval(); // Call the update method on each rat
+                    }
+                }
+
+                groupIndex = (groupIndex + 1) % 5; // Cycle through groups
+                yield return new WaitForSeconds(updateInterval);
+            }
         }
 
         public static EnemyVent? GetClosestVentToPosition(Vector3 pos)
@@ -97,10 +150,14 @@ namespace Rats
             return RatNest.Nests.Where(x => x.IsOpen).Count();
         }
 
-        public static RatNest GetClosestNest(Vector3 position, bool checkForPath = false)
+        public static RatNest? GetClosestNest(Vector3 position, bool checkForPath = false)
         {
             float closestDistance = 4000f;
-            RatNest closestNest = RatKingAI.Instance.KingNest;
+            RatNest closestNest = null!;
+            if (RatKingAI.Instance != null)
+            {
+                closestNest = RatKingAI.Instance.KingNest;
+            }
 
             foreach (var nest in RatNest.Nests)
             {

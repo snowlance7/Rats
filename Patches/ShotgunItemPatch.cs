@@ -20,7 +20,7 @@ namespace Rats
 
             for (int i = 0; i < num4; i++)
             {
-                Debug.Log("Raycasting enemy");
+                logger.LogDebug("Raycasting enemy");
                 if (!__instance.enemyColliders[i].transform.GetComponent<RatAICollisionDetect>())
                 {
                     break;
@@ -31,7 +31,7 @@ namespace Rats
                 {
                     float num5 = Vector3.Distance(shotgunPosition, __instance.enemyColliders[i].point);
                     int num6 = ((num5 < 3.7f) ? 5 : ((!(num5 < 6f)) ? 2 : 3));
-                    Debug.Log($"Hit enemy, hitDamage: {num6}");
+                    logger.LogDebug($"Hit enemy, hitDamage: {num6}");
                     hit.Hit(num6, shotgunForward, __instance.playerHeldBy, playHitSFX: true);
                 }
             }

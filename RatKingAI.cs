@@ -23,21 +23,22 @@ namespace Rats
     {
         private static ManualLogSource logger = LoggerInstance;
         public static RatKingAI? Instance { get; private set; }
-        public bool IsActive = false;
+        public bool ratKingCanDie = false;
 
 #pragma warning disable 0649
-        public ScanNodeProperties ScanNode = null!;
-        public AudioClip[] SqueakSFX = null!;
-        public AudioClip[] AttackSFX = null!;
-        public AudioClip[] HitSFX = null!;
-        public AudioClip[] NibbleSFX = null!;
-        public AudioClip[] ScreamSFX = null!;
-        public Transform RatMouth = null!;
-        public GameObject NestPrefab = null!;
-        public GameObject RatCrownPrefab = null!;
-        public GameObject RatMesh = null!;
-        public GameObject CrownMesh = null!;
-        public NetworkAnimator networkAnimator = null!;
+        public ScanNodeProperties ScanNode;
+        public AudioClip[] SqueakSFX;
+        public AudioClip[] AttackSFX;
+        public AudioClip[] HitSFX;
+        public AudioClip[] NibbleSFX;
+        public AudioClip[] ScreamSFX;
+        public Transform RatMouth;
+        public GameObject NestPrefab;
+        public GameObject RatCrownPrefab;
+        public GameObject RatMesh;
+        public GameObject CrownMesh;
+        public NetworkAnimator networkAnimator;
+        public Transform NestTransform;
 #pragma warning restore 0649
 
         public bool IsJermaRat;
@@ -52,23 +53,17 @@ namespace Rats
         DeadBodyInfo? heldBody;
         bool grabbingBody;
 
-        int groupCount;
-        List<List<RatAI>> ratGroups = [];
-
         Coroutine? ratCoroutine;
 
         // Config Values
         int ratKingDamage = 10;
 
-        float ratUpdateInterval = 0.2f;
-        float ratUpdatePercentage = 0.2f;
         float rallyCooldown = 60f;
         float distanceToLoseRatKing = 20f;
         float rallyRadius = 20f;
 
         public enum State
         {
-            Inactive,
             Roaming,
             Hunting,
             Attacking,
@@ -80,9 +75,8 @@ namespace Rats
             base.OnNetworkSpawn();
             if (Instance != null && Instance != this)
             {
-                Instance.SetActive();
                 if (!IsServerOrHost) { return; }
-                logger.LogDebug("There is already a Rat King in the scene. Removing this one and activating the rat king.");
+                logger.LogDebug("There is already a Rat King in the scene. Removing this one.");
                 NetworkObject.Despawn(true);
                 return;
             }
@@ -91,17 +85,9 @@ namespace Rats
 
 
             if (!IsServerOrHost) { return; }
-            KingNest = GameObject.Instantiate(NestPrefab, transform).GetComponent<RatNest>(); // TODO: Test this
-            KingNest.NetworkObject.Spawn();
-            KingNest.IsRatKing = true;
-            KingNest.IsOpen = false;
-            KingNest.RatNestMesh.SetActive(false);
-            KingNest.TerminalAccessibleObj.enabled = false;
-
-            foreach (var code in KingNest.TerminalCodes)
-            {
-                code.enabled = false;
-            }
+            KingNest = GameObject.Instantiate(NestPrefab, NestTransform).GetComponent<RatNest>(); // TODO: Test this
+            KingNest.NetworkObject.Spawn(true);
+            KingNest.SetAsRatKingNestClientRpc();
         }
 
         public override void OnNetworkDespawn()
@@ -111,16 +97,6 @@ namespace Rats
             {
                 Instance = null;
             }
-        }
-
-        public void SetActive()
-        {
-            if (IsActive) { return; }
-            IsActive = true;
-            RatMesh.SetActive(true);
-            KingNest.IsOpen = true;
-            if (!IsServerOrHost) { return; }
-            SwitchToBehaviorStateCustom(State.Roaming);
         }
 
         public override void Start()
@@ -139,47 +115,11 @@ namespace Rats
             thisEnemyIndex = RoundManager.Instance.numberOfEnemiesInScene;
             RoundManager.Instance.numberOfEnemiesInScene++;
             allAINodes = RoundManager.Instance.insideAINodes;
-            RoundManager.Instance.SpawnedEnemies.Add(this);
             path1 = new NavMeshPath();
             ventAnimationFinished = true;
-
-            if (!IsServerOrHost) { return; }
-
-            //StartCoroutine(RatUpdater());
-        }
-
-        IEnumerator RatUpdater()
-        {
-            yield return null;
-
-            while (!StartOfRound.Instance.shipIsLeaving)
+            if (IsServerOrHost)
             {
-                yield return new WaitForSeconds(AIIntervalTime);
-                if (RatManager.SpawnedRats.Count <= 0) { break; }
-
-                ratGroups.Clear();
-                groupCount = (int)(1 / ratUpdatePercentage);
-                RegisterRats();
-
-                foreach (var ratGroup in ratGroups)
-                {
-                    yield return new WaitForSeconds(ratUpdateInterval);
-
-                    foreach (var rat in ratGroup)
-                    {
-                        rat.DoAIInterval();
-                    }
-                }
-            }
-        }
-
-        public void RegisterRats()
-        {
-            foreach (var rat in RatManager.SpawnedRats)
-            {
-                // Assign the rat to a group based on round-robin
-                int groupIndex = ratGroups.Count > 0 ? (ratGroups.Sum(group => group.Count) % groupCount) : 0;
-                ratGroups[groupIndex].Add(rat);
+                SwitchToBehaviourClientRpc((int)State.Roaming);
             }
         }
 
@@ -187,7 +127,7 @@ namespace Rats
         {
             base.Update();
 
-            if (isEnemyDead || StartOfRound.Instance.allPlayersDead || !IsActive)
+            if (isEnemyDead || StartOfRound.Instance.allPlayersDead)
             {
                 return;
             };
@@ -195,33 +135,6 @@ namespace Rats
             timeSinceRally += Time.deltaTime;
             timeSinceCollision += Time.deltaTime;
             timeSinceAddThreat += Time.deltaTime;
-        }
-
-        void SwitchToBehaviorStateCustom(State state)
-        {
-            if (currentBehaviourStateIndex == (int)state) { return; }
-
-            switch (state)
-            {
-                case State.Inactive:
-                    break;
-                case State.Roaming:
-                    DoAnimationClientRpc("run", false);
-                    break;
-                case State.Hunting:
-                    DoAnimationClientRpc("run", true);
-                    break;
-                case State.Attacking:
-                    DoAnimationClientRpc("run", true);
-                    break;
-                case State.Rampaging:
-                    DoAnimationClientRpc("run", true);
-                    break;
-                default:
-                    break;
-            }
-
-            SwitchToBehaviourClientRpc((int)state);
         }
 
         public override void DoAIInterval()
@@ -236,15 +149,11 @@ namespace Rats
 
             switch (currentBehaviourStateIndex)
             {
-                case (int)State.Inactive:
-
-                    break;
-
                 case (int)State.Roaming:
 
                     agent.speed = 3f;
                     StartRoam();
-                    CheckForThreatsInLOS();
+                    //CheckForThreatsInLOS();
 
                     break;
 
@@ -255,7 +164,7 @@ namespace Rats
                     {
                         logger.LogDebug("Stop Targeting");
                         targetPlayer = null;
-                        SwitchToBehaviorStateCustom(State.Roaming);
+                        SwitchToBehaviourClientRpc((int)State.Roaming);
                         return;
                     }
 
@@ -268,7 +177,7 @@ namespace Rats
                     {
                         logger.LogDebug("Stop Targeting");
                         targetPlayer = null;
-                        SwitchToBehaviorStateCustom(State.Roaming);
+                        SwitchToBehaviourClientRpc((int)State.Roaming);
                         return;
                     }
 
@@ -305,7 +214,7 @@ namespace Rats
                 AddThreat(player, highThreatToAttackPlayer, false);
             }
 
-            SwitchToBehaviorStateCustom(State.Rampaging);
+            SwitchToBehaviourClientRpc((int)State.Rampaging);
         }
 
         public void SetInSpecialAnimationFalse()
@@ -328,7 +237,7 @@ namespace Rats
 
             foreach (var rat in SpawnedRats)
             {
-                if (rat.currentRatType == RatType.DefenseRat) { return; }
+                if (rat.defenseRat) { return; }
                 if (Vector3.Distance(rat.transform.position, transform.position) > rallyRadius) { continue; }
 
                 rat.targetPlayer = targetPlayer;
@@ -337,15 +246,20 @@ namespace Rats
             }
         }
 
+        public void PlayRallySFX()
+        {
+            RoundManager.PlayRandomClip(creatureVoice, ScreamSFX);
+        }
+
         public void AlertHighThreatPlayer(PlayerControllerB player) // Called from ratai
         {
-            if (targetPlayer != null) { return; }
+            if (targetPlayer != null || inSpecialAnimation) { return; }
 
             targetPlayer = player;
 
             if (currentBehaviourStateIndex != (int)State.Rampaging)
             {
-                SwitchToBehaviorStateCustom(State.Hunting);
+                SwitchToBehaviourClientRpc((int)State.Hunting);
                 Rally(targetPlayer, true);
             }
         }
@@ -382,14 +296,6 @@ namespace Rats
             }
         }
 
-        void HottestRat()
-        {
-            if (UnityEngine.Random.Range(0f, 1f) < 0.01f)
-            {
-                ScanNode.headerText = "HottestRat";
-            }
-        }
-
         bool FoundClosestPlayerInRange(float range, float senseRange)
         {
             TargetClosestPlayer(bufferDistance: 1.5f, requireLineOfSight: true);
@@ -415,7 +321,7 @@ namespace Rats
             for (int i = 0; i < StartOfRound.Instance.connectedPlayersAmount + 1; i++)
             {
                 tempDist = Vector3.Distance(transform.position, StartOfRound.Instance.allPlayerScripts[i].transform.position);
-                if (tempDist < mostOptimalDistance)
+                if (tempDist < mostOptimalDistance && StartOfRound.Instance.allPlayerScripts[i].isInsideFactory)
                 {
                     mostOptimalDistance = tempDist;
                     targetPlayer = StartOfRound.Instance.allPlayerScripts[i];
@@ -488,7 +394,7 @@ namespace Rats
                     if (!agent.hasPath || timeStuck > 1f)
                     {
                         DoAnimationClientRpc("idle", UnityEngine.Random.Range(1, 3));
-                        yield return new WaitForSeconds(4.7f);
+                        yield return new WaitForSeconds(5f);
                         PlaySqueakSFXClientRpc();
                         break;
                     }
@@ -503,7 +409,7 @@ namespace Rats
 
         public override void HitEnemy(int force = 0, PlayerControllerB playerWhoHit = null!, bool playHitSFX = true, int hitID = -1)
         {
-            if (!isEnemyDead)
+            if (!isEnemyDead && ratKingCanDie)
             {
                 enemyHP -= force;
                 if (enemyHP <= 0)
@@ -564,7 +470,7 @@ namespace Rats
             }
 
             int threat = RatManager.PlayerThreatCounter[player];
-            logIfDebug($"{player.playerUsername}: {threat} threat");
+            log($"{player.playerUsername}: {threat} threat");
 
             if (!aggro) { return; }
 
@@ -573,13 +479,8 @@ namespace Rats
             if (RatManager.PlayerThreatCounter[player] > threatToAttackPlayer || player.isPlayerDead)
             {
                 targetPlayer = player;
-                SwitchToBehaviorStateCustom(State.Attacking);
+                SwitchToBehaviourClientRpc((int)State.Attacking);
             }
-        }
-
-        public override void KillEnemy(bool destroy = false)
-        {
-            base.KillEnemy(false);
         }
 
         // Animator stuff
@@ -591,6 +492,13 @@ namespace Rats
         }
 
         // RPC's
+
+        [ClientRpc]
+        public new void SwitchToBehaviourClientRpc(int stateIndex)
+        {
+            ratKingCanDie = stateIndex == (int)State.Rampaging;
+            base.SwitchToBehaviourClientRpc(stateIndex);
+        }
 
         [ClientRpc]
         public void DoAnimationClientRpc(string animationName, int value)
@@ -642,15 +550,6 @@ namespace Rats
                     PlayerControllerB player = PlayerFromId(clientId);
                     AddThreat(player);
                 }
-            }
-        }
-
-        [ClientRpc]
-        public void SetNestClientRpc(NetworkObjectReference nestRef)
-        {
-            if (nestRef.TryGet(out NetworkObject netObj))
-            {
-                KingNest = netObj.GetComponent<RatNest>();
             }
         }
 

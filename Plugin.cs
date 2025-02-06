@@ -166,7 +166,7 @@ namespace Rats
             Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
         }
 
-        public static void logIfDebug(string message)
+        public static void log(string message)
         {
             if (!IsLoggingEnabled) { return; }
             LoggerInstance.LogDebug(message);
