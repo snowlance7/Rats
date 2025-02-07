@@ -85,6 +85,7 @@ namespace Rats
 
 
             if (!IsServerOrHost) { return; }
+            logger.LogDebug("Spawning KingNest");
             KingNest = GameObject.Instantiate(NestPrefab, NestTransform).GetComponent<RatNest>(); // TODO: Test this
             KingNest.NetworkObject.Spawn(true);
             KingNest.SetAsRatKingNestClientRpc();

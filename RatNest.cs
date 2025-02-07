@@ -19,10 +19,10 @@ namespace Rats
         public GameObject RatKingPrefab = null!;
         public GameObject JermaRatPrefab = null!;
         public GameObject JermaRatKingPrefab = null!;
-        public TextMeshPro[] TerminalCodes = null!;
-        public TerminalAccessibleObject TerminalAccessibleObj = null!;
         public GameObject RatNestMesh = null!;
         public ScanNodeProperties ScanNode = null!;
+        public MeshRenderer renderer;
+        public Material RustMat;
 #pragma warning restore 0649
 
         public static List<RatNest> Nests = [];
@@ -35,23 +35,24 @@ namespace Rats
         public static Dictionary<EnemyAI, int> EnemyFoodAmount = [];
         float timeSinceSpawnRat;
         float nextRatSpawnTime;
-        bool codeOnGrateSet = false;
         int food;
 
+        public float PoisonInNest;
+        
+
         // Config Values
-        bool hideCodeOnTerminal = true;
         float minRatSpawnTime = 10f;
         float maxRatSpawnTime = 30f;
         int foodToSpawnRat = 5;
         int enemyFoodPerHPPoint = 10;
         int maxRats = 40;
+        float poisonToCloseNest = 1f;
 
         public void Start()
         {
             log("Sewer grate spawned at: " + transform.position);
             Nests.Add(this);
 
-            hideCodeOnTerminal = configHideCodeOnTerminal.Value;
             minRatSpawnTime = configMinRatSpawnTime.Value;
             maxRatSpawnTime = configMaxRatSpawnTime.Value;
             foodToSpawnRat = configFoodToSpawnRat.Value;
@@ -83,19 +84,6 @@ namespace Rats
                 return;
             }*/
 
-            if (!IsRatKing && !codeOnGrateSet)
-            {
-                if (TerminalAccessibleObj.objectCode != "")
-                {
-                    codeOnGrateSet = true;
-                    SetCodes();
-                    if (hideCodeOnTerminal)
-                    {
-                        TerminalAccessibleObj.mapRadarText.text = "??";
-                    }
-                }
-            }
-
             if (Apparatus != null && !Apparatus.isLungDocked)
             {
                 // TODO: Radiated rats???
@@ -115,6 +103,18 @@ namespace Rats
                     SpawnRat();
                 }
             }
+
+            if (IsOpen && PoisonInNest >= poisonToCloseNest)
+            {
+                IsOpen = false;
+                CloseNestClientRpc();
+
+                int openNests = GetOpenNestCount();
+                if (openNests <= 0)
+                {
+                    SpawnRatKing();
+                }
+            }
         }
 
         void SpawnRatKing()
@@ -127,14 +127,6 @@ namespace Rats
                 if (node == null) { LoggerInstance.LogError("node was null cant spawn rat king"); return; }
                 RatKingAI ratKing = GameObject.Instantiate(RatKingPrefab, node.transform.position, Quaternion.identity).GetComponent<RatKingAI>();
                 ratKing.NetworkObject.Spawn();
-            }
-        }
-
-        void SetCodes()
-        {
-            foreach(var tmp in TerminalCodes)
-            {
-                tmp.text = TerminalAccessibleObj.objectCode;
             }
         }
 
@@ -176,7 +168,7 @@ namespace Rats
             }
         }
 
-        public void DisableNest() // TODO: Reset this in terminal settings
+        public void DisableNest()
         {
             LoggerInstance.LogDebug("Disabling nest");
             if (IsRatKing) { return; }
@@ -217,15 +209,15 @@ namespace Rats
             IsRatKing = true;
             IsOpen = true;
             RatNestMesh.SetActive(false);
-            TerminalAccessibleObj.enabled = false;
-
-            foreach (var code in TerminalCodes)
-            {
-                code.enabled = false;
-            }
 
             ScanNode.enabled = false;
             RatKingAI.Instance.KingNest = this;
+        }
+
+        [ClientRpc]
+        public void CloseNestClientRpc()
+        {
+            renderer.material = RustMat;
         }
     }
 }

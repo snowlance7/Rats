@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1811368810
+CRC: 1440377935
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: bfca3eae6a651085d8f5372077e53dd3
+    Hash: 6b133e0d56398c47605cac764f2f711b
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 5ad1f76daaa5c65240dbc30574ee7957
+    Hash: 7ac4db6dcd8eab26bc1301fc242371ab
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: bfca3eae6a651085d8f5372077e53dd3
+    Hash: 6b133e0d56398c47605cac764f2f711b
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -47,8 +47,6 @@ ClassTypes:
 - Class: 114
   Script: {fileID: -1316427704, guid: 30534a6f96417e1578491dec35947abb, type: 3}
 - Class: 114
-  Script: {fileID: 11500000, guid: 9541d86e2fd84c1d9990edf0852d74ab, type: 3}
-- Class: 114
   Script: {fileID: 11500000, guid: 65d3fcb39dd67306e9bb17a603308070, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: 04f75356a7e9c978bddc7d568e58a50b, type: 3}
@@ -67,32 +65,36 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
 - Class: 114
-  Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
-- Class: 114
   Script: {fileID: 11500000, guid: d3cecf05b78b173605122a700874719c, type: 3}
+- Class: 114
+  Script: {fileID: -1139795581, guid: 738d9d25447a9af45973cf8fc54c6be1, type: 3}
+- Class: 114
+  Script: {fileID: 364194853, guid: 738d9d25447a9af45973cf8fc54c6be1, type: 3}
 - Class: 114
   Script: {fileID: -41463191, guid: 738d9d25447a9af45973cf8fc54c6be1, type: 3}
 - Class: 114
   Script: {fileID: -819815532, guid: 738d9d25447a9af45973cf8fc54c6be1, type: 3}
 - Class: 114
-  Script: {fileID: -818212457, guid: 738d9d25447a9af45973cf8fc54c6be1, type: 3}
+  Script: {fileID: -1691173931, guid: 738d9d25447a9af45973cf8fc54c6be1, type: 3}
 - Class: 114
   Script: {fileID: 1349644444, guid: 738d9d25447a9af45973cf8fc54c6be1, type: 3}
 - Class: 114
   Script: {fileID: -142638541, guid: 738d9d25447a9af45973cf8fc54c6be1, type: 3}
 - Class: 114
-  Script: {fileID: 11500000, guid: f2c662b0f92d7236699123213e2fb9f4, type: 3}
+  Script: {fileID: 1151888701, guid: 738d9d25447a9af45973cf8fc54c6be1, type: 3}
+- Class: 114
+  Script: {fileID: -808091259, guid: 738d9d25447a9af45973cf8fc54c6be1, type: 3}
 - Class: 115
-  Script: {instanceID: 0}
-- Class: 128
   Script: {instanceID: 0}
 - Class: 137
   Script: {instanceID: 0}
 - Class: 195
   Script: {instanceID: 0}
-- Class: 213
+- Class: 198
   Script: {instanceID: 0}
-- Class: 224
+- Class: 199
+  Script: {instanceID: 0}
+- Class: 213
   Script: {instanceID: 0}
 - Class: 241
   Script: {instanceID: 0}
@@ -108,54 +110,19 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: Assembly-CSharp
   ClassName: EnemyBehaviourState
 - AssemblyName: Assembly-CSharp
-  ClassName: InteractEvent
-- AssemblyName: Assembly-CSharp
   ClassName: NavSizeLimit
 - AssemblyName: Assembly-CSharp
   ClassName: SpawnableMapObject
 - AssemblyName: Unity.Netcode.Components
   ClassName: Unity.Netcode.Components.NetworkAnimator/TransitionStateinfo
-- AssemblyName: Unity.TextMeshPro
-  ClassName: TMPro.FaceInfo_Legacy
-- AssemblyName: Unity.TextMeshPro
-  ClassName: TMPro.FontAssetCreationSettings
-- AssemblyName: Unity.TextMeshPro
-  ClassName: TMPro.KerningTable
-- AssemblyName: Unity.TextMeshPro
-  ClassName: TMPro.TMP_Character
-- AssemblyName: Unity.TextMeshPro
-  ClassName: TMPro.TMP_FontFeatureTable
-- AssemblyName: Unity.TextMeshPro
-  ClassName: TMPro.TMP_FontWeightPair
-- AssemblyName: Unity.TextMeshPro
-  ClassName: TMPro.TMP_GlyphAdjustmentRecord
-- AssemblyName: Unity.TextMeshPro
-  ClassName: TMPro.TMP_GlyphPairAdjustmentRecord
-- AssemblyName: Unity.TextMeshPro
-  ClassName: TMPro.TMP_GlyphValueRecord
-- AssemblyName: Unity.TextMeshPro
-  ClassName: TMPro.VertexGradient
-- AssemblyName: UnityEngine.CoreModule
-  ClassName: UnityEngine.Events.ArgumentCache
-- AssemblyName: UnityEngine.CoreModule
-  ClassName: UnityEngine.Events.PersistentCallGroup
-- AssemblyName: UnityEngine.CoreModule
-  ClassName: UnityEngine.Events.PersistentListenerMode
-- AssemblyName: UnityEngine.TextCoreFontEngineModule
-  ClassName: UnityEngine.TextCore.FaceInfo
-- AssemblyName: UnityEngine.TextCoreFontEngineModule
-  ClassName: UnityEngine.TextCore.Glyph
-- AssemblyName: UnityEngine.TextCoreFontEngineModule
-  ClassName: UnityEngine.TextCore.GlyphMetrics
-- AssemblyName: UnityEngine.TextCoreFontEngineModule
-  ClassName: UnityEngine.TextCore.GlyphRect
-- AssemblyName: UnityEngine.UI
-  ClassName: UnityEngine.UI.MaskableGraphic/CullStateChangedEvent
 Assets:
+- Assets/ModAssets/BoxOfSnapTrapsItem.asset
 - Assets/ModAssets/Bestiary/RatKingTK.asset
 - Assets/ModAssets/RatCrownItem.asset
 - Assets/ModAssets/JermaRatKingEnemy.asset
 - Assets/ModAssets/RatSpawn.asset
+- Assets/ModAssets/RatPoisonItem.asset
 - Assets/ModAssets/RatKingEnemy.asset
 - Assets/ModAssets/Bestiary/RatKingTN.asset
+- Assets/ModAssets/GlueTrapItem.asset
 Dependencies: []

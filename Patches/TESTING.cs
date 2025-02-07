@@ -30,6 +30,12 @@ namespace Rats
         public static void PingScan_performedPostFix()
         {
             //logger.LogDebug("were rats");
+            Vector3 forward = localPlayer.gameplayCamera.transform.forward;
+
+            if (Vector3.Dot(forward, Vector3.down) > 0.7f)
+            {
+                logger.LogDebug("Looking down");
+            }
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.SubmitChat_performed))]

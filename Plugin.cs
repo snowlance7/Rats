@@ -51,7 +51,6 @@ namespace Rats
 
         // KingNest
         public static ConfigEntry<string> configSewerGrateSpawnWeightCurve;
-        public static ConfigEntry<bool> configHideCodeOnTerminal;
         public static ConfigEntry<int> configMinRatSpawnTime;
         public static ConfigEntry<int> configMaxRatSpawnTime;
         public static ConfigEntry<int> configFoodToSpawnRat;
@@ -61,7 +60,6 @@ namespace Rats
         // SpawnedRats
         public static ConfigEntry<bool> configUseJermaRats;
         public static ConfigEntry<float> configAIIntervalTime;
-        //public static ConfigEntry<bool> configMakeLessSqueaks;
         public static ConfigEntry<float> configDefenseRadius;
         public static ConfigEntry<float> configTimeToIncreaseThreat;
         public static ConfigEntry<int> configThreatToAttackPlayer;
@@ -74,6 +72,15 @@ namespace Rats
         public static ConfigEntry<int> configEnemyHitsToDoDamage;
         public static ConfigEntry<int> configPlayerFoodAmount;
         public static ConfigEntry<int> configRatDamage;
+
+        // RatPoison
+        public static ConfigEntry<int> configRatPoisonPrice;
+
+        // GlueTrap
+        public static ConfigEntry<int> configGlueTrapPrice;
+
+        // Box Of Snap traps
+        public static ConfigEntry<int> configBoxOfSnapTrapsPrice;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 
@@ -101,12 +108,11 @@ namespace Rats
             // RatKing
             configUseJermaRatKing = Config.Bind("Rat King", "Use Jerma Rat King", false, "Uses a lower quality model for the rat king with no animations. Can help with performance if enabled.");
             configEnableRatKing = Config.Bind("Rat King", "Enable Rat King", true, "Set to false to disable spawning the rat king.");
-            configRatKingLevelRarities = Config.Bind("Rat King Rarities", "Level Rarities", "ExperimentationLevel:5, AssuranceLevel:6, VowLevel:9, OffenseLevel:10, AdamanceLevel:10, MarchLevel:10, RendLevel:75, DineLevel:75, TitanLevel:75, ArtificeLevel:20, EmbrionLevel:25, Modded:15", "Rarities for each level. See default for formatting.");
+            configRatKingLevelRarities = Config.Bind("Rat King Rarities", "Level Rarities", "All: 25", "Rarities for each level. Example formatting: ExperimentationLevel:5, AssuranceLevel:6, VowLevel:9, OffenseLevel:10, AdamanceLevel:10, MarchLevel:10, RendLevel:75, DineLevel:75, TitanLevel:75, ArtificeLevel:20, EmbrionLevel:25, Modded:15");
             configRatKingCustomLevelRarities = Config.Bind("Rat King Rarities", "Custom Level Rarities", "", "Rarities for modded levels. Same formatting as level rarities.");
 
             // KingNest
             configSewerGrateSpawnWeightCurve = Config.Bind("Nest", "Spawn Weight Curve", "Vanilla - 0,0 ; 1,3 | Custom - 0,0 ; 1,3", "The MoonName - CurveSpawnWeight for the SewerGrate(Rat nest).");
-            configHideCodeOnTerminal = Config.Bind("Nest", "Hide Code On Terminal", true, "If set to true, will make the code on the ship monitor for the nest be ??, requiring the player to find the nest physically to turn off its spawning.");
             configMinRatSpawnTime = Config.Bind("Nest", "Minimum Rat Spawn Time", 5, "The minimum time in seconds before a rat can spawn from the nest.");
             configMaxRatSpawnTime = Config.Bind("Nest", "Maximum Rat Spawn Time", 20, "The maximum time in seconds before a rat can spawn from the nest.");
             configFoodToSpawnRat = Config.Bind("Nest", "Food Required to Spawn Rat", 5, "The amount of food needed in the nest to spawn a new rat.");
@@ -115,7 +121,6 @@ namespace Rats
 
             // SpawnedRats
             configUseJermaRats = Config.Bind("Rats", "Use Jerma Rats", false, "Uses a lower quality model for the rats with no animations. Can help with performance if enabled.");
-            //configMakeLessSqueaks = Config.Bind("SpawnedRats", "Make Less Squeaks", false, "If set to true, will make the rats squeak less, which can help with performance.");
             configAIIntervalTime = Config.Bind("Rats", "AI Interval Time", 0.3f, "The interval in which rats will update their AI (Changing position, doing complex calculations, etc). Setting this higher can improve performance but can also make the rats freeze in place more often while lower values makes them constantly moving but can decrease performance.");
             configDefenseRadius = Config.Bind("Rats", "Defense Radius", 5f, "The radius in which defense rats protect the nest.");
             configTimeToIncreaseThreat = Config.Bind("Rats", "Time to Increase Threat", 2.5f, "The time needed to add a threat point for a player when they are in line of sight of the rat.");
@@ -129,6 +134,15 @@ namespace Rats
             configEnemyHitsToDoDamage = Config.Bind("Rats", "Enemy Hits to Do Damage", 10, "The amount of attacks needed to do 1 shovel hit of damage to an enemy. If 10, thumper will need to be attacked 40 times by a rat.");
             configPlayerFoodAmount = Config.Bind("Rats", "Player Food Amount", 30, "How much food points a player corpse gives when brought to the nest.");
             configRatDamage = Config.Bind("Rats", "Rat Damage", 2, "The damage dealt by a rat when attacking.");
+
+            // RatPoison
+            configRatPoisonPrice = Config.Bind("Rat Poison", "Store Price", 40, "The cost of rat poison in the store.");
+
+            // GlueTrap
+            configGlueTrapPrice = Config.Bind("Glue Trap", "Store Price", 10, "The cost of the glue trap in the store.");
+
+            // BoxOfSnapTraps
+            configBoxOfSnapTrapsPrice = Config.Bind("Box Of Snap Traps", "Store Price", 30, "The cost of the box of snap traps in the store.");
 
             // Loading Assets
             string sAssemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -161,6 +175,24 @@ namespace Rats
 
             LoggerInstance.LogDebug($"Registering RatSpawn");
             RegisterInsideMapObjectWithConfig(RatSpawnPrefab, configSewerGrateSpawnWeightCurve.Value);
+
+            // Rat poison
+            Item RatPoison = ModAssets.LoadAsset<Item>("Assets/ModAssets/RatPoisonItem.asset");
+            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(RatPoison.spawnPrefab);
+            LethalLib.Modules.Utilities.FixMixerGroups(RatPoison.spawnPrefab);
+            LethalLib.Modules.Items.RegisterShopItem(RatPoison, configRatPoisonPrice.Value);
+
+            // Glue trap
+            Item GlueTrap = ModAssets.LoadAsset<Item>("Assets/ModAssets/GlueTrapItem.asset");
+            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(GlueTrap.spawnPrefab);
+            LethalLib.Modules.Utilities.FixMixerGroups(GlueTrap.spawnPrefab);
+            LethalLib.Modules.Items.RegisterShopItem(GlueTrap, configGlueTrapPrice.Value);
+
+            // Box Of Snap Traps
+            Item SnapTraps = ModAssets.LoadAsset<Item>("Assets/ModAssets/BoxOfSnapTrapsItem.asset");
+            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(SnapTraps.spawnPrefab);
+            LethalLib.Modules.Utilities.FixMixerGroups(SnapTraps.spawnPrefab);
+            LethalLib.Modules.Items.RegisterShopItem(SnapTraps, configBoxOfSnapTrapsPrice.Value);
 
             // Finished
             Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
