@@ -7,6 +7,7 @@ namespace Rats.Items
 {
     internal class GlueTrapBehavior : PhysicsProp
     {
+        public BoxCollider mainCollider;
         int ratsOnGlueTrap;
 
         // Configs
@@ -15,10 +16,12 @@ namespace Rats.Items
 
         public override void ActivatePhysicsTrigger(Collider other)
         {
+            Plugin.LoggerInstance.LogDebug("In ActivatePhysicsTrigger()");
             if (ratsOnGlueTrap >= maxRatsOnGlueTrap) { return; }
-            if (!other.gameObject.TryGetComponent(out RatAI rat)) { return; }
+            if (!other.gameObject.TryGetComponent(out RatAICollisionDetect ratCollision)) { return; }
+            RatAI rat = ratCollision.mainScript;
             rat.KillEnemy();
-            rat.transform.SetParent(this.transform);
+            rat.gameObject.transform.SetParent(this.transform);
             ratsOnGlueTrap++;
             SetScrapValue(scrapValue + scrapValuePerRat);
         }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity.Netcode;
 using UnityEngine;
+using static Rats.Plugin;
 
 namespace Rats.Items
 {
@@ -33,7 +35,8 @@ namespace Rats.Items
             if (buttonDown && snapTrapAmount > 0)
             {
                 if (!Physics.Raycast(transform.position, -Vector3.up, out var hitInfo, 80f, 268437761, QueryTriggerInteraction.Ignore)) { return; }
-                GameObject.Instantiate(SnapTrapPrefab, hitInfo.point, Quaternion.identity);
+                GameObject snapTrap = GameObject.Instantiate(SnapTrapPrefab, hitInfo.point, Quaternion.identity);
+                if (IsServerOrHost) { snapTrap.GetComponent<NetworkObject>().Spawn(true); }
                 snapTrapAmount--;
                 SetControlTipsForItem();
             }

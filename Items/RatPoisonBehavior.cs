@@ -10,12 +10,14 @@ namespace Rats.Items
         public AudioSource ItemAudio;
         public ParticleSystem particleSystem;
         public Animator ItemAnimator;
+        public Transform PourDirection;
 
         readonly float downAngle = 0.7f;
 
         float maxFluid = 5f;
         float currentFluid;
-        float pourRate = 0.5f;
+        float pourRate = 0.1f;
+        bool pouring;
 
         public override void Start()
         {
@@ -27,7 +29,7 @@ namespace Rats.Items
         public override void SetControlTipsForItem()
         {
             string[] toolTips = itemProperties.toolTips;
-            toolTips[0] = $"Pour [LMB] ({currentFluid} left)";
+            toolTips[0] = $"Pour [LMB] ({currentFluid.ToString("F1")}L left)";
             HUDManager.Instance.ChangeControlTipMultiple(toolTips, holdingItem: true, itemProperties);
         }
 
@@ -35,13 +37,24 @@ namespace Rats.Items
         {
             base.ItemActivate(used, buttonDown);
 
-            bool lookingDown = Vector3.Dot(playerHeldBy.gameplayCamera.transform.forward, Vector3.down) > downAngle;
+            bool lookingDown = isPlayerLookingDown();
             bool isPouring = buttonDown && lookingDown && currentFluid > 0f;
 
-            playerHeldBy.activatingItem = isPouring;
-            ItemAnimator.SetBool("pour", isPouring);
+            SetPouring(isPouring);
+        }
 
-            if (isPouring)
+        bool isPlayerLookingDown()
+        {
+            return Vector3.Dot(playerHeldBy.gameplayCamera.transform.forward, Vector3.down) > downAngle;
+        }
+
+        void SetPouring(bool value)
+        {
+            pouring = value;
+            playerHeldBy.activatingItem = pouring;
+            ItemAnimator.SetBool("pour", pouring);
+
+            if (pouring)
             {
                 particleSystem.Play();
                 ItemAudio.Play();
@@ -51,23 +64,37 @@ namespace Rats.Items
                 particleSystem.Stop();
                 ItemAudio.Stop();
             }
-
-            Pour(isPouring);
         }
 
-        public void Pour(bool pouring)
+        public override void Update()
         {
-
-        }
-
-        IEnumerator PourCoroutine()
-        {
-            yield return null;
-
-            while (playerHeldBy.activatingItem)
+            base.Update();
+            if (pouring)
             {
                 currentFluid -= pourRate * Time.deltaTime;
+                SetControlTipsForItem();
 
+                if (currentFluid <= 0)
+                {
+                    SetPouring(false);
+                    currentFluid = 0;
+                    return;
+                }
+
+                if (!isPlayerLookingDown())
+                {
+                    SetPouring(false);
+                    return;
+                }
+
+                if (Physics.Raycast(PourDirection.position, -Vector3.up, out var hitInfo, 80f))
+                {
+                    if (hitInfo.collider.gameObject.TryGetComponent(out RatNest nest))
+                    {
+                        Plugin.LoggerInstance.LogDebug("Pouring into nest");
+                        nest.AddPoison(pourRate);
+                    }
+                }
             }
         }
     }

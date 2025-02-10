@@ -117,6 +117,11 @@ namespace Rats
             }
         }
 
+        public void AddPoison(float pourRate)
+        {
+            PoisonInNest += pourRate * Time.deltaTime;
+        }
+
         void SpawnRatKing()
         {
             if (!IsServerOrHost) { return; }
@@ -148,7 +153,7 @@ namespace Rats
             SpawnRats(ratsToSpawn);
         }
 
-        void SpawnRats(int amount)
+        public void SpawnRats(int amount)
         {
             if (amount == 0) { return; }
             log("Spawning rats from food: " + amount);
@@ -160,7 +165,7 @@ namespace Rats
 
         void SpawnRat()
         {
-            if (RatManager.SpawnedRats.Count < maxRats)
+            if (RatManager.SpawnedRats.Count < maxRats || TESTING.testing)
             {
                 GameObject ratObj = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
                 ratObj.GetComponent<NetworkObject>().Spawn();
@@ -190,6 +195,7 @@ namespace Rats
 
             foreach (RatAI rat in SpawnedRats)
             {
+                if (!rat.NetworkObject.IsSpawned) { continue; }
                 rat.NetworkObject.Despawn(true);
             }
 

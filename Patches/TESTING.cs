@@ -25,6 +25,7 @@ namespace Rats
     internal class TESTING : MonoBehaviour
     {
         private static ManualLogSource logger = Plugin.LoggerInstance;
+        public static bool testing = false;
 
         [HarmonyPostfix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.PingScan_performed))]
         public static void PingScan_performedPostFix()
@@ -47,10 +48,17 @@ namespace Rats
 
             switch (args[0])
             {
+                case "/spawnRat":
+                    RatNest nest = RatManager.GetClosestNest(localPlayer.transform.position);
+                    nest.SpawnRats(int.Parse(args[1]));
+                    logger.LogDebug($"Spawning {args[1]} rats");
+                    break;
+                case "/spawnNest":
+
+                    break;
                 case "/testing":
-
-                    RatManager.testing = bool.Parse(args[1]);
-
+                    testing = !testing;
+                    HUDManager.Instance.DisplayTip("Testing", testing.ToString());
                     break;
                 case "/enemies":
                     foreach (var enemy in GetEnemies())

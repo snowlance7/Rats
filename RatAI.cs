@@ -49,9 +49,8 @@ namespace Rats
         DeadBodyInfo? heldBody;
         bool holdingFood;
 
-        int animationRallyHash;
-        int animationIdleHash;
-        int animationDieHash;
+        int hashRally;
+        int hashDie;
 
         bool grabbingBody;
         bool returningBodyToNest;
@@ -75,13 +74,10 @@ namespace Rats
         // Config Values
         //float sickRatChance = 0.1f;
         float swarmRadius = 10f;
-        bool canVent = true;
         int maxDefenseRats = 10;
         float distanceToLoseRats = 25f;
         int ratDamage = 2;
-
-        private bool walking;
-        System.Random random;
+        float squeakChance = 0.1f;
 
         public enum State
         {
@@ -101,13 +97,11 @@ namespace Rats
 
         public void Start()
         {
-            animationRallyHash = Animator.StringToHash("rally");
-            animationIdleHash = Animator.StringToHash("idle");
-            animationDieHash = Animator.StringToHash("die");
+            hashRally = Animator.StringToHash("rally");
+            hashDie = Animator.StringToHash("die");
 
             AIIntervalTime = configAIIntervalTime.Value;
             swarmRadius = configSwarmRadius.Value;
-            canVent = configCanVent.Value;
             maxDefenseRats = configMaxDefenseRats.Value;
             distanceToLoseRats = configDistanceNeededToLoseRats.Value;
             ratDamage = configRatDamage.Value;
@@ -119,14 +113,6 @@ namespace Rats
             currentBehaviorState = State.ReturnToNest;
             Nest = GetClosestNest(transform.position);
             RatManager.SpawnedRats.Add(this);
-
-            if (!RoundManager.Instance.hasInitializedLevelRandomSeed)
-            {
-                RoundManager.Instance.InitializeRandomNumberGenerators();
-            }
-            log("initialized random number generators");
-
-            random = new System.Random(StartOfRound.Instance.randomMapSeed * RatManager.SpawnedRats.Count);
 
             if (IsServerOrHost)
             {
@@ -145,17 +131,6 @@ namespace Rats
 
             timeSinceCollision += Time.deltaTime;
             timeSinceAddThreat += Time.deltaTime;
-
-            if (IsJermaRat) { return; }
-
-            bool _walking = agent.velocity.sqrMagnitude >= 0.01f; // TODO: Check if this causes errors on clients
-
-            if (walking != _walking)
-            {
-                creatureAnimator.SetInteger(animationIdleHash, _walking ? 0 : random.Next(1, 3)); // TODO: Test this
-                walking = _walking;
-                //inSpecialAnimation = !walking; // TODO: Test this
-            }
         }
 
         public void SwitchToBehaviorState(State state)
@@ -169,7 +144,7 @@ namespace Rats
                 case State.ReturnToNest:
                     
                     ResetRat();
-                    Nest = GetClosestNest(transform.position, !canVent);
+                    Nest = GetClosestNest(transform.position, true);
                     SetStatus("Returning to nest");
 
                     break;
@@ -227,6 +202,8 @@ namespace Rats
                 return;
             };
 
+            //LoggerInstance.LogDebug("Doing AI interval");
+
             if (moveTowardsDestination)
             {
                 agent.SetDestination(destination);
@@ -257,36 +234,15 @@ namespace Rats
                         return;
                     }
 
-                    // TODO: Set this up so that if a rat can vent and the nest is unreachable, they should vent to it, otherwise just roam.
-                    // TODO: Also make it so that if a destination is unreachable from the nest when a scout rat sets it, vent from the nest to the vent closest to that position.
-                    if (Nest == null || !Nest.IsOpen)
+                    if (Nest == null || !Nest.IsOpen || !SetDestinationToPosition(Nest.transform.position, checkForPath: true))
                     {
-                        Nest = GetClosestNest(transform.position);
+                        Nest = GetClosestNest(transform.position, true);
                         if (Nest == null)
                         {
                             pathingToNest = false;
                             Roam();
                             return;
                         }
-                    }
-
-                    if (!SetDestinationToPosition(Nest.transform.position, checkForPath: true))
-                    {
-                        pathingToNest = false;
-                        if (!canVent) { Roam(); return; }
-                        EnemyVent? vent = GetClosestVentToPosition(transform.position);
-                        if (vent == null) { Roam(); return; }
-
-                        RoamStop();
-                        SetDestinationToPosition(vent.floorNode.position);
-
-                        if (ReachedDestination())
-                        {
-                            // Reached destination
-                            WarpFromVent(vent, Nest.transform.position);
-                        }
-
-                        return;
                     }
 
                     pathingToNest = true;
@@ -492,66 +448,6 @@ namespace Rats
             return null;
         }
 
-        void WarpFromVent(EnemyVent fromVent, Vector3 position)
-        {
-            OpenVents(fromVent);
-            Vector3 warpPos = RoundManager.Instance.GetNavMeshPosition(position, RoundManager.Instance.navHit, 1.75f);
-            agent.Warp(warpPos);
-        }
-
-        void WarpToVent(EnemyVent fromVent, EnemyVent toVent)
-        {
-            OpenVents(fromVent, toVent);
-            Vector3 warpPos = RoundManager.Instance.GetNavMeshPosition(toVent!.floorNode.transform.position, RoundManager.Instance.navHit, 1.75f);
-            agent.Warp(warpPos);
-        }
-
-        void WarpToVent(EnemyVent toVent)
-        {
-            OpenVents(toVent);
-            Vector3 warpPos = RoundManager.Instance.GetNavMeshPosition(toVent!.floorNode.transform.position, RoundManager.Instance.navHit, 1.75f);
-            agent.Warp(warpPos);
-        }
-
-        void Warp(Vector3 pos)
-        {
-            pos = RoundManager.Instance.GetNavMeshPosition(pos, RoundManager.Instance.navHit, 1.75f);
-            agent.Warp(pos);
-        }
-
-        int GetVentIndex(EnemyVent? vent)
-        {
-            for (int i = 0; i < RoundManager.Instance.allEnemyVents.Length; i++)
-            {
-                if (RoundManager.Instance.allEnemyVents[i] == vent)
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        void OpenVents(EnemyVent? vent, EnemyVent? vent2 = null)
-        {
-            if (vent == null) { return; }
-            int index = -1;
-            int index2 = -1;
-
-            if (!vent.ventIsOpen)
-            {
-                index = GetVentIndex(vent);
-            }
-
-            if (vent2 != null && !vent2.ventIsOpen)
-            {
-                index2 = GetVentIndex(vent2);
-            }
-
-            if (index == -1 && index2 == -1) { return; }
-
-            OpenVentsClientRpc(index, index2);
-        }
-
         void SetStatus(string status)
         {
             if (configEnableDebugging.Value)
@@ -664,7 +560,6 @@ namespace Rats
             yield return null;
             while (ratCoroutine != null)
             {
-                //logIfDebug("Choosing new position");
                 float timeStopped = 0f;
                 Vector3 pos = position;
                 pos = RoundManager.Instance.GetRandomNavMeshPositionInRadius(pos, radius, RoundManager.Instance.navHit);
@@ -719,17 +614,15 @@ namespace Rats
 
         public void HitEnemy(int force = 0, PlayerControllerB? playerWhoHit = null, bool playHitSFX = true, int hitID = -1)
         {
-            if (!isEnemyDead)
+            if (isEnemyDead) { return; }
+            enemyHP -= force;
+            if (enemyHP > 0) { return; }
+            DropBody();
+            RoundManager.PlayRandomClip(creatureSFX, HitSFX, true, 1, -1);
+            KillEnemyOnOwnerClient();
+            if (IsServerOrHost && playerWhoHit != null)
             {
-                enemyHP -= force;
-                if (enemyHP <= 0)
-                {
-                    DropBody();
-                    RoundManager.PlayRandomClip(creatureSFX, HitSFX, true, 1, -1);
-                    KillEnemyOnOwnerClient();
-                    if (IsServerOrHost && playerWhoHit != null) { AddThreat(playerWhoHit, 2); }
-                    return;
-                }
+                AddThreat(playerWhoHit, 2);
             }
         }
 
@@ -771,29 +664,6 @@ namespace Rats
                 }
             }
             return false;
-        }
-
-        public PlayerControllerB? MeetsStandardPlayerCollisionConditions(Collider other)
-        {
-            if (isEnemyDead)
-            {
-                return null;
-            }
-            /*if (stunNormalizedTimer >= 0f)
-            {
-                return null;
-            }*/
-            PlayerControllerB component = other.gameObject.GetComponent<PlayerControllerB>();
-            if (component == null || component != GameNetworkManager.Instance.localPlayerController)
-            {
-                return null;
-            }
-            if (!PlayerIsTargetable(component))
-            {
-                Debug.Log("Player is not targetable");
-                return null;
-            }
-            return component;
         }
 
         public void OnCollideWithPlayer(Collider other)
@@ -904,8 +774,6 @@ namespace Rats
                     RatManager.EnemyThreatCounter.Add(enemy, amount);
                 }
 
-                PlaySqueakSFXClientRpc();
-
                 int threat = RatManager.EnemyThreatCounter[enemy];
                 log($"{enemy.enemyType.enemyName}: {threat} threat");
 
@@ -937,8 +805,6 @@ namespace Rats
                     RatManager.PlayerThreatCounter.Add(player, amount);
                 }
 
-                PlaySqueakSFXClientRpc();
-
                 int threat = RatManager.PlayerThreatCounter[player];
                 log($"{player.playerUsername}: {threat} threat");
 
@@ -968,10 +834,10 @@ namespace Rats
             inSpecialAnimation = true;
             agent.ResetPath();
 
-            DoAnimationClientRpc(animationRallyHash);
+            DoAnimationClientRpc(hashRally);
         }
 
-        void FinishCallRatKingAnim() // Animation function "call" TODO: Set this up in unity
+        public void FinishCallRatKingAnim() // Animation function "call"
         {
             inSpecialAnimation = false;
             if (targetPlayer == null || !IsServerOrHost) { return; }
@@ -979,9 +845,17 @@ namespace Rats
             SwitchToBehaviorState(State.Swarming);
         }
 
-        void PlayCallSFX() // Animation function "call" TODO: Set this up in unity
+        public void PlayCallSFX() // Animation function "call"
         {
             RoundManager.PlayRandomClip(creatureVoice, ScreamSFX);
+        }
+
+        public void FinishRunCycle()
+        {
+            if (UnityEngine.Random.Range(0f, 1f) < squeakChance)
+            {
+                RoundManager.PlayRandomClip(creatureSFX, SqueakSFX);
+            }
         }
 
         public void KillEnemyOnOwnerClient()
@@ -1010,7 +884,7 @@ namespace Rats
                 ScanNode.gameObject.GetComponent<Collider>().enabled = false;
             }
             isEnemyDead = true;
-            creatureAnimator.SetTrigger(animationDieHash);
+            creatureAnimator.SetTrigger(hashDie);
             creatureAnimator.Update(0);
 
             StopAllCoroutines();
@@ -1018,8 +892,6 @@ namespace Rats
             RatManager.SpawnedRats.Remove(this);
             ResetRat();
         }
-
-
 
         // RPC's
 
@@ -1058,56 +930,6 @@ namespace Rats
             {
                 currentBehaviorState = state;
                 RoundManager.PlayRandomClip(creatureSFX, SqueakSFX, true, 1, -1);
-            }
-        }
-
-        [ClientRpc]
-        public void PlaySqueakSFXClientRpc(bool longSqueak = false)
-        {
-            if (longSqueak)
-            {
-                RoundManager.PlayRandomClip(creatureSFX, SqueakSFX, true, 1, -1);
-                return;
-            }
-            RoundManager.PlayRandomClip(creatureSFX, HitSFX, true, 1, -1);
-        }
-
-        [ClientRpc]
-        public void OpenVentsClientRpc(int ventIndex, int ventIndex2 = -1)
-        {
-            if (ventIndex != -1)
-            {
-                EnemyVent vent = RoundManager.Instance.allEnemyVents[ventIndex];
-                if (vent == null)
-                {
-                    RoundManager.Instance.RefreshEnemyVents();
-                    vent = RoundManager.Instance.allEnemyVents[ventIndex];
-                    if (vent == null)
-                    {
-                        LoggerInstance.LogError("Cant get vent to open on client");
-                        return;
-                    }
-                }
-                vent.ventIsOpen = true;
-                vent.ventAnimator.SetTrigger("openVent");
-                vent.lowPassFilter.lowpassResonanceQ = 0f;
-            }
-            if (ventIndex2 != -1)
-            {
-                EnemyVent vent = RoundManager.Instance.allEnemyVents[ventIndex2];
-                if (vent == null)
-                {
-                    RoundManager.Instance.RefreshEnemyVents();
-                    vent = RoundManager.Instance.allEnemyVents[ventIndex2];
-                    if (vent == null)
-                    {
-                        LoggerInstance.LogError("Cant get vent to open on client");
-                        return;
-                    }
-                }
-                vent.ventIsOpen = true;
-                vent.ventAnimator.SetTrigger("openVent");
-                vent.lowPassFilter.lowpassResonanceQ = 0f;
             }
         }
 

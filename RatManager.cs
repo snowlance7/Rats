@@ -14,8 +14,7 @@ namespace Rats
 {
     public class RatManager : MonoBehaviour
     {
-        public static bool testing = true;
-
+        private static ManualLogSource logger = LoggerInstance;
         public static RatManager Instance { get; private set; }
 
         public static List<RatAI> SpawnedRats = [];
@@ -52,11 +51,14 @@ namespace Rats
             if (Instance == null)
             {
                 Instance = GameObject.Instantiate(new GameObject("RatManager")).AddComponent<RatManager>();
+                logger.LogDebug("Init RatManager");
             }
         }
 
         public void Start()
         {
+            if (!IsServerOrHost) { return; }
+            logger.LogDebug("Starting batch updater");
             StartCoroutine(BatchUpdateRoutine());
         }
 
@@ -101,24 +103,6 @@ namespace Rats
                 groupIndex = (groupIndex + 1) % 5; // Cycle through groups
                 yield return new WaitForSeconds(updateInterval);
             }
-        }
-
-        public static EnemyVent? GetClosestVentToPosition(Vector3 pos)
-        {
-            float mostOptimalDistance = 2000f;
-            EnemyVent? targetVent = null;
-            foreach (var vent in Vents)
-            {
-                float distance = Vector3.Distance(pos, vent.floorNode.transform.position);
-
-                if (CalculatePath(pos, vent.floorNode.transform.position) && distance < mostOptimalDistance)
-                {
-                    mostOptimalDistance = distance;
-                    targetVent = vent;
-                }
-            }
-
-            return targetVent;
         }
 
         public static bool CalculatePath(Vector3 fromPos, Vector3 toPos)

@@ -41,6 +41,9 @@ namespace Rats
         public Transform NestTransform;
 #pragma warning restore 0649
 
+        int hashIdle1;
+        int hashIdle2;
+
         public bool IsJermaRat;
 
         public RatNest KingNest;
@@ -106,6 +109,9 @@ namespace Rats
             {
                 return;
             }
+
+            hashIdle1 = Animator.StringToHash("idle1");
+            hashIdle2 = Animator.StringToHash("idle2");
             
             timeToIncreaseThreat = configTimeToIncreaseThreat.Value;
             threatToAttackPlayer = configThreatToAttackPlayer.Value;
@@ -394,8 +400,10 @@ namespace Rats
                     yield return new WaitForSeconds(AIIntervalTime);
                     if (!agent.hasPath || timeStuck > 1f)
                     {
-                        DoAnimationClientRpc("idle", UnityEngine.Random.Range(1, 3));
-                        yield return new WaitForSeconds(5f);
+                        inSpecialAnimation = true;
+                        int animHash = UnityEngine.Random.Range(0, 2) == 0 ? hashIdle1 : hashIdle2;
+                        networkAnimator.SetTrigger(animHash);
+                        yield return new WaitUntil(() => inSpecialAnimation = false);
                         PlaySqueakSFXClientRpc();
                         break;
                     }
@@ -490,6 +498,16 @@ namespace Rats
         {
             inSpecialAnimation = false;
 
+        }
+
+        public void SetInSpecialAnimation()
+        {
+            inSpecialAnimation = true;
+        }
+
+        public void UnsetInSpecialAnimation()
+        {
+            inSpecialAnimation = false;
         }
 
         // RPC's

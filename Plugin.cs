@@ -200,7 +200,7 @@ namespace Rats
 
         public static void log(string message)
         {
-            if (!IsLoggingEnabled) { return; }
+            if (!IsLoggingEnabled && !TESTING.testing) { return; }
             LoggerInstance.LogDebug(message);
         }
 
