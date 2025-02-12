@@ -97,5 +97,15 @@ namespace Rats.Items
                 }
             }
         }
+
+        public override int GetItemDataToSave()
+        {
+            return (int)currentFluid;
+        }
+
+        public override void LoadItemSaveData(int saveData)
+        {
+            currentFluid = (float)saveData;
+        }
     }
 }

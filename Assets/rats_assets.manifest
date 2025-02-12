@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2539833102
+CRC: 3866903230
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 9614007e6dfe132e41493263f83cb459
+    Hash: af929915bf8a264b88a1329eb0ccb3e8
   TypeTreeHash:
     serializedVersion: 2
-    Hash: aac46673348d6f129832f1016d7eafb9
+    Hash: 653566014a736237708da22b422340a6
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 9614007e6dfe132e41493263f83cb459
+    Hash: af929915bf8a264b88a1329eb0ccb3e8
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -45,6 +45,8 @@ ClassTypes:
 - Class: 95
   Script: {instanceID: 0}
 - Class: 114
+  Script: {fileID: 364194853, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
+- Class: 114
   Script: {fileID: -1316427704, guid: 30534a6f96417e1578491dec35947abb, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: 65d3fcb39dd67306e9bb17a603308070, type: 3}
@@ -62,8 +64,6 @@ ClassTypes:
   Script: {fileID: 11500000, guid: 6d7127b8f98ca8ec9896b384a71d39a2, type: 3}
 - Class: 114
   Script: {fileID: -1139795581, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
-- Class: 114
-  Script: {fileID: 364194853, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
 - Class: 114
   Script: {fileID: -41463191, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
 - Class: 114
@@ -119,7 +119,6 @@ Assets:
 - Assets/ModAssets/BoxOfSnapTrapsItem.asset
 - Assets/ModAssets/Bestiary/RatKingTK.asset
 - Assets/ModAssets/RatCrownItem.asset
-- Assets/ModAssets/JermaRatKingEnemy.asset
 - Assets/ModAssets/RatSpawn.asset
 - Assets/ModAssets/RatPoisonItem.asset
 - Assets/ModAssets/RatKingEnemy.asset

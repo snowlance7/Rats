@@ -13,12 +13,12 @@ namespace Rats
     public class RatAI : NetworkBehaviour
     {
 #pragma warning disable 0649
-        public ScanNodeProperties ScanNode;
         public AudioClip[] SqueakSFX;
         public AudioClip[] AttackSFX;
         public AudioClip[] HitSFX;
         public AudioClip[] NibbleSFX;
         public AudioClip[] ScreamSFX;
+        public AudioClip[] HappyBirthdayRatSFX;
         public Transform RatMouth;
         public GameObject ChristmasHat;
 
@@ -145,7 +145,6 @@ namespace Rats
                     
                     ResetRat();
                     Nest = GetClosestNest(transform.position, true);
-                    SetStatus("Returning to nest");
 
                     break;
                 case State.Routine:
@@ -312,7 +311,19 @@ namespace Rats
 
         bool ReachedDestination()
         {
-            return !agent.pathPending && agent.hasPath && agent.pathStatus == NavMeshPathStatus.PathComplete && agent.remainingDistance <= agent.stoppingDistance;
+            // Check if we've reached the destination
+            if (!agent.pathPending)
+            {
+                if (agent.remainingDistance <= agent.stoppingDistance)
+                {
+                    if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         void GrabBody()
@@ -446,14 +457,6 @@ namespace Rats
                 }
             }
             return null;
-        }
-
-        void SetStatus(string status)
-        {
-            if (configEnableDebugging.Value)
-            {
-                ScanNode.subText = status;
-            }
         }
 
         void Roam()
@@ -879,10 +882,6 @@ namespace Rats
 
         public void KillEnemy()
         {
-            if (ScanNode != null && (bool)ScanNode.gameObject.GetComponent<Collider>())
-            {
-                ScanNode.gameObject.GetComponent<Collider>().enabled = false;
-            }
             isEnemyDead = true;
             creatureAnimator.SetTrigger(hashDie);
             creatureAnimator.Update(0);

@@ -14,6 +14,18 @@ namespace Rats.Items
         int maxRatsOnGlueTrap = 10;
         int scrapValuePerRat = 3;
 
+        public override void OnHitGround()
+        {
+            base.OnHitGround();
+            mainCollider.enabled = true;
+        }
+
+        public override void GrabItem()
+        {
+            base.GrabItem();
+            mainCollider.enabled = false;
+        }
+
         public override void ActivatePhysicsTrigger(Collider other)
         {
             Plugin.LoggerInstance.LogDebug("In ActivatePhysicsTrigger()");

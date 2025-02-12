@@ -1,21 +1,20 @@
 ﻿using BepInEx.Logging;
 using GameNetcodeStuff;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 using static Rats.Plugin;
-using static UnityEngine.VFX.VisualEffectControlTrackController;
 
 namespace Rats
 {
     public class RatManager : MonoBehaviour
     {
-        private static ManualLogSource logger = LoggerInstance;
         public static RatManager Instance { get; private set; }
+
+        public static GameObject RatNestPrefab;
 
         public static List<RatAI> SpawnedRats = [];
         private List<List<RatAI>> ratGroups = new List<List<RatAI>>(); // Groups for batch updates
@@ -35,6 +34,9 @@ namespace Rats
         public static int highThreatToAttackPlayer = 250;
         public static int enemyHitsToDoDamage = 10;
         public static int playerFoodAmount = 30;
+        public static float ratKingSummonChancePoison = 0.5f;
+        public static float ratKingSummonChanceApparatus = 0.1f;
+        public static float ratKingSummonChanceNests = 0.5f;
 
         public static void InitConfigs()
         {
@@ -51,14 +53,14 @@ namespace Rats
             if (Instance == null)
             {
                 Instance = GameObject.Instantiate(new GameObject("RatManager")).AddComponent<RatManager>();
-                logger.LogDebug("Init RatManager");
+                LoggerInstance.LogDebug("Init RatManager");
             }
         }
 
         public void Start()
         {
             if (!IsServerOrHost) { return; }
-            logger.LogDebug("Starting batch updater");
+            LoggerInstance.LogDebug("Starting batch updater");
             StartCoroutine(BatchUpdateRoutine());
         }
 
@@ -154,6 +156,13 @@ namespace Rats
             }
 
             return closestNest;
+        }
+
+        public static void SpawnNest(Vector3 position)
+        {
+            if (!IsServerOrHost) { return; }
+            GameObject ratNest = Instantiate(RatNestPrefab, position, Quaternion.identity);
+            ratNest.GetComponent<NetworkObject>().Spawn(true);
         }
     }
 }

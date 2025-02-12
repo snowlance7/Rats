@@ -7,6 +7,6 @@ namespace Rats.Items
 {
     internal class RatCrownBehavior : PhysicsProp
     {
-        public AudioSource ItemAudio;
+
     }
 }

@@ -12,7 +12,7 @@ namespace Rats.Items
         public GameObject SnapTrapPrefab;
 
         // Configs
-        int snapTrapAmount = 50;
+        int snapTrapAmount = 100;
 
         public override void Start()
         {
@@ -35,8 +35,7 @@ namespace Rats.Items
             if (buttonDown && snapTrapAmount > 0)
             {
                 if (!Physics.Raycast(transform.position, -Vector3.up, out var hitInfo, 80f, 268437761, QueryTriggerInteraction.Ignore)) { return; }
-                GameObject snapTrap = GameObject.Instantiate(SnapTrapPrefab, hitInfo.point, Quaternion.identity);
-                if (IsServerOrHost) { snapTrap.GetComponent<NetworkObject>().Spawn(true); }
+                GameObject.Instantiate(SnapTrapPrefab, hitInfo.point, playerHeldBy.transform.rotation);
                 snapTrapAmount--;
                 SetControlTipsForItem();
             }

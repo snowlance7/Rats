@@ -45,7 +45,6 @@ namespace Rats
 
         // RatKing
         public static ConfigEntry<bool> configEnableRatKing;
-        public static ConfigEntry<bool> configUseJermaRatKing;
         public static ConfigEntry<string> configRatKingLevelRarities;
         public static ConfigEntry<string> configRatKingCustomLevelRarities;
 
@@ -81,6 +80,10 @@ namespace Rats
 
         // Box Of Snap traps
         public static ConfigEntry<int> configBoxOfSnapTrapsPrice;
+
+        // Rat Crown
+        public static ConfigEntry<float> configRatCrownAbilityRange;
+
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 
@@ -106,7 +109,6 @@ namespace Rats
             configEnableDebugging = Config.Bind("Debugging", "Enable Debugging", false, "Allows debug logs to show in the logs");
 
             // RatKing
-            configUseJermaRatKing = Config.Bind("Rat King", "Use Jerma Rat King", false, "Uses a lower quality model for the rat king with no animations. Can help with performance if enabled.");
             configEnableRatKing = Config.Bind("Rat King", "Enable Rat King", true, "Set to false to disable spawning the rat king.");
             configRatKingLevelRarities = Config.Bind("Rat King Rarities", "Level Rarities", "All: 25", "Rarities for each level. Example formatting: ExperimentationLevel:5, AssuranceLevel:6, VowLevel:9, OffenseLevel:10, AdamanceLevel:10, MarchLevel:10, RendLevel:75, DineLevel:75, TitanLevel:75, ArtificeLevel:20, EmbrionLevel:25, Modded:15");
             configRatKingCustomLevelRarities = Config.Bind("Rat King Rarities", "Custom Level Rarities", "", "Rarities for modded levels. Same formatting as level rarities.");
@@ -144,6 +146,9 @@ namespace Rats
             // BoxOfSnapTraps
             configBoxOfSnapTrapsPrice = Config.Bind("Box Of Snap Traps", "Store Price", 30, "The cost of the box of snap traps in the store.");
 
+            // Rat Crown
+            configRatCrownAbilityRange = Config.Bind("Rat Crown", "Ability Range", 30f, "The range in which the rat king and player (if using item) can rally rats.");
+
             // Loading Assets
             string sAssemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
@@ -155,8 +160,7 @@ namespace Rats
             }
             LoggerInstance.LogDebug($"Got AssetBundle at: {Path.Combine(sAssemblyLocation, "rats_assets")}");
 
-            string ratKingPath = configUseJermaRatKing.Value ? "Assets/ModAssets/JermaRatKingEnemy.asset" : "Assets/ModAssets/RatKingEnemy.asset";
-            EnemyType RatKing = ModAssets.LoadAsset<EnemyType>(ratKingPath);
+            EnemyType RatKing = ModAssets.LoadAsset<EnemyType>("Assets/ModAssets/RatKingEnemy.asset");
             if (RatKing == null) { LoggerInstance.LogError("Error: Couldnt get Rat from assets"); return; }
             LoggerInstance.LogDebug($"Got Rat prefab");
 
@@ -172,6 +176,7 @@ namespace Rats
             if (RatSpawnPrefab == null) { LoggerInstance.LogError("Error: Couldnt get RatSpawnPrefab from assets"); return; }
             LoggerInstance.LogDebug("Registering rat spawn network prefab...");
             LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(RatSpawnPrefab.spawnableMapObject.prefabToSpawn);
+            RatManager.RatNestPrefab = RatSpawnPrefab.spawnableMapObject.prefabToSpawn;
 
             LoggerInstance.LogDebug($"Registering RatSpawn");
             RegisterInsideMapObjectWithConfig(RatSpawnPrefab, configSewerGrateSpawnWeightCurve.Value);

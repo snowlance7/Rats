@@ -54,7 +54,8 @@ namespace Rats
                     logger.LogDebug($"Spawning {args[1]} rats");
                     break;
                 case "/spawnNest":
-
+                    Vector3 position = localPlayer.transform.position + localPlayer.transform.forward * 1f;
+                    RatManager.SpawnNest(position);
                     break;
                 case "/testing":
                     testing = !testing;
