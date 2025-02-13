@@ -153,7 +153,7 @@ namespace Rats
                     {
                         Nest.DefenseRats.Add(this);
                         defenseRat = true;
-                        ratCoroutine = StartCoroutine(SwarmCoroutine(Nest.transform.position, defenseRadius));
+                        ratCoroutine = StartCoroutine(SwarmCoroutine(Nest, defenseRadius));
                         break;
                     }
 
@@ -565,6 +565,33 @@ namespace Rats
             {
                 float timeStopped = 0f;
                 Vector3 pos = position;
+                pos = RoundManager.Instance.GetRandomNavMeshPositionInRadius(pos, radius, RoundManager.Instance.navHit);
+                SetDestinationToPosition(pos, false);
+                while (agent.enabled)
+                {
+                    yield return new WaitForSeconds(AIIntervalTime);
+                    if (!agent.hasPath || timeStopped > idleTime)
+                    {
+                        break;
+                    }
+
+                    if (agent.velocity == Vector3.zero)
+                    {
+                        timeStopped += AIIntervalTime;
+                    }
+                }
+            }
+
+            SwitchToBehaviorState(State.ReturnToNest);
+        }
+
+        IEnumerator SwarmCoroutine(RatNest nest, float radius)
+        {
+            yield return null;
+            while (ratCoroutine != null)
+            {
+                float timeStopped = 0f;
+                Vector3 pos = nest.transform.position;
                 pos = RoundManager.Instance.GetRandomNavMeshPositionInRadius(pos, radius, RoundManager.Instance.navHit);
                 SetDestinationToPosition(pos, false);
                 while (agent.enabled)

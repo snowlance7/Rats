@@ -38,6 +38,14 @@ namespace Rats
         public static float ratKingSummonChanceApparatus = 0.1f;
         public static float ratKingSummonChanceNests = 0.5f;
 
+        // Nests
+        public static float minRatSpawnTime = 10f;
+        public static float maxRatSpawnTime = 30f;
+        public static int foodToSpawnRat = 5;
+        public static int enemyFoodPerHPPoint = 10;
+        public static int maxRats = 40;
+        public static float poisonToCloseNest = 1f;
+
         public static void InitConfigs()
         {
             defenseRadius = configDefenseRadius.Value;
@@ -46,6 +54,13 @@ namespace Rats
             threatToAttackEnemy = configThreatToAttackEnemy.Value;
             enemyHitsToDoDamage = configEnemyHitsToDoDamage.Value;
             playerFoodAmount = configPlayerFoodAmount.Value;
+
+            minRatSpawnTime = configMinRatSpawnTime.Value;
+            maxRatSpawnTime = configMaxRatSpawnTime.Value;
+            foodToSpawnRat = configFoodToSpawnRat.Value;
+            enemyFoodPerHPPoint = configEnemyFoodPerHPPoint.Value;
+            maxRats = configMaxRats.Value;
+            IsLoggingEnabled = configEnableDebugging.Value;
         }
 
         public static void Init()

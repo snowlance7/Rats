@@ -38,27 +38,11 @@ namespace Rats
         int food;
 
         public float PoisonInNest;
-        
-
-        // Config Values
-        float minRatSpawnTime = 10f;
-        float maxRatSpawnTime = 30f;
-        int foodToSpawnRat = 5;
-        int enemyFoodPerHPPoint = 10;
-        int maxRats = 40;
-        float poisonToCloseNest = 1f;
 
         public void Start()
         {
             log("Sewer grate spawned at: " + transform.position);
             Nests.Add(this);
-
-            minRatSpawnTime = configMinRatSpawnTime.Value;
-            maxRatSpawnTime = configMaxRatSpawnTime.Value;
-            foodToSpawnRat = configFoodToSpawnRat.Value;
-            enemyFoodPerHPPoint = configEnemyFoodPerHPPoint.Value;
-            maxRats = configMaxRats.Value;
-            IsLoggingEnabled = configEnableDebugging.Value;
 
             if (Apparatus == null)
             {
@@ -78,10 +62,9 @@ namespace Rats
 
         public void Update()
         {
-            if (IsRatKing)
+            if (IsRatKing && RatKingAI.Instance != null)
             {
                 transform.position = RatKingAI.Instance.NestTransform.position;
-                return;
             }
 
             if (Apparatus != null && !Apparatus.isLungDocked && !appyPulled)
@@ -92,30 +75,33 @@ namespace Rats
 
             if (!IsServerOrHost) { return; }
 
-            if (/*!IsRatKing && */IsOpen && SpawnedRats.Count < maxRats)
+            if (IsOpen)
             {
-                timeSinceSpawnRat += Time.unscaledDeltaTime;
-
-                if (timeSinceSpawnRat > nextRatSpawnTime)
+                if (SpawnedRats.Count < maxRats)
                 {
-                    timeSinceSpawnRat = 0f;
-                    nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
+                    timeSinceSpawnRat += Time.unscaledDeltaTime;
 
-                    SpawnRat();
+                    if (timeSinceSpawnRat > nextRatSpawnTime)
+                    {
+                        timeSinceSpawnRat = 0f;
+                        nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
+
+                        SpawnRat();
+                    }
                 }
-            }
 
-            if (IsOpen && PoisonInNest >= poisonToCloseNest)
-            {
-                IsOpen = false;
-                CloseNestClientRpc();
-
-                SpawnRatKing(ratKingSummonChancePoison);
-
-                int openNests = GetOpenNestCount();
-                if (openNests <= 0)
+                if (PoisonInNest >= poisonToCloseNest)
                 {
-                    SpawnRatKing(ratKingSummonChanceNests, true);
+                    IsOpen = false;
+                    CloseNestClientRpc();
+
+                    SpawnRatKing(ratKingSummonChancePoison);
+
+                    int openNests = GetOpenNestCount();
+                    if (openNests <= 0)
+                    {
+                        SpawnRatKing(ratKingSummonChanceNests, true);
+                    }
                 }
             }
         }
@@ -163,16 +149,6 @@ namespace Rats
             SpawnRats(ratsToSpawn);
         }
 
-        public void SpawnRats(int amount)
-        {
-            if (amount == 0) { return; }
-            log("Spawning rats from food: " + amount);
-            for (int i = 0; i < amount; i++)
-            {
-                SpawnRat();
-            }
-        }
-
         void SpawnRat()
         {
             if (RatManager.SpawnedRats.Count < maxRats || TESTING.testing)
@@ -180,6 +156,16 @@ namespace Rats
                 GameObject ratObj = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
                 ratObj.GetComponent<NetworkObject>().Spawn(destroyWithScene: true);
                 RatManager.Instance.RegisterRat(ratObj.GetComponent<RatAI>());
+            }
+        }
+
+        public void SpawnRats(int amount)
+        {
+            if (amount == 0) { return; }
+            log("Spawning rats from food: " + amount);
+            for (int i = 0; i < amount; i++)
+            {
+                SpawnRat();
             }
         }
 

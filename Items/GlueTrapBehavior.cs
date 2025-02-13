@@ -2,40 +2,52 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using static Rats.Plugin;
 
 namespace Rats.Items
 {
     internal class GlueTrapBehavior : PhysicsProp
     {
-        public BoxCollider mainCollider;
-        int ratsOnGlueTrap;
+        public GameObject GlueBoardPrefab;
 
         // Configs
-        int maxRatsOnGlueTrap = 10;
-        int scrapValuePerRat = 3;
+        int glueTrapAmount = 10;
 
-        public override void OnHitGround()
+        public override void Start()
         {
-            base.OnHitGround();
-            mainCollider.enabled = true;
+            base.Start();
+            // TODO: Set up configs
+            SetControlTipsForItem();
         }
 
-        public override void GrabItem()
+        public override void SetControlTipsForItem()
         {
-            base.GrabItem();
-            mainCollider.enabled = false;
+            string[] toolTips = itemProperties.toolTips;
+            toolTips[0] = $"Drop Glue Trap [LMB] ({glueTrapAmount} left)";
+            HUDManager.Instance.ChangeControlTipMultiple(toolTips, holdingItem: true, itemProperties);
         }
 
-        public override void ActivatePhysicsTrigger(Collider other)
+        public override void ItemActivate(bool used, bool buttonDown = true)
         {
-            Plugin.LoggerInstance.LogDebug("In ActivatePhysicsTrigger()");
-            if (ratsOnGlueTrap >= maxRatsOnGlueTrap) { return; }
-            if (!other.gameObject.TryGetComponent(out RatAICollisionDetect ratCollision)) { return; }
-            RatAI rat = ratCollision.mainScript;
-            rat.KillEnemy();
-            rat.gameObject.transform.SetParent(this.transform);
-            ratsOnGlueTrap++;
-            SetScrapValue(scrapValue + scrapValuePerRat);
+            base.ItemActivate(used, buttonDown);
+
+            if (buttonDown && glueTrapAmount > 0)
+            {
+                if (!Physics.Raycast(transform.position, -Vector3.up, out var hitInfo, 80f, 268437761, QueryTriggerInteraction.Ignore)) { return; }
+                GameObject.Instantiate(GlueBoardPrefab, hitInfo.point, playerHeldBy.transform.rotation);
+                glueTrapAmount--;
+                SetControlTipsForItem();
+            }
+        }
+
+        public override int GetItemDataToSave()
+        {
+            return glueTrapAmount;
+        }
+
+        public override void LoadItemSaveData(int saveData)
+        {
+            glueTrapAmount = saveData;
         }
     }
 }

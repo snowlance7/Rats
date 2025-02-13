@@ -60,7 +60,6 @@ namespace Rats
 
         const float rallyCooldown = 60f;
         const float distanceToLoseRatKing = 20f;
-        const float rallyRadius = 20f;
 
         public enum State
         {
@@ -144,6 +143,7 @@ namespace Rats
 
             if (isEnemyDead || StartOfRound.Instance.allPlayersDead || stunNormalizedTimer > 0f || inSpecialAnimation)
             {
+                //agent.ResetPath();
                 agent.speed = 0f;
                 return;
             };
@@ -343,10 +343,12 @@ namespace Rats
                     //if (!agent.hasPath || timeStuck > 1f)
                     if (ReachedDestination())
                     {
+                        logger.LogDebug("Rat King has reached destination, idling...");
                         inSpecialAnimation = true;
                         int animHash = UnityEngine.Random.Range(0, 2) == 0 ? hashIdle1 : hashIdle2;
                         networkAnimator.SetTrigger(animHash);
                         yield return new WaitUntil(() => inSpecialAnimation == false);
+                        logger.LogDebug("Finished idling, choosing a new position...");
                         break;
                     }
 
@@ -475,7 +477,6 @@ namespace Rats
             foreach (var rat in SpawnedRats)
             {
                 if (rat.defenseRat) { continue; }
-                if (Vector3.Distance(rat.transform.position, transform.position) > rallyRadius) { continue; }
 
                 rat.targetPlayer = targetPlayer;
                 rat.rallyRat = true;
