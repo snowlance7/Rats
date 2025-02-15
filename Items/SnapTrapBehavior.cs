@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BepInEx.Logging;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -10,6 +11,8 @@ namespace Rats.Items
 {
     internal class SnapTrapBehavior : MonoBehaviour
     {
+        private static ManualLogSource logger = LoggerInstance;
+
         public AudioSource ItemAudio;
         public AudioClip[] SetSFX;
         public AudioClip[] SnapSFX;

@@ -862,7 +862,7 @@ namespace Rats
         {
             StopTaskRoutine();
             inSpecialAnimation = true;
-            agent.ResetPath();
+            //agent.ResetPath();
 
             DoAnimationClientRpc(hashRally);
         }
@@ -871,6 +871,7 @@ namespace Rats
         {
             inSpecialAnimation = false;
             if (targetPlayer == null || !IsServerOrHost) { return; }
+            LoggerInstance.LogDebug("Alerting rat king of high threat player");
             RatKingAI.Instance.AlertHighThreatPlayer(targetPlayer);
             SwitchToBehaviorState(State.Swarming);
         }

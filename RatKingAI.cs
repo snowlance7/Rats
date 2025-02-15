@@ -41,6 +41,8 @@ namespace Rats
         public Transform NestTransform;
 #pragma warning restore 0649
 
+        bool inRallyAnimation;
+
         int hashIdle1;
         int hashIdle2;
         int hashRun;
@@ -141,7 +143,7 @@ namespace Rats
         {
             base.DoAIInterval();
 
-            if (isEnemyDead || StartOfRound.Instance.allPlayersDead || stunNormalizedTimer > 0f || inSpecialAnimation)
+            if (isEnemyDead || StartOfRound.Instance.allPlayersDead || stunNormalizedTimer > 0f || inSpecialAnimation || inRallyAnimation)
             {
                 //agent.ResetPath();
                 agent.speed = 0f;
@@ -336,7 +338,11 @@ namespace Rats
                 float timeStuck = 0f;
                 targetNode = GetRandomNode();
                 Vector3 position = RoundManager.Instance.GetNavMeshPosition(targetNode.position, RoundManager.Instance.navHit, 1.75f, agent.areaMask);
-                if (!SetDestinationToPosition(position)) { continue; }
+                if (!SetDestinationToPosition(position, true))
+                {
+                    logger.LogDebug("RatKing couldnt reach random node, choosing a new one...");
+                    continue;
+                }
                 while (agent.enabled)
                 {
                     yield return new WaitForSeconds(AIIntervalTime);
@@ -384,7 +390,7 @@ namespace Rats
         public override void HitFromExplosion(float distance)
         {
             RoundManager.PlayRandomClip(creatureSFX, HitSFX, true, 1, -1);
-            HitEnemy(5);
+            HitEnemy(10);
         }
 
         public bool PlayerIsTargetable(PlayerControllerB playerScript)
@@ -446,7 +452,7 @@ namespace Rats
 
             if (RatManager.PlayerThreatCounter[player] > highThreatToAttackPlayer)
             {
-                Rally(player); // TODO: runs in place after this...
+                Rally(player); // TODO: Keeps walking here
             }
 
             if (RatManager.PlayerThreatCounter[player] > threatToAttackPlayer)
@@ -462,6 +468,7 @@ namespace Rats
             logger.LogDebug("Rallying");
             timeSinceRally = 0f;
             inSpecialAnimation = true;
+            inRallyAnimation = true;
             targetPlayer = player;
             networkAnimator.SetTrigger("rally");
         }
@@ -473,6 +480,7 @@ namespace Rats
             if (!IsServerOrHost) { return; }
             logger.LogDebug("Finishing rally animation");
             inSpecialAnimation = false;
+            inRallyAnimation = false;
 
             foreach (var rat in SpawnedRats)
             {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BepInEx.Logging;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Unity.Netcode;
@@ -9,6 +10,8 @@ namespace Rats.Items
 {
     internal class BoxOfSnapTrapsBehavior : PhysicsProp
     {
+        private static ManualLogSource logger = LoggerInstance;
+
         public GameObject SnapTrapPrefab;
 
         // Configs

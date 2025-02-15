@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3657177634
+CRC: 4133630012
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 58225d856905e26d3e4ad6f362303681
+    Hash: 4c142eab80882b2a8446117689b569df
   TypeTreeHash:
     serializedVersion: 2
-    Hash: c9f1b37bf582d12455f857c052cc2afe
+    Hash: 213100b0e523442ea1aea4e9dc742f55
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 58225d856905e26d3e4ad6f362303681
+    Hash: 4c142eab80882b2a8446117689b569df
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -63,9 +63,7 @@ ClassTypes:
 - Class: 114
   Script: {fileID: -1139795581, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
 - Class: 114
-  Script: {fileID: -441300744, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
-- Class: 114
-  Script: {fileID: 364194853, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
+  Script: {fileID: -741224381, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
 - Class: 114
   Script: {fileID: -41463191, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
 - Class: 114
@@ -86,6 +84,8 @@ ClassTypes:
   Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: d3cecf05b78b173605122a700874719c, type: 3}
+- Class: 114
+  Script: {fileID: -869513902, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 137
@@ -125,5 +125,6 @@ Assets:
 - Assets/ModAssets/RatPoisonItem.asset
 - Assets/ModAssets/RatKingEnemy.asset
 - Assets/ModAssets/GlueTrapItem.asset
+- Assets/ModAssets/GlueBoardItem.asset
 - Assets/ModAssets/Bestiary/RatKingTN.asset
 Dependencies: []

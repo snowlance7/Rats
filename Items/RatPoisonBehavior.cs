@@ -1,12 +1,16 @@
-﻿using System;
+﻿using BepInEx.Logging;
+using System;
 using System.Collections;
 using System.Text;
 using UnityEngine;
+using static Rats.Plugin;
 
 namespace Rats.Items
 {
     internal class RatPoisonBehavior : PhysicsProp
     {
+        private static ManualLogSource logger = LoggerInstance;
+
         public AudioSource ItemAudio;
         public ParticleSystem particleSystem;
         public Animator ItemAnimator;
@@ -91,8 +95,7 @@ namespace Rats.Items
                 {
                     if (hitInfo.collider.gameObject.TryGetComponent(out RatNest nest))
                     {
-                        Plugin.LoggerInstance.LogDebug("Pouring into nest");
-                        nest.AddPoison(pourRate);
+                        nest.AddPoison(pourRate * Time.deltaTime);
                     }
                 }
             }

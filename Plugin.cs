@@ -193,6 +193,12 @@ namespace Rats
             LethalLib.Modules.Utilities.FixMixerGroups(GlueTrap.spawnPrefab);
             LethalLib.Modules.Items.RegisterShopItem(GlueTrap, configGlueTrapPrice.Value);
 
+            // Glue Board
+            Item Glueboard = ModAssets.LoadAsset<Item>("Assets/ModAssets/GlueBoardItem.asset");
+            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(Glueboard.spawnPrefab);
+            LethalLib.Modules.Utilities.FixMixerGroups(Glueboard.spawnPrefab);
+            LethalLib.Modules.Items.RegisterItem(Glueboard);
+
             // Box Of Snap Traps
             Item SnapTraps = ModAssets.LoadAsset<Item>("Assets/ModAssets/BoxOfSnapTrapsItem.asset");
             LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(SnapTraps.spawnPrefab);

@@ -9,11 +9,14 @@ using UnityEngine;
 using UnityEngine.AI;
 using static Rats.Plugin;
 using static Rats.RatManager;
+using static Steamworks.InventoryItem;
 
 namespace Rats
 {
     public class RatNest : NetworkBehaviour
     {
+        private static ManualLogSource logger = LoggerInstance;
+
 #pragma warning disable 0649
         public GameObject RatPrefab = null!;
         public GameObject RatKingPrefab = null!;
@@ -21,6 +24,7 @@ namespace Rats
         public GameObject RatNestMesh = null!;
         public ScanNodeProperties ScanNode = null!;
         public MeshRenderer renderer;
+        public Material GoldMat;
         public Material RustMat;
 #pragma warning restore 0649
 
@@ -93,7 +97,6 @@ namespace Rats
                 if (PoisonInNest >= poisonToCloseNest)
                 {
                     IsOpen = false;
-                    CloseNestClientRpc();
 
                     SpawnRatKing(ratKingSummonChancePoison);
 
@@ -106,10 +109,23 @@ namespace Rats
             }
         }
 
-        public void AddPoison(float pourRate)
+        public void AddPoison(float amount)
         {
-            PoisonInNest += pourRate * Time.deltaTime;
+            PoisonInNest = Mathf.Min(PoisonInNest + amount, poisonToCloseNest);
+            float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
+
+            renderer.material.Lerp(GoldMat, RustMat, t);
+            logger.LogDebug("PoisonInNest: " + PoisonInNest);
         }
+
+        /*public void AddPoison(float amount)
+        {
+            PoisonInNest = Mathf.Min(PoisonInNest + amount, poisonToCloseNest);
+            float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
+            currentMat.Lerp(GoldMat, RustMat, t);
+            renderer.material = currentMat;
+            logger.LogDebug("PoisonInNest: " + PoisonInNest);
+        }*/
 
         void SpawnRatKing(float spawnChance = 1f, bool rampage = false)
         {
@@ -202,12 +218,6 @@ namespace Rats
 
             ScanNode.enabled = false;
             RatKingAI.Instance.KingNest = this;
-        }
-
-        [ClientRpc]
-        public void CloseNestClientRpc()
-        {
-            renderer.material = RustMat;
         }
     }
 }
