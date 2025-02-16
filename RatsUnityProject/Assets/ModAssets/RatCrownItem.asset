@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c30496d6ae6d6f907456e10a94e01ec6, type: 3}
+  m_Name: RatCrownItem
+  m_EditorClassIdentifier: 
+  itemId: 0
+  itemName: Rat Crown
+  spawnPositionTypes: []
+  twoHanded: 0
+  twoHandedAnimation: 0
+  disableHandsOnWall: 0
+  canBeGrabbedBeforeGameStart: 0
+  weight: 1.2
+  itemIsTrigger: 0
+  holdButtonUse: 1
+  itemSpawnsOnGround: 0
+  isConductiveMetal: 0
+  isScrap: 1
+  creditsWorth: 0
+  lockedInDemo: 0
+  highestSalePercentage: 0
+  maxValue: 0
+  minValue: 0
+  spawnPrefab: {fileID: 4871654158992444280, guid: 1ba02b67befaf744b819d074b896ce7f,
+    type: 3}
+  requiresBattery: 0
+  batteryUsage: 0
+  automaticallySetUsingPower: 0
+  itemIcon: {fileID: 21300000, guid: 3b935013d802984458c9bbef2a054fc6, type: 3}
+  grabAnim: 
+  useAnim: 
+  pocketAnim: 
+  throwAnim: 
+  grabAnimationTime: 0
+  grabSFX: {fileID: 8300000, guid: 6a4b237098b06d5438fd673aaa04c1f8, type: 3}
+  dropSFX: {fileID: 8300000, guid: 40201305d6861d44ca06d5d07c8d283d, type: 3}
+  pocketSFX: {fileID: 8300000, guid: 6a4b237098b06d5438fd673aaa04c1f8, type: 3}
+  throwSFX: {fileID: 0}
+  syncGrabFunction: 0
+  syncUseFunction: 0
+  syncDiscardFunction: 0
+  syncInteractLRFunction: 0
+  saveItemVariable: 0
+  isDefensiveWeapon: 1
+  toolTips:
+  - Wear Crown [LMB]
+  verticalOffset: 0
+  floorYOffset: 0
+  allowDroppingAheadOfPlayer: 0
+  restingRotation: {x: 0, y: 0, z: 0}
+  rotationOffset: {x: 0, y: 0, z: 0}
+  positionOffset: {x: 0, y: 0, z: 0}
+  meshOffset: 0
+  meshVariants: []
+  materialVariants: []
+  usableInSpecialAnimations: 0
+  canBeInspected: 0
