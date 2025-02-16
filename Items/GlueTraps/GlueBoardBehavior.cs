@@ -20,7 +20,7 @@ namespace Rats.Items.GlueTraps
         const float minSlowTime = 1f;
         const float maxSlowTime = 2.5f;
 
-        // Configs
+        // Configs // TODO: Set up configs
         int maxRatsOnGlueTrap = 10;
 
         public override void Start()

@@ -14,7 +14,7 @@ namespace Rats.Items.GlueTraps
 
         public GameObject GlueBoardPrefab;
 
-        // Configs
+        // Configs // TODO: Set up configs
         int glueTrapAmount = 5;
 
         public override void Start()

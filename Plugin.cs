@@ -43,6 +43,11 @@ namespace Rats
         // Debugging
         public static ConfigEntry<bool> configEnableDebugging;
 
+        // Performance
+        public static ConfigEntry<int> configMaxRats;
+        public static ConfigEntry<float> configAIIntervalTime;
+        public static ConfigEntry<bool> configRatsDoIdleAnimations;
+
         // RatKing
         public static ConfigEntry<bool> configEnableRatKing;
         public static ConfigEntry<string> configRatKingLevelRarities;
@@ -54,17 +59,14 @@ namespace Rats
         public static ConfigEntry<int> configMaxRatSpawnTime;
         public static ConfigEntry<int> configFoodToSpawnRat;
         public static ConfigEntry<int> configEnemyFoodPerHPPoint;
-        public static ConfigEntry<int> configMaxRats;
 
         // SpawnedRats
         public static ConfigEntry<bool> configUseJermaRats;
-        public static ConfigEntry<float> configAIIntervalTime;
         public static ConfigEntry<float> configDefenseRadius;
         public static ConfigEntry<float> configTimeToIncreaseThreat;
         public static ConfigEntry<int> configThreatToAttackPlayer;
         public static ConfigEntry<int> configThreatToAttackEnemy;
         public static ConfigEntry<float> configSwarmRadius;
-        public static ConfigEntry<bool> configCanVent;
         public static ConfigEntry<int> configMaxDefenseRats;
         public static ConfigEntry<int> configRatsNeededToAttack;
         public static ConfigEntry<float> configDistanceNeededToLoseRats;
@@ -108,6 +110,11 @@ namespace Rats
             // Debugging
             configEnableDebugging = Config.Bind("Debugging", "Enable Debugging", false, "Allows debug logs to show in the logs");
 
+            // Performance
+            configMaxRats = Config.Bind("Performance", "Maximum Rats", 50, "The maximum number of rats that can be on the map. Lowering this can improve performance.");
+            configAIIntervalTime = Config.Bind("Performance", "AI Interval Time", 0.3f, "The interval in which rats will update their AI (Changing position, doing complex calculations, etc). Setting this higher can improve performance but can also make the rats freeze in place more often while lower values makes them constantly moving but can decrease performance. Funnily enough the rats move more rat like when this is set higher.");
+            configRatsDoIdleAnimations = Config.Bind("Performance", "Rats do idle animations", true, "Setting this to false will disable idle animations for rats, which can improve performance.");
+
             // RatKing
             configEnableRatKing = Config.Bind("Rat King", "Enable Rat King", true, "Set to false to disable spawning the rat king.");
             configRatKingLevelRarities = Config.Bind("Rat King Rarities", "Level Rarities", "All: 25", "Rarities for each level. Example formatting: ExperimentationLevel:5, AssuranceLevel:6, VowLevel:9, OffenseLevel:10, AdamanceLevel:10, MarchLevel:10, RendLevel:75, DineLevel:75, TitanLevel:75, ArtificeLevel:20, EmbrionLevel:25, Modded:15");
@@ -119,17 +126,14 @@ namespace Rats
             configMaxRatSpawnTime = Config.Bind("Nest", "Maximum Rat Spawn Time", 20, "The maximum time in seconds before a rat can spawn from the nest.");
             configFoodToSpawnRat = Config.Bind("Nest", "Food Required to Spawn Rat", 5, "The amount of food needed in the nest to spawn a new rat.");
             configEnemyFoodPerHPPoint = Config.Bind("Nest", "Food Per HP Point", 10, "How much food points one HP will equal for enemies. ex: if 10 thumper will give 40 food points.");
-            configMaxRats = Config.Bind("Nest", "Maximum Rats", 40, "The maximum number of rats that can be on the map. Lowering this can improve performance.");
 
             // SpawnedRats
             configUseJermaRats = Config.Bind("Rats", "Use Jerma Rats", false, "Uses a lower quality model for the rats with no animations. Can help with performance if enabled.");
-            configAIIntervalTime = Config.Bind("Rats", "AI Interval Time", 0.3f, "The interval in which rats will update their AI (Changing position, doing complex calculations, etc). Setting this higher can improve performance but can also make the rats freeze in place more often while lower values makes them constantly moving but can decrease performance.");
             configDefenseRadius = Config.Bind("Rats", "Defense Radius", 5f, "The radius in which defense rats protect the nest.");
             configTimeToIncreaseThreat = Config.Bind("Rats", "Time to Increase Threat", 2.5f, "The time needed to add a threat point for a player when they are in line of sight of the rat.");
             configThreatToAttackPlayer = Config.Bind("Rats", "Threat to Attack Player", 100, "The threat level at which rats begin attacking the player.");
             configThreatToAttackEnemy = Config.Bind("Rats", "Threat to Attack Enemy", 50, "The threat level at which rats begin attacking enemy entities.");
             configSwarmRadius = Config.Bind("Rats", "Swarm Radius", 10f, "The radius in which rats swarm around their target.");
-            configCanVent = Config.Bind("Rats", "Can Vent", true, "If set to true, allows rats to travel through vents. This can also increase performance if set to false.");
             configMaxDefenseRats = Config.Bind("Rats", "Maximum Defense Rats", 10, "The maximum number of defense rats assigned to protect the nest.");
             configRatsNeededToAttack = Config.Bind("Rats", "Rats Needed to Attack", 5, "The minimum number of rats required to start an attack.");
             configDistanceNeededToLoseRats = Config.Bind("Rats", "Distance Needed to Lose Rats", 25f, "The distance the player must be from rats to lose them.");

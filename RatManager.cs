@@ -25,7 +25,7 @@ namespace Rats
         public static Dictionary<PlayerControllerB, int> PlayerThreatCounter = [];
         public static Dictionary<EnemyAI, int> EnemyThreatCounter = [];
 
-        // Global Configs
+        //// Global Configs // TODO: Set up configs
 
         public static float defenseRadius = 5f;
         public static float timeToIncreaseThreat = 3f;
@@ -37,13 +37,14 @@ namespace Rats
         public static float ratKingSummonChancePoison = 0.5f;
         public static float ratKingSummonChanceApparatus = 0.1f;
         public static float ratKingSummonChanceNests = 0.5f;
+        public static float squeakChance = 0.1f;
 
         // Nests
         public static float minRatSpawnTime = 10f;
         public static float maxRatSpawnTime = 30f;
         public static int foodToSpawnRat = 5;
         public static int enemyFoodPerHPPoint = 10;
-        public static int maxRats = 40;
+        public static int maxRats = 50;
         public static float poisonToCloseNest = 1f;
 
         public static void InitConfigs()
@@ -94,7 +95,10 @@ namespace Rats
         {
             // Reset groups
             ratGroups.Clear();
-            for (int i = 0; i < 5; i++) ratGroups.Add(new List<RatAI>());
+            for (int i = 0; i < 5; i++)
+            {
+                ratGroups.Add(new List<RatAI>());
+            }
 
             // Distribute rats into groups
             for (int i = 0; i < SpawnedRats.Count; i++)

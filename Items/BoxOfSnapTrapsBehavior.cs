@@ -14,7 +14,7 @@ namespace Rats.Items
 
         public GameObject SnapTrapPrefab;
 
-        // Configs
+        // Configs // TODO: Set up configs
         int snapTrapAmount = 100;
 
         public override void Start()

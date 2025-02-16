@@ -14,9 +14,6 @@ using static Rats.Plugin;
 using static Rats.RatAI;
 using static Rats.RatManager;
 
-// TODO: Rat king can spawn naturally or spawn when a sewer grate nest is sealed!
-// TODO: Set up calling/rallying rats around the king. He will only call when a player is in line of sight and has high threat
-// TODO: Rats who see a player with high threat will call to rat king if he isnt currently targetting a player. if player is high threat, rat king will not stop chasing player until they are out of the facility or dead.
 namespace Rats
 {
     public class RatKingAI : EnemyAI
@@ -43,25 +40,24 @@ namespace Rats
 
         bool inRallyAnimation;
 
-        int hashIdle1;
-        int hashIdle2;
-        int hashRun;
+        int hashRunSpeed;
 
         public RatNest KingNest;
 
         float timeSinceCollision;
         float timeSinceAddThreat;
         float timeSinceRally;
+        float timeSinceSyncedAIInterval;
 
         DeadBodyInfo? heldBody;
 
         Coroutine? ratCoroutine;
 
-        // Config Values
+        // Config Values // TODO: Set up configs
         const int ratKingDamage = 25;
-
         const float rallyCooldown = 60f;
         const float distanceToLoseRatKing = 20f;
+        float idleTime = 5f;
 
         public enum State
         {
@@ -99,6 +95,11 @@ namespace Rats
             {
                 Instance = null;
             }
+
+            if (KingNest != null && KingNest.NetworkObject.IsSpawned && IsServerOrHost)
+            {
+                KingNest.NetworkObject.Despawn(true);
+            }
         }
 
         public override void Start()
@@ -108,9 +109,7 @@ namespace Rats
                 return;
             }
 
-            hashIdle1 = Animator.StringToHash("idle1");
-            hashIdle2 = Animator.StringToHash("idle2");
-            hashRun = Animator.StringToHash("run");
+            hashRunSpeed = Animator.StringToHash("runSpeed");
 
             thisEnemyIndex = RoundManager.Instance.numberOfEnemiesInScene;
             RoundManager.Instance.numberOfEnemiesInScene++;
@@ -135,8 +134,18 @@ namespace Rats
             timeSinceRally += Time.deltaTime;
             timeSinceCollision += Time.deltaTime;
             timeSinceAddThreat += Time.deltaTime;
+            timeSinceSyncedAIInterval += Time.deltaTime;
 
-            creatureAnimator.SetBool(hashRun, currentBehaviourStateIndex != (int)State.Roaming);
+            if (timeSinceSyncedAIInterval > AIIntervalTime)
+            {
+                timeSinceSyncedAIInterval = 0f;
+                DoSyncedAIInterval();
+            }
+        }
+
+        public void DoSyncedAIInterval()
+        {
+            creatureAnimator.SetFloat(hashRunSpeed, agent.velocity.magnitude / 2);
         }
 
         public override void DoAIInterval()
@@ -145,7 +154,6 @@ namespace Rats
 
             if (isEnemyDead || StartOfRound.Instance.allPlayersDead || stunNormalizedTimer > 0f || inSpecialAnimation || inRallyAnimation)
             {
-                //agent.ResetPath();
                 agent.speed = 0f;
                 return;
             };
@@ -335,7 +343,6 @@ namespace Rats
             yield return null;
             while (ratCoroutine != null)
             {
-                float timeStuck = 0f;
                 targetNode = GetRandomNode();
                 Vector3 position = RoundManager.Instance.GetNavMeshPosition(targetNode.position, RoundManager.Instance.navHit, 1.75f, agent.areaMask);
                 if (!SetDestinationToPosition(position, true))
@@ -350,18 +357,10 @@ namespace Rats
                     if (ReachedDestination())
                     {
                         logger.LogDebug("Rat King has reached destination, idling...");
-                        inSpecialAnimation = true;
-                        int animHash = UnityEngine.Random.Range(0, 2) == 0 ? hashIdle1 : hashIdle2;
-                        networkAnimator.SetTrigger(animHash);
-                        yield return new WaitUntil(() => inSpecialAnimation == false);
+                        yield return new WaitForSeconds(idleTime);
                         logger.LogDebug("Finished idling, choosing a new position...");
                         break;
                     }
-
-                    /*if (agent.velocity == Vector3.zero)
-                    {
-                        timeStuck += AIIntervalTime;
-                    }*/
                 }
             }
         }
@@ -492,13 +491,13 @@ namespace Rats
             }
         }
 
-        public void PlayRallySFX()
+        public void PlayRallySFX() // Animation function
         {
             RoundManager.PlayRandomClip(creatureVoice, ScreamSFX);
             logger.LogDebug("Played rally sfx");
         }
 
-        public void FinishEatingBody()
+        public void FinishEatingBody() // Animation function
         {
             logger.LogDebug("Finishing eating body");
             DropBodyOnLocalClient(true);
@@ -508,16 +507,24 @@ namespace Rats
             KingNest.AddFood(playerFoodAmount);
         }
 
-        public void SetInSpecialAnimation()
+        public void SetInSpecialAnimation() // Animation function
         {
             inSpecialAnimation = true;
         }
 
-        public void UnsetInSpecialAnimation()
+        public void UnsetInSpecialAnimation() // Animation function
         {
             logger.LogDebug("In UnsetInSpecialAnimation()");
             inSpecialAnimation = false;
             RoundManager.PlayRandomClip(creatureSFX, SqueakSFX);
+        }
+
+        public void FinishRunCycle() // Animation function // TODO: Set this up in unity editor
+        {
+            if (UnityEngine.Random.Range(0f, 1f) < squeakChance)
+            {
+                RoundManager.PlayRandomClip(creatureSFX, SqueakSFX);
+            }
         }
 
         // RPC's

@@ -17,11 +17,12 @@ namespace Rats.Items
         public Transform PourDirection;
 
         readonly float downAngle = 0.7f;
-
-        float maxFluid = 5f;
-        float currentFluid;
-        float pourRate = 0.1f;
         bool pouring;
+        float currentFluid;
+
+        // Configs // TODO: Set up configs
+        float maxFluid = 5f;
+        float pourRate = 0.1f;
 
         public override void Start()
         {

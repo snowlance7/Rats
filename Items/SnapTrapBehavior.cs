@@ -27,6 +27,8 @@ namespace Rats.Items
         bool triggered;
         Quaternion ratRotationOffset;
         Vector3 ratPositionOffset;
+
+        // Configs // TODO: Set up configs
         float minLaunchForce = 10f;
         float maxLaunchForce = 15f;
         float destroyTime = 10f;
