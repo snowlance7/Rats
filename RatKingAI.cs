@@ -28,7 +28,7 @@ namespace Rats
         public AudioClip[] AttackSFX;
         public AudioClip[] HitSFX;
         public AudioClip[] NibbleSFX;
-        public AudioClip[] ScreamSFX;
+        public AudioClip ScreamSFX;
         public Transform RatMouth;
         public GameObject NestPrefab;
         public GameObject RatCrownPrefab;
@@ -145,12 +145,13 @@ namespace Rats
 
         public void DoSyncedAIInterval()
         {
-            creatureAnimator.SetFloat(hashRunSpeed, agent.velocity.magnitude / 2);
+            creatureAnimator.SetFloat(hashRunSpeed, agent.velocity.magnitude / 2); // TODO: Ask Xu how to make the idle animation stop right away if he starts moving again instead of playing the full animation first
         }
 
         public override void DoAIInterval()
         {
             base.DoAIInterval();
+            logger.LogDebug(agent.speed);
 
             if (isEnemyDead || StartOfRound.Instance.allPlayersDead || stunNormalizedTimer > 0f || inSpecialAnimation || inRallyAnimation)
             {
@@ -171,6 +172,8 @@ namespace Rats
                 case (int)State.Hunting:
                     agent.speed = 7.5f;
 
+                    StopRoam();
+
                     if (targetPlayer == null || targetPlayer.isPlayerDead || targetPlayer.disconnectedMidGame || !SetDestinationToPosition(targetPlayer.transform.position, true))
                     {
                         logger.LogDebug("Stop Targeting");
@@ -185,6 +188,7 @@ namespace Rats
                     agent.speed = 6.5f;
 
                     CheckForThreatsInLOS();
+                    StopRoam();
 
                     if (!TargetClosestPlayerInAnyCase() || (Vector3.Distance(transform.position, targetPlayer.transform.position) > distanceToLoseRatKing && !CheckLineOfSightForPosition(targetPlayer.transform.position)))
                     {
@@ -451,7 +455,7 @@ namespace Rats
 
             if (RatManager.PlayerThreatCounter[player] > highThreatToAttackPlayer)
             {
-                Rally(player); // TODO: Keeps walking here
+                Rally(player); // TODO: Keeps walking here STILL TO THIS DAY KEEPS WALKING WHYYYYYYYYYYYY
             }
 
             if (RatManager.PlayerThreatCounter[player] > threatToAttackPlayer)
@@ -474,7 +478,7 @@ namespace Rats
 
         // Animator stuff
 
-        public void FinishRallyAnim() // Animation function "rally" // TODO: Set this up in unity editor
+        public void FinishRallyAnim() // Animation function "rally"
         {
             if (!IsServerOrHost) { return; }
             logger.LogDebug("Finishing rally animation");
@@ -493,7 +497,7 @@ namespace Rats
 
         public void PlayRallySFX() // Animation function
         {
-            RoundManager.PlayRandomClip(creatureVoice, ScreamSFX);
+            creatureVoice.PlayOneShot(ScreamSFX);
             logger.LogDebug("Played rally sfx");
         }
 
@@ -507,7 +511,7 @@ namespace Rats
             KingNest.AddFood(playerFoodAmount);
         }
 
-        public void SetInSpecialAnimation() // Animation function
+        /*public void SetInSpecialAnimation() // Animation function
         {
             inSpecialAnimation = true;
         }
@@ -517,9 +521,9 @@ namespace Rats
             logger.LogDebug("In UnsetInSpecialAnimation()");
             inSpecialAnimation = false;
             RoundManager.PlayRandomClip(creatureSFX, SqueakSFX);
-        }
+        }*/
 
-        public void FinishRunCycle() // Animation function // TODO: Set this up in unity editor
+        public void FinishRunCycle() // Animation function
         {
             if (UnityEngine.Random.Range(0f, 1f) < squeakChance)
             {

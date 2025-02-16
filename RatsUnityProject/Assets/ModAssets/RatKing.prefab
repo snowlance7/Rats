@@ -577,7 +577,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
-  m_Pitch: 0.5
+  m_Pitch: 0.1
   Loop: 0
   Mute: 0
   Spatialize: 0
@@ -1609,7 +1609,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 8556767893162925194}
@@ -1700,28 +1700,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TransitionStateInfoList:
-  - IsCrossFadeExit: 0
-    Layer: 0
-    OriginatingState: -1310306925
-    DestinationState: -531397933
-    TransitionDuration: 0
-    TriggerNameHash: -287494167
-    TransitionIndex: 1
-  - IsCrossFadeExit: 0
-    Layer: 0
-    OriginatingState: -1310306925
-    DestinationState: 377620484
-    TransitionDuration: 0
-    TriggerNameHash: 2010414675
-    TransitionIndex: 2
-  - IsCrossFadeExit: 0
-    Layer: 0
-    OriginatingState: 614839268
-    DestinationState: -1310306925
-    TransitionDuration: 0
-    TriggerNameHash: 1744178083
-    TransitionIndex: 0
+  TransitionStateInfoList: []
   m_Animator: {fileID: 6733413655033965617}
 --- !u!114 &6979141968431578474
 MonoBehaviour:
@@ -1879,8 +1858,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: cecae45df886e014a8479d2b9104270f, type: 3}
   - {fileID: 8300000, guid: c3259ca13ec2e8943b45b3017b4187d6, type: 3}
   - {fileID: 8300000, guid: 3b7ba3088fb0d6444b971db9833b28a1, type: 3}
-  ScreamSFX:
-  - {fileID: 8300000, guid: 7281819988ebcb1419a6f031f4fa1b88, type: 3}
+  ScreamSFX: {fileID: 8300000, guid: 7281819988ebcb1419a6f031f4fa1b88, type: 3}
   RatMouth: {fileID: 4858904884389950001}
   NestPrefab: {fileID: 9177947075591294298, guid: fcd826d24cddf5449bce391d918176bb,
     type: 3}
@@ -1890,7 +1868,6 @@ MonoBehaviour:
   CrownMesh: {fileID: 5369736353203265660}
   networkAnimator: {fileID: 1251195740925534040}
   NestTransform: {fileID: 5253935998020485342}
-  IsJermaRat: 0
   KingNest: {fileID: 0}
 --- !u!114 &5439890104153132102
 MonoBehaviour:
@@ -1970,7 +1947,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
-  m_Pitch: 0.5
+  m_Pitch: 0.1
   Loop: 0
   Mute: 0
   Spatialize: 0

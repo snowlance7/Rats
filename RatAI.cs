@@ -17,7 +17,7 @@ namespace Rats
         public AudioClip[] AttackSFX;
         public AudioClip[] HitSFX;
         public AudioClip[] NibbleSFX;
-        public AudioClip[] ScreamSFX;
+        public AudioClip ScreamSFX;
         public AudioClip[] HappyBirthdayRatSFX;
         public Transform RatMouth;
         public GameObject ChristmasHat;
@@ -49,16 +49,13 @@ namespace Rats
         DeadBodyInfo? heldBody;
         bool holdingFood;
 
-        int hashRally;
         int hashDie;
-        int hashRunSpeed;
 
         bool grabbingBody;
         bool returningBodyToNest;
 
         public RatNest? Nest;
 
-        float timeSinceSyncedAIInterval;
         float timeSinceCollision;
         float timeSinceAddThreat;
         float spinTimer;
@@ -78,7 +75,6 @@ namespace Rats
         int maxDefenseRats = 10;
         float distanceToLoseRats = 25f;
         int ratDamage = 2;
-        float AIIntervalTimeSynced = 0.5f;
         bool doIdleAnimations = true;
 
         public enum State
@@ -99,9 +95,7 @@ namespace Rats
 
         public void Start()
         {
-            hashRally = Animator.StringToHash("rally");
             hashDie = Animator.StringToHash("die");
-            hashRunSpeed = Animator.StringToHash("runSpeed");
 
             AIIntervalTime = configAIIntervalTime.Value;
             swarmRadius = configSwarmRadius.Value;
@@ -133,20 +127,8 @@ namespace Rats
                 return;
             };
 
-            timeSinceSyncedAIInterval += Time.deltaTime;
             timeSinceCollision += Time.deltaTime;
             timeSinceAddThreat += Time.deltaTime;
-
-            if (agent.enabled && !IsJermaRat && doIdleAnimations && timeSinceSyncedAIInterval > AIIntervalTimeSynced)
-            {
-                timeSinceSyncedAIInterval = 0f;
-                DoSyncedAIInterval();
-            }
-        }
-
-        public void DoSyncedAIInterval()
-        {
-            creatureAnimator.SetFloat(hashRunSpeed, agent.velocity.magnitude / 2);
         }
 
         public void SwitchToBehaviorState(State state)
@@ -863,7 +845,9 @@ namespace Rats
                         log("Calling Rat King");
                         targetEnemy = null;
                         targetPlayer = player;
-                        CallRatKing();
+                        PlayRallySFXClientRpc();
+                        RatKingAI.Instance.AlertHighThreatPlayer(player);
+                        SwitchToBehaviorState(State.Swarming);
                     }
                 }
                 if (threat > threatToAttackPlayer || player.isPlayerDead)
@@ -873,29 +857,6 @@ namespace Rats
                     SwitchToBehaviorState(State.Swarming);
                 }
             }
-        }
-
-        void CallRatKing()
-        {
-            StopTaskRoutine();
-            inSpecialAnimation = true;
-
-            DoAnimationClientRpc(hashRally);
-        }
-
-        public void FinishCallRatKingAnim() // Animation function "call"
-        {
-            inSpecialAnimation = false;
-            if (!IsServerOrHost) { return; }
-            if (targetPlayer == null) { return; }
-            LoggerInstance.LogDebug("Alerting rat king of high threat player");
-            RatKingAI.Instance.AlertHighThreatPlayer(targetPlayer);
-            SwitchToBehaviorState(State.Swarming);
-        }
-
-        public void PlayCallSFX() // Animation function "call"
-        {
-            RoundManager.PlayRandomClip(creatureVoice, ScreamSFX);
         }
 
         public void FinishRunCycle() // Animation function
@@ -940,10 +901,9 @@ namespace Rats
         // RPC's
 
         [ClientRpc]
-        public void DoAnimationClientRpc(int animationHash)
+        public void PlayRallySFXClientRpc()
         {
-            creatureAnimator.SetTrigger(animationHash);
-            creatureAnimator.Update(0);
+            creatureVoice.PlayOneShot(ScreamSFX);
         }
 
         [ServerRpc(RequireOwnership = false)]

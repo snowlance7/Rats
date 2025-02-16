@@ -702,7 +702,6 @@ MonoBehaviour:
   m_Script: {fileID: -41463191, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ScanNode: {fileID: 0}
   SqueakSFX:
   - {fileID: 8300000, guid: c63541de79b8c2f48b8c146cb01f9a8f, type: 3}
   - {fileID: 8300000, guid: 875332d79e31e7d47befa82583dd855f, type: 3}
@@ -738,14 +737,13 @@ MonoBehaviour:
   - {fileID: 8300000, guid: cecae45df886e014a8479d2b9104270f, type: 3}
   - {fileID: 8300000, guid: c3259ca13ec2e8943b45b3017b4187d6, type: 3}
   - {fileID: 8300000, guid: 3b7ba3088fb0d6444b971db9833b28a1, type: 3}
-  ScreamSFX:
-  - {fileID: 8300000, guid: 7281819988ebcb1419a6f031f4fa1b88, type: 3}
+  ScreamSFX: {fileID: 8300000, guid: 7281819988ebcb1419a6f031f4fa1b88, type: 3}
+  HappyBirthdayRatSFX: []
   RatMouth: {fileID: 7141508304028364253}
   ChristmasHat: {fileID: 8916332277764663740}
-  rb: {fileID: 4664923662712959394}
   agent: {fileID: 835767262270216843}
   creatureAnimator: {fileID: 4993871470383950864}
-  AIIntervalTime: 0.5
+  AIIntervalTime: 1
   eye: {fileID: 8257306636695816652}
   enemyHP: 1
   creatureSFX: {fileID: 7974736408781690819}
@@ -821,14 +819,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TransitionStateInfoList:
-  - IsCrossFadeExit: 0
-    Layer: 0
-    OriginatingState: 614839268
-    DestinationState: -252110600
-    TransitionDuration: 0
-    TriggerNameHash: 1744178083
-    TransitionIndex: 0
+  TransitionStateInfoList: []
   m_Animator: {fileID: 4993871470383950864}
 --- !u!1 &3399548701976123500
 GameObject:
