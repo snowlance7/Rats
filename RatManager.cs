@@ -25,7 +25,7 @@ namespace Rats
         public static Dictionary<PlayerControllerB, int> PlayerThreatCounter = [];
         public static Dictionary<EnemyAI, int> EnemyThreatCounter = [];
 
-        //// Global Configs // TODO: Set up configs
+        //// Global Configs
 
         public static float defenseRadius = 5f;
         public static float timeToIncreaseThreat = 3f;
@@ -35,8 +35,8 @@ namespace Rats
         public static int enemyHitsToDoDamage = 10;
         public static int playerFoodAmount = 30;
         public static float ratKingSummonChancePoison = 0.5f;
-        public static float ratKingSummonChanceApparatus = 0.1f;
-        public static float ratKingSummonChanceNests = 0.5f;
+        public static float ratKingSummonChanceApparatus = 0.01f;
+        public static float ratKingSummonChanceNests = 0.8f;
         public static float squeakChance = 0.1f;
 
         // Nests
@@ -55,6 +55,10 @@ namespace Rats
             threatToAttackEnemy = configThreatToAttackEnemy.Value;
             enemyHitsToDoDamage = configEnemyHitsToDoDamage.Value;
             playerFoodAmount = configPlayerFoodAmount.Value;
+            ratKingSummonChancePoison = configRatKingSummonChancePoison.Value;
+            ratKingSummonChanceApparatus = configRatKingSummonChanceApparatus.Value;
+            ratKingSummonChanceNests = configRatKingSummonChanceNests.Value;
+            squeakChance = configSqueakChance.Value;
 
             minRatSpawnTime = configMinRatSpawnTime.Value;
             maxRatSpawnTime = configMaxRatSpawnTime.Value;
@@ -62,6 +66,7 @@ namespace Rats
             enemyFoodPerHPPoint = configEnemyFoodPerHPPoint.Value;
             maxRats = configMaxRats.Value;
             IsLoggingEnabled = configEnableDebugging.Value;
+            poisonToCloseNest = configPoisonToCloseNest.Value;
         }
 
         public static void Init()

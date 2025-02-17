@@ -13,14 +13,16 @@ namespace Rats.Items
         private static ManualLogSource logger = LoggerInstance;
 
         public GameObject SnapTrapPrefab;
+        public ScanNodeProperties ScanNode;
 
         // Configs // TODO: Set up configs
-        int snapTrapAmount = 100;
+        int snapTrapAmount;
 
         public override void Start()
         {
             base.Start();
-            // TODO: Set up configs
+            ScanNode.subText = "";
+            snapTrapAmount = configSnapTrapAmount.Value;
             SetControlTipsForItem();
         }
 

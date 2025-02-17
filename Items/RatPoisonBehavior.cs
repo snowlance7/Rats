@@ -15,19 +15,19 @@ namespace Rats.Items
         public ParticleSystem particleSystem;
         public Animator ItemAnimator;
         public Transform PourDirection;
+        public ScanNodeProperties ScanNode;
 
         readonly float downAngle = 0.7f;
+        float pourRate;
         bool pouring;
         float currentFluid;
-
-        // Configs // TODO: Set up configs
-        float maxFluid = 5f;
-        float pourRate = 0.1f;
 
         public override void Start()
         {
             base.Start();
-            currentFluid = maxFluid;
+            ScanNode.subText = "";
+            currentFluid = configRatPoisonMaxFluid.Value;
+            pourRate = configRatPoisonPourRate.Value;
             SetControlTipsForItem();
         }
 

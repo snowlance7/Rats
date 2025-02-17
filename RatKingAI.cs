@@ -53,12 +53,6 @@ namespace Rats
 
         Coroutine? ratCoroutine;
 
-        // Config Values // TODO: Set up configs
-        const int ratKingDamage = 25;
-        const float rallyCooldown = 60f;
-        const float distanceToLoseRatKing = 20f;
-        float idleTime = 5f;
-
         public enum State
         {
             Roaming,
@@ -83,7 +77,7 @@ namespace Rats
 
             if (!IsServerOrHost) { return; }
             logger.LogDebug("Spawning KingNest");
-            KingNest = GameObject.Instantiate(NestPrefab, NestTransform).GetComponent<RatNest>(); // TODO: Test this
+            KingNest = GameObject.Instantiate(NestPrefab, NestTransform).GetComponent<RatNest>();
             KingNest.NetworkObject.Spawn(true);
             KingNest.SetAsRatKingNestClientRpc();
         }
@@ -126,15 +120,15 @@ namespace Rats
         {
             base.Update();
 
-            if (isEnemyDead || StartOfRound.Instance.allPlayersDead)
-            {
-                return;
-            };
-
             timeSinceRally += Time.deltaTime;
             timeSinceCollision += Time.deltaTime;
             timeSinceAddThreat += Time.deltaTime;
             timeSinceSyncedAIInterval += Time.deltaTime;
+
+            if (isEnemyDead || StartOfRound.Instance.allPlayersDead)
+            {
+                return;
+            };
 
             if (timeSinceSyncedAIInterval > AIIntervalTime)
             {
@@ -145,7 +139,7 @@ namespace Rats
 
         public void DoSyncedAIInterval()
         {
-            creatureAnimator.SetFloat(hashRunSpeed, agent.velocity.magnitude / 2); // TODO: Ask Xu how to make the idle animation stop right away if he starts moving again instead of playing the full animation first
+            creatureAnimator.SetFloat(hashRunSpeed, agent.velocity.magnitude / 2);
         }
 
         public override void DoAIInterval()
@@ -190,7 +184,7 @@ namespace Rats
                     CheckForThreatsInLOS();
                     StopRoam();
 
-                    if (!TargetClosestPlayerInAnyCase() || (Vector3.Distance(transform.position, targetPlayer.transform.position) > distanceToLoseRatKing && !CheckLineOfSightForPosition(targetPlayer.transform.position)))
+                    if (!TargetClosestPlayerInAnyCase() || (Vector3.Distance(transform.position, targetPlayer.transform.position) > configRatKingLoseDistance.Value && !CheckLineOfSightForPosition(targetPlayer.transform.position)))
                     {
                         logger.LogDebug("Stop Targeting");
                         targetPlayer = null;
@@ -361,7 +355,7 @@ namespace Rats
                     if (ReachedDestination())
                     {
                         logger.LogDebug("Rat King has reached destination, idling...");
-                        yield return new WaitForSeconds(idleTime);
+                        yield return new WaitForSeconds(configRatKingIdleTime.Value);
                         logger.LogDebug("Finished idling, choosing a new position...");
                         break;
                     }
@@ -417,7 +411,7 @@ namespace Rats
                 if (!PlayerIsTargetable(player)) { return; }
                 if (player == null || player != localPlayer) { return; }
 
-                if (player.health <= ratKingDamage)
+                if (player.health <= configRatKingDamage.Value)
                 {
                     inSpecialAnimation = true;
                     player.KillPlayer(Vector3.zero, true, CauseOfDeath.Mauling);
@@ -426,7 +420,7 @@ namespace Rats
                 }
 
                 int deathAnim = UnityEngine.Random.Range(0, 2) == 1 ? 7 : 0;
-                player.DamagePlayer(ratKingDamage, true, true, CauseOfDeath.Mauling, deathAnim);
+                player.DamagePlayer(configRatKingDamage.Value, true, true, CauseOfDeath.Mauling, deathAnim);
                 PlayAttackSFXServerRpc();
             }
         }
@@ -467,7 +461,7 @@ namespace Rats
 
         public void Rally(PlayerControllerB player)
         {
-            if (timeSinceRally < rallyCooldown) { return; }
+            if (timeSinceRally < configRatKingRallyCooldown.Value) { return; }
             logger.LogDebug("Rallying");
             timeSinceRally = 0f;
             inSpecialAnimation = true;
@@ -487,7 +481,7 @@ namespace Rats
 
             foreach (var rat in SpawnedRats)
             {
-                if (rat.defenseRat) { continue; }
+                //if (rat.defenseRat) { continue; }
 
                 rat.targetPlayer = targetPlayer;
                 rat.rallyRat = true;

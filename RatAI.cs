@@ -75,7 +75,6 @@ namespace Rats
         int maxDefenseRats = 10;
         float distanceToLoseRats = 25f;
         int ratDamage = 2;
-        bool doIdleAnimations = true;
 
         public enum State
         {
@@ -86,11 +85,8 @@ namespace Rats
 
         public void StopTaskRoutine()
         {
-            if (ratCoroutine != null)
-            {
-                StopCoroutine(ratCoroutine);
-                ratCoroutine = null;
-            }
+            StopAllCoroutines();
+            ratCoroutine = null;
         }
 
         public void Start()
@@ -103,7 +99,6 @@ namespace Rats
             distanceToLoseRats = configDistanceNeededToLoseRats.Value;
             ratDamage = configRatDamage.Value;
             ChristmasHat.SetActive(configHolidayRats.Value);
-            doIdleAnimations = configRatsDoIdleAnimations.Value;
 
             updateDestinationInterval = AIIntervalTime;
             path1 = new NavMeshPath();
@@ -273,7 +268,16 @@ namespace Rats
 
                     if (targetPlayer != null)
                     {
-                        if (rallyRat) { return; }
+                        if (rallyRat)
+                        {
+                            if (!SetDestinationToPosition(targetPlayer.transform.position, true))
+                            {
+                                rallyRat = false;
+                                SwitchToBehaviorState(State.ReturnToNest);
+                            }
+                            return;
+                        }
+
                         if (Vector3.Distance(targetPlayer.transform.position, transform.position) > distanceToLoseRats)
                         {
                             // Target too far, return to nest
@@ -286,6 +290,16 @@ namespace Rats
                     }
                     if (targetEnemy != null)
                     {
+                        if (rallyRat)
+                        {
+                            if (!SetDestinationToPosition(targetEnemy.transform.position, true))
+                            {
+                                rallyRat = false;
+                                SwitchToBehaviorState(State.ReturnToNest);
+                            }
+                            return;
+                        }
+
                         if (Vector3.Distance(targetEnemy.transform.position, transform.position) > distanceToLoseRats)
                         {
                             // Target too far, return to nest
@@ -391,6 +405,14 @@ namespace Rats
                 PlayerControllerB player = CheckLineOfSightForPlayer(60f, 60, 5);
                 if (PlayerIsTargetable(player))
                 {
+                    if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.name == "RatCrown" && !player.currentlyHeldObjectServer.isPocketed)
+                    {
+                        targetPlayer = player;
+                        targetEnemy = null;
+                        SwitchToBehaviorState(State.Swarming);
+                        return;
+                    }
+
                     AddThreat(player);
                     return;
                 }
@@ -471,7 +493,7 @@ namespace Rats
         {
             if (ratCoroutine != null)
             {
-                StopCoroutine(ratCoroutine);
+                StopAllCoroutines();
                 ratCoroutine = null;
             }
         }
@@ -650,7 +672,7 @@ namespace Rats
             KillEnemyOnOwnerClient();
             if (IsServerOrHost && playerWhoHit != null)
             {
-                AddThreat(playerWhoHit, 2);
+                AddThreat(playerWhoHit, 1);
             }
         }
 
@@ -696,16 +718,19 @@ namespace Rats
 
         public void OnCollideWithPlayer(Collider other)
         {
-            rallyRat = false;
             if (isEnemyDead) { return; }
             if (timeSinceCollision > 1f)
             {
                 timeSinceCollision = 0f;
-                RoundManager.PlayRandomClip(creatureSFX, AttackSFX);
                 PlayerControllerB? player = other.gameObject.GetComponent<PlayerControllerB>();
-                if (player == null || player != localPlayer || !PlayerIsTargetable(player)) { return; }
+                if (player == null || !PlayerIsTargetable(player)) { return; }
+                if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.name == "RatCrown" && !player.currentlyHeldObjectServer.isPocketed) { return; }
+                rallyRat = false;
                 if (currentBehaviorState == State.Swarming || IsPlayerNearANest(player)) // TODO: Test this
                 {
+                    RoundManager.PlayRandomClip(creatureSFX, AttackSFX);
+
+                    if (player != localPlayer) { return; }
                     int deathAnim = UnityEngine.Random.Range(0, 2) == 1 ? 7 : 0;
                     player.DamagePlayer(ratDamage, true, true, CauseOfDeath.Mauling, deathAnim);
                 }
@@ -716,6 +741,7 @@ namespace Rats
         {
             if (IsServerOrHost)
             {
+                rallyRat = false;
                 if (isEnemyDead || currentBehaviorState == State.ReturnToNest || Nest == null) { return; }
                 if (timeSinceCollision > 1f)
                 {

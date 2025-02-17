@@ -26,6 +26,7 @@ namespace Rats
         public MeshRenderer renderer;
         public Material GoldMat;
         public Material RustMat;
+        public MeshRenderer planeRenderer;
 #pragma warning restore 0649
 
         public static List<RatNest> Nests = [];
@@ -52,6 +53,8 @@ namespace Rats
             {
                 Apparatus = FindObjectsOfType<LungProp>().Where(x => x.isLungDocked).FirstOrDefault();
             }
+
+            AddPoison(Time.deltaTime);
 
             if (!IsServerOrHost) { return; }
 

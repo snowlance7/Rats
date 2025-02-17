@@ -13,14 +13,15 @@ namespace Rats.Items.GlueTraps
         private static ManualLogSource logger = LoggerInstance;
 
         public GameObject GlueBoardPrefab;
+        public ScanNodeProperties ScanNode;
 
-        // Configs // TODO: Set up configs
-        int glueTrapAmount = 5;
+        int glueTrapAmount;
 
         public override void Start()
         {
             base.Start();
-            // TODO: Set up configs
+            ScanNode.subText = "";
+            glueTrapAmount = configGlueBoardAmount.Value;
             SetControlTipsForItem();
         }
 

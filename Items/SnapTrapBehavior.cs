@@ -28,10 +28,9 @@ namespace Rats.Items
         Quaternion ratRotationOffset;
         Vector3 ratPositionOffset;
 
-        // Configs // TODO: Set up configs
+        // Configs
         float minLaunchForce = 10f;
         float maxLaunchForce = 15f;
-        float destroyTime = 10f;
 
         public void Start()
         {
@@ -74,7 +73,7 @@ namespace Rats.Items
             rb.useGravity = true;
             triggered = true;
 
-            GameObject.Destroy(this.gameObject, destroyTime);
+            GameObject.Destroy(this.gameObject, configSnapTrapsDespawnTime.Value);
         }
     }
 }

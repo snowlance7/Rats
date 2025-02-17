@@ -156,7 +156,7 @@ MonoBehaviour:
   subText: 
   scrapValue: 0
   creatureScanID: -1
-  nodeType: 2
+  nodeType: 0
 --- !u!1 &3570764565569835984
 GameObject:
   m_ObjectHideFlags: 0
@@ -287,6 +287,7 @@ MonoBehaviour:
   hasBeenHeld: 0
   GlueBoardPrefab: {fileID: 1535911432680096998, guid: 2b1cda44d7e96d847bd6dfc29fe99739,
     type: 3}
+  ScanNode: {fileID: 4406274286716307312}
 --- !u!82 &5033940921285507212
 AudioSource:
   m_ObjectHideFlags: 0

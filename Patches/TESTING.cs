@@ -1,4 +1,5 @@
 using BepInEx.Logging;
+using Dissonance;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ using static Rats.Plugin;
 
 namespace Rats
 {
-    //[HarmonyPatch]
+    [HarmonyPatch]
     internal class TESTING : MonoBehaviour
     {
         private static ManualLogSource logger = Plugin.LoggerInstance;
@@ -30,13 +31,10 @@ namespace Rats
         [HarmonyPostfix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.PingScan_performed))]
         public static void PingScan_performedPostFix()
         {
-            //logger.LogDebug("were rats");
-            Vector3 forward = localPlayer.gameplayCamera.transform.forward;
+            DissonanceComms comms = FindObjectOfType<DissonanceComms>();
+            float detectedVolumeAmplitude = Mathf.Clamp(comms.FindPlayer(comms.LocalPlayerName).Amplitude * 35f, 0f, 1f);
+            logger.LogDebug(detectedVolumeAmplitude);
 
-            if (Vector3.Dot(forward, Vector3.down) > 0.7f)
-            {
-                logger.LogDebug("Looking down");
-            }
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.SubmitChat_performed))]

@@ -4986,7 +4986,7 @@ MonoBehaviour:
   subText: 
   scrapValue: 0
   creatureScanID: -1
-  nodeType: 2
+  nodeType: 0
 --- !u!1 &7548659131972677963
 GameObject:
   m_ObjectHideFlags: 0
@@ -5216,6 +5216,7 @@ MonoBehaviour:
   particleSystem: {fileID: 4213189863407211916}
   ItemAnimator: {fileID: 4059404602660131355}
   PourDirection: {fileID: 7233857064835898484}
+  ScanNode: {fileID: 6186879607787624003}
 --- !u!95 &4059404602660131355
 Animator:
   serializedVersion: 5

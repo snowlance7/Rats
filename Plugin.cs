@@ -46,12 +46,18 @@ namespace Rats
         // Performance
         public static ConfigEntry<int> configMaxRats;
         public static ConfigEntry<float> configAIIntervalTime;
-        public static ConfigEntry<bool> configRatsDoIdleAnimations;
 
         // RatKing
         public static ConfigEntry<bool> configEnableRatKing;
         public static ConfigEntry<string> configRatKingLevelRarities;
         public static ConfigEntry<string> configRatKingCustomLevelRarities;
+        public static ConfigEntry<float> configRatKingSummonChancePoison;
+        public static ConfigEntry<float> configRatKingSummonChanceApparatus;
+        public static ConfigEntry<float> configRatKingSummonChanceNests;
+        public static ConfigEntry<int> configRatKingDamage;
+        public static ConfigEntry<float> configRatKingRallyCooldown;
+        public static ConfigEntry<float> configRatKingLoseDistance;
+        public static ConfigEntry<float> configRatKingIdleTime;
 
         // KingNest
         public static ConfigEntry<string> configSewerGrateSpawnWeightCurve;
@@ -73,15 +79,25 @@ namespace Rats
         public static ConfigEntry<int> configEnemyHitsToDoDamage;
         public static ConfigEntry<int> configPlayerFoodAmount;
         public static ConfigEntry<int> configRatDamage;
+        public static ConfigEntry<float> configSqueakChance;
 
         // RatPoison
         public static ConfigEntry<int> configRatPoisonPrice;
+        public static ConfigEntry<float> configRatPoisonMaxFluid;
+        public static ConfigEntry<float> configRatPoisonPourRate;
+        public static ConfigEntry<float> configPoisonToCloseNest;
 
         // GlueTrap
         public static ConfigEntry<int> configGlueTrapPrice;
+        public static ConfigEntry<int> configGlueBoardAmount;
+        public static ConfigEntry<int> configScrapValuePerRat;
+        public static ConfigEntry<int> configMaxRatsOnGlueTrap;
+
 
         // Box Of Snap traps
-        public static ConfigEntry<int> configBoxOfSnapTrapsPrice;
+        public static ConfigEntry<int> configSnapTrapsPrice;
+        public static ConfigEntry<int> configSnapTrapAmount;
+        public static ConfigEntry<float> configSnapTrapsDespawnTime;
 
         // Rat Crown
         public static ConfigEntry<float> configRatCrownAbilityRange;
@@ -113,12 +129,18 @@ namespace Rats
             // Performance
             configMaxRats = Config.Bind("Performance", "Maximum Rats", 50, "The maximum number of rats that can be on the map. Lowering this can improve performance.");
             configAIIntervalTime = Config.Bind("Performance", "AI Interval Time", 0.3f, "The interval in which rats will update their AI (Changing position, doing complex calculations, etc). Setting this higher can improve performance but can also make the rats freeze in place more often while lower values makes them constantly moving but can decrease performance. Funnily enough the rats move more rat like when this is set higher.");
-            configRatsDoIdleAnimations = Config.Bind("Performance", "Rats do idle animations", true, "Setting this to false will disable idle animations for rats, which can improve performance.");
 
             // RatKing
             configEnableRatKing = Config.Bind("Rat King", "Enable Rat King", true, "Set to false to disable spawning the rat king.");
-            configRatKingLevelRarities = Config.Bind("Rat King Rarities", "Level Rarities", "All: 25", "Rarities for each level. Example formatting: ExperimentationLevel:5, AssuranceLevel:6, VowLevel:9, OffenseLevel:10, AdamanceLevel:10, MarchLevel:10, RendLevel:75, DineLevel:75, TitanLevel:75, ArtificeLevel:20, EmbrionLevel:25, Modded:15");
+            configRatKingLevelRarities = Config.Bind("Rat King Rarities", "Level Rarities", "All: 20", "Rarities for each level. Example formatting: ExperimentationLevel:5, AssuranceLevel:6, VowLevel:9, OffenseLevel:10, AdamanceLevel:10, MarchLevel:10, RendLevel:75, DineLevel:75, TitanLevel:75, ArtificeLevel:20, EmbrionLevel:25, Modded:15");
             configRatKingCustomLevelRarities = Config.Bind("Rat King Rarities", "Custom Level Rarities", "", "Rarities for modded levels. Same formatting as level rarities.");
+            configRatKingSummonChancePoison = Config.Bind("Rat King", "Poison Summon Chance", 0.5f, "The chance the rat king will spawn when disabling a nest with rat poison.");
+            configRatKingSummonChanceApparatus = Config.Bind("Rat King", "Apparatus Summon Chance", 0.01f, "The chance the rat king will spawn when pulling the apparatus.");
+            configRatKingSummonChanceNests = Config.Bind("Rat King", "All Nests Disabled Summon Chance", 0.8f, "The chance the rat king will spawn when all the nests are disabled.");
+            configRatKingDamage = Config.Bind("Rat King", "Damage", 25, "The amount of damage the rat king does.");
+            configRatKingRallyCooldown = Config.Bind("Rat King", "Rally Cooldown", 30f, "The cooldown for the rat kings rally ability.");
+            configRatKingLoseDistance = Config.Bind("Rat King", "Distance to Lose Rat King", 20f, "The distance from the rat king you need to be to lose him. Does not apply when rampaged or hunting.");
+            configRatKingIdleTime = Config.Bind("Rat King", "Idle Time", 5f, "The amount of time the rat king will spend idling when reaching a destination during his roam routine.");
 
             // KingNest
             configSewerGrateSpawnWeightCurve = Config.Bind("Nest", "Spawn Weight Curve", "Vanilla - 0,0 ; 1,3 | Custom - 0,0 ; 1,3", "The MoonName - CurveSpawnWeight for the SewerGrate(Rat nest).");
@@ -140,15 +162,25 @@ namespace Rats
             configEnemyHitsToDoDamage = Config.Bind("Rats", "Enemy Hits to Do Damage", 10, "The amount of attacks needed to do 1 shovel hit of damage to an enemy. If 10, thumper will need to be attacked 40 times by a rat.");
             configPlayerFoodAmount = Config.Bind("Rats", "Player Food Amount", 30, "How much food points a player corpse gives when brought to the nest.");
             configRatDamage = Config.Bind("Rats", "Rat Damage", 2, "The damage dealt by a rat when attacking.");
+            configSqueakChance = Config.Bind("Rats", "Squeak Chance", 0.05f, "The chance a rat will squeak when completing a run cycle (every second)");
 
             // RatPoison
             configRatPoisonPrice = Config.Bind("Rat Poison", "Store Price", 40, "The cost of rat poison in the store.");
+            configRatPoisonMaxFluid = Config.Bind("Rat Poison", "Max Fluid", 5f, "The amount of rat poison in a container of rat poison.");
+            configRatPoisonPourRate = Config.Bind("Rat Poison", "Pour Rate", 0.1f, "How fast the rat poison pours out of the container.");
+            configPoisonToCloseNest = Config.Bind("Rat Poison", "Poison To Close Nest", 1f, "The amount of poison you need to pour in a rat nest to disable it. Disabling a nest prevents rats from spawning and has a chance to spawn the rat king.");
 
             // GlueTrap
-            configGlueTrapPrice = Config.Bind("Glue Trap", "Store Price", 10, "The cost of the glue trap in the store.");
+            configGlueTrapPrice = Config.Bind("Glue Trap", "Store Price", 20, "The cost of the glue trap in the store.");
+            configGlueBoardAmount = Config.Bind("Glue Trap", "Glue Board Amount", 4, "The amount of glue boards you get in the glue trap item.");
+            configScrapValuePerRat = Config.Bind("Glue Trap", "Scrap Value Per Rat", 2, "The scrap value added to the glue board per rat stuck.");
+            configMaxRatsOnGlueTrap = Config.Bind("Glue Trap", "Maximum Rats on Glue Trap", 5, "The maximum number of rats that can be caught on a single glue trap before it becomes full.");
+
 
             // BoxOfSnapTraps
-            configBoxOfSnapTrapsPrice = Config.Bind("Box Of Snap Traps", "Store Price", 30, "The cost of the box of snap traps in the store.");
+            configSnapTrapsPrice = Config.Bind("Snap Traps", "Store Price", 50, "The cost of the box of snap traps in the store.");
+            configSnapTrapAmount = Config.Bind("Snap Traps", "Snap Trap Amount", 100, "The amount of snap traps that come with a Box Of Snap Traps.");
+            configSnapTrapsDespawnTime = Config.Bind("Snap Traps", "Despawn Time", 10f, "The time for snap traps to despawn after being triggered.");
 
             // Rat Crown
             configRatCrownAbilityRange = Config.Bind("Rat Crown", "Ability Range", 30f, "The range in which the rat king and player (if using item) can rally rats.");
@@ -207,7 +239,7 @@ namespace Rats
             Item SnapTraps = ModAssets.LoadAsset<Item>("Assets/ModAssets/BoxOfSnapTrapsItem.asset");
             LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(SnapTraps.spawnPrefab);
             LethalLib.Modules.Utilities.FixMixerGroups(SnapTraps.spawnPrefab);
-            LethalLib.Modules.Items.RegisterShopItem(SnapTraps, configBoxOfSnapTrapsPrice.Value);
+            LethalLib.Modules.Items.RegisterShopItem(SnapTraps, configSnapTrapsPrice.Value);
 
             // Finished
             Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
@@ -215,8 +247,10 @@ namespace Rats
 
         public static void log(string message)
         {
-            if (!IsLoggingEnabled && !TESTING.testing) { return; }
-            LoggerInstance.LogDebug(message);
+            if (IsLoggingEnabled || TESTING.testing)
+            {
+                LoggerInstance.LogDebug(message);
+            }
         }
 
         // Xu's code for registering map objects with configs
