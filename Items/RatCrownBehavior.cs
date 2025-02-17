@@ -1,4 +1,5 @@
-﻿using Dissonance;
+﻿using BepInEx.Logging;
+using Dissonance;
 using GameNetcodeStuff;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ namespace Rats.Items
 {
     internal class RatCrownBehavior : PhysicsProp
     {
+        private static ManualLogSource logger = LoggerInstance;
+
         readonly Vector3 posOffsetWearing = new Vector3(0f, 0f, 0f);
         readonly Vector3 rotOffsetWearing = new Vector3(0f, 0f, 0f);
 
@@ -51,6 +54,7 @@ namespace Rats.Items
                 float volume = GetPlayerVolume();
                 if (volume  >= volumeToRallyRats)
                 {
+                    logger.LogDebug("Rallying rats with crown");
                     rallyCooldown = 0f;
                     RallyRatsServerRpc(); // TODO: TEST THIS
                 }
@@ -100,8 +104,8 @@ namespace Rats.Items
             if (previousPlayerHeldBy != null)
             {
                 wearingCrown = false;
-                playerHeldBy.playerBodyAnimator.SetBool("HoldMask", false);
-                playerHeldBy.activatingItem = false;
+                previousPlayerHeldBy.playerBodyAnimator.SetBool("HoldMask", false);
+                previousPlayerHeldBy.activatingItem = false;
             }
         }
 
@@ -111,8 +115,8 @@ namespace Rats.Items
             if (previousPlayerHeldBy != null)
             {
                 wearingCrown = false;
-                playerHeldBy.playerBodyAnimator.SetBool("HoldMask", false);
-                playerHeldBy.activatingItem = false;
+                previousPlayerHeldBy.playerBodyAnimator.SetBool("HoldMask", false);
+                previousPlayerHeldBy.activatingItem = false;
             }
         }
 

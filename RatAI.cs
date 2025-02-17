@@ -1,4 +1,5 @@
-﻿using GameNetcodeStuff;
+﻿using BepInEx.Logging;
+using GameNetcodeStuff;
 using System.Collections;
 using Unity.Netcode;
 using Unity.Netcode.Components;
@@ -12,6 +13,8 @@ namespace Rats
 {
     public class RatAI : NetworkBehaviour
     {
+        private static ManualLogSource logger = LoggerInstance;
+
 #pragma warning disable 0649
         public AudioClip[] SqueakSFX;
         public AudioClip[] AttackSFX;
@@ -24,7 +27,6 @@ namespace Rats
 
         public NavMeshAgent agent;
         public Animator creatureAnimator;
-        public float AIIntervalTime;
         public Transform eye;
         public int enemyHP;
         public AudioSource creatureSFX;
@@ -71,10 +73,11 @@ namespace Rats
         const float idleTime = 1f;
 
         // Config Values // TODO: Set up configs
-        float swarmRadius = 10f;
-        int maxDefenseRats = 10;
-        float distanceToLoseRats = 25f;
-        int ratDamage = 2;
+        float swarmRadius;
+        int maxDefenseRats;
+        float distanceToLoseRats;
+        int ratDamage;
+        float AIIntervalTime;
 
         public enum State
         {
@@ -405,7 +408,8 @@ namespace Rats
                 PlayerControllerB player = CheckLineOfSightForPlayer(60f, 60, 5);
                 if (PlayerIsTargetable(player))
                 {
-                    if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.name == "RatCrown" && !player.currentlyHeldObjectServer.isPocketed)
+                    if (player.currentlyHeldObjectServer != null) { logger.LogDebug(player.currentlyHeldObjectServer.itemProperties.name); }
+                    if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.itemProperties.name == "RatCrownItem" && !player.currentlyHeldObjectServer.isPocketed)
                     {
                         targetPlayer = player;
                         targetEnemy = null;
@@ -511,7 +515,7 @@ namespace Rats
                 while (agent.enabled)
                 {
                     yield return new WaitForSeconds(AIIntervalTime);
-                    if (!agent.hasPath || timeStopped > idleTime)
+                    if (timeStopped > idleTime)
                     {
                         break;
                     }
@@ -537,7 +541,7 @@ namespace Rats
                 while (agent.enabled)
                 {
                     yield return new WaitForSeconds(AIIntervalTime);
-                    if (!agent.hasPath || timeStopped > idleTime)
+                    if (timeStopped > idleTime)
                     {
                         break;
                     }
@@ -563,7 +567,7 @@ namespace Rats
                 while (agent.enabled)
                 {
                     yield return new WaitForSeconds(AIIntervalTime);
-                    if (!agent.hasPath || timeStopped > idleTime)
+                    if (timeStopped > idleTime)
                     {
                         break;
                     }
@@ -590,7 +594,7 @@ namespace Rats
                 while (agent.enabled)
                 {
                     yield return new WaitForSeconds(AIIntervalTime);
-                    if (!agent.hasPath || timeStopped > idleTime)
+                    if (timeStopped > idleTime)
                     {
                         break;
                     }
@@ -617,7 +621,7 @@ namespace Rats
                 while (agent.enabled)
                 {
                     yield return new WaitForSeconds(AIIntervalTime);
-                    if (!agent.hasPath || timeStopped > idleTime)
+                    if (timeStopped > idleTime)
                     {
                         break;
                     }
@@ -645,7 +649,7 @@ namespace Rats
                 while (agent.enabled)
                 {
                     yield return new WaitForSeconds(AIIntervalTime);
-                    if (!agent.hasPath || timeStopped > idleTime)
+                    if (timeStopped > idleTime)
                     {
                         SwitchToBehaviorState(State.ReturnToNest);
                         ratCoroutine = null;
