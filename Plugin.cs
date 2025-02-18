@@ -46,6 +46,8 @@ namespace Rats
         // Performance
         public static ConfigEntry<int> configMaxRats;
         public static ConfigEntry<float> configAIIntervalTime;
+        public static ConfigEntry<int> configBatchGroupCount;
+        public static ConfigEntry<float> configBatchUpdateInterval;
 
         // RatKing
         public static ConfigEntry<bool> configEnableRatKing;
@@ -66,7 +68,7 @@ namespace Rats
         public static ConfigEntry<int> configFoodToSpawnRat;
         public static ConfigEntry<int> configEnemyFoodPerHPPoint;
 
-        // SpawnedRats
+        // Rats
         public static ConfigEntry<bool> configUseJermaRats;
         public static ConfigEntry<float> configDefenseRadius;
         public static ConfigEntry<float> configTimeToIncreaseThreat;
@@ -74,7 +76,6 @@ namespace Rats
         public static ConfigEntry<int> configThreatToAttackEnemy;
         public static ConfigEntry<float> configSwarmRadius;
         public static ConfigEntry<int> configMaxDefenseRats;
-        public static ConfigEntry<int> configRatsNeededToAttack;
         public static ConfigEntry<float> configDistanceNeededToLoseRats;
         public static ConfigEntry<int> configEnemyHitsToDoDamage;
         public static ConfigEntry<int> configPlayerFoodAmount;
@@ -100,7 +101,8 @@ namespace Rats
         public static ConfigEntry<float> configSnapTrapsDespawnTime;
 
         // Rat Crown
-        public static ConfigEntry<float> configRatCrownAbilityRange;
+        public static ConfigEntry<int> configRatCrownMinValue;
+        public static ConfigEntry<int> configRatCrownMaxValue;
 
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
@@ -129,6 +131,8 @@ namespace Rats
             // Performance
             configMaxRats = Config.Bind("Performance", "Maximum Rats", 50, "The maximum number of rats that can be on the map. Lowering this can improve performance.");
             configAIIntervalTime = Config.Bind("Performance", "AI Interval Time", 0.3f, "The interval in which rats will update their AI (Changing position, doing complex calculations, etc). Setting this higher can improve performance but can also make the rats freeze in place more often while lower values makes them constantly moving but can decrease performance. Funnily enough the rats move more rat like when this is set higher.");
+            configBatchGroupCount = Config.Bind("Performance", "Batch Group Count", 5, "The amount of groups the rats will be split into to update. (if you dont know what this means, just leave this config alone)");
+            configBatchUpdateInterval = Config.Bind("Performance", "Batch Update Interval", 0.2f, "The amount of time between each group update. (if you dont know what this means, just leave this config alone)");
 
             // RatKing
             configEnableRatKing = Config.Bind("Rat King", "Enable Rat King", true, "Set to false to disable spawning the rat king.");
@@ -143,7 +147,7 @@ namespace Rats
             configRatKingIdleTime = Config.Bind("Rat King", "Idle Time", 5f, "The amount of time the rat king will spend idling when reaching a destination during his roam routine.");
 
             // KingNest
-            configSewerGrateSpawnWeightCurve = Config.Bind("Nest", "Spawn Weight Curve", "Vanilla - 0,0 ; 1,3 | Custom - 0,0 ; 1,3", "The MoonName - CurveSpawnWeight for the SewerGrate(Rat nest).");
+            configSewerGrateSpawnWeightCurve = Config.Bind("Nest", "Spawn Weight Curve", "Vanilla - 0,0 ; 1,2 | Custom - 0,0 ; 1,2", "The MoonName - CurveSpawnWeight for the SewerGrate(Rat nest).");
             configMinRatSpawnTime = Config.Bind("Nest", "Minimum Rat Spawn Time", 5, "The minimum time in seconds before a rat can spawn from the nest.");
             configMaxRatSpawnTime = Config.Bind("Nest", "Maximum Rat Spawn Time", 20, "The maximum time in seconds before a rat can spawn from the nest.");
             configFoodToSpawnRat = Config.Bind("Nest", "Food Required to Spawn Rat", 5, "The amount of food needed in the nest to spawn a new rat.");
@@ -155,14 +159,13 @@ namespace Rats
             configTimeToIncreaseThreat = Config.Bind("Rats", "Time to Increase Threat", 2.5f, "The time needed to add a threat point for a player when they are in line of sight of the rat.");
             configThreatToAttackPlayer = Config.Bind("Rats", "Threat to Attack Player", 100, "The threat level at which rats begin attacking the player.");
             configThreatToAttackEnemy = Config.Bind("Rats", "Threat to Attack Enemy", 50, "The threat level at which rats begin attacking enemy entities.");
-            configSwarmRadius = Config.Bind("Rats", "Swarm Radius", 1f, "The radius in which rats swarm around their target.");
+            configSwarmRadius = Config.Bind("Rats", "Swarm Radius", 3f, "The radius in which rats swarm around their target.");
             configMaxDefenseRats = Config.Bind("Rats", "Maximum Defense Rats", 10, "The maximum number of defense rats assigned to protect the nest.");
-            configRatsNeededToAttack = Config.Bind("Rats", "Rats Needed to Attack", 5, "The minimum number of rats required to start an attack.");
             configDistanceNeededToLoseRats = Config.Bind("Rats", "Distance Needed to Lose Rats", 25f, "The distance the player must be from rats to lose them.");
             configEnemyHitsToDoDamage = Config.Bind("Rats", "Enemy Hits to Do Damage", 10, "The amount of attacks needed to do 1 shovel hit of damage to an enemy. If 10, thumper will need to be attacked 40 times by a rat.");
             configPlayerFoodAmount = Config.Bind("Rats", "Player Food Amount", 30, "How much food points a player corpse gives when brought to the nest.");
             configRatDamage = Config.Bind("Rats", "Rat Damage", 2, "The damage dealt by a rat when attacking.");
-            configSqueakChance = Config.Bind("Rats", "Squeak Chance", 0.05f, "The chance a rat will squeak when completing a run cycle (every second)");
+            configSqueakChance = Config.Bind("Rats", "Squeak Chance", 0.01f, "The chance a rat will squeak when completing a run cycle (every second)");
 
             // RatPoison
             configRatPoisonPrice = Config.Bind("Rat Poison", "Store Price", 40, "The cost of rat poison in the store.");
@@ -183,7 +186,8 @@ namespace Rats
             configSnapTrapsDespawnTime = Config.Bind("Snap Traps", "Despawn Time", 10f, "The time for snap traps to despawn after being triggered.");
 
             // Rat Crown
-            configRatCrownAbilityRange = Config.Bind("Rat Crown", "Ability Range", 30f, "The range in which the rat king and player (if using item) can rally rats.");
+            configRatCrownMinValue = Config.Bind("Rat Crown", "Minimum Scrap Value", 300, "The minimum scrap value of the crown.");
+            configRatCrownMaxValue = Config.Bind("Rat Crown", "Maximum Scrap Value", 500, "The maximum scrap value of the crown.");
 
             // Loading Assets
             string sAssemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -241,6 +245,16 @@ namespace Rats
             LethalLib.Modules.Utilities.FixMixerGroups(SnapTraps.spawnPrefab);
             LethalLib.Modules.Items.RegisterShopItem(SnapTraps, configSnapTrapsPrice.Value);
 
+            // Rat Crowwn
+            Item RatCrown = ModAssets.LoadAsset<Item>("Assets/ModAssets/RatCrownItem.asset");
+
+            RatCrown.minValue = configRatCrownMinValue.Value;
+            RatCrown.maxValue = configRatCrownMaxValue.Value;
+
+            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(RatCrown.spawnPrefab);
+            LethalLib.Modules.Utilities.FixMixerGroups(RatCrown.spawnPrefab);
+            LethalLib.Modules.Items.RegisterScrap(RatCrown, 0);
+
             // Finished
             Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
         }
@@ -279,6 +293,7 @@ namespace Rats
                 MapObjects.RegisterMapObject(mapObjDef, Levels.LevelTypes.None, new string[] { entry.Key }, (level) => animationCurve);
             }
         }
+
         protected (Dictionary<Levels.LevelTypes, string> spawnRateByLevelType, Dictionary<string, string> spawnRateByCustomLevelType) ConfigParsingWithCurve(string configMoonRarity)
         {
             Dictionary<Levels.LevelTypes, string> spawnRateByLevelType = new();

@@ -417,7 +417,6 @@ namespace Rats
                 PlayerControllerB player = CheckLineOfSightForPlayer(60f, 60, 5);
                 if (PlayerIsTargetable(player))
                 {
-                    if (player.currentlyHeldObjectServer != null) { log(player.currentlyHeldObjectServer.itemProperties.name); }
                     if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.itemProperties.name == "RatCrownItem" && !player.currentlyHeldObjectServer.isPocketed)
                     {
                         targetPlayer = player;
@@ -737,7 +736,7 @@ namespace Rats
                 timeSinceCollision = 0f;
                 PlayerControllerB? player = other.gameObject.GetComponent<PlayerControllerB>();
                 if (player == null || !PlayerIsTargetable(player)) { return; }
-                if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.name == "RatCrown" && !player.currentlyHeldObjectServer.isPocketed) { return; }
+                if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.name == "RatCrownItem" && !player.currentlyHeldObjectServer.isPocketed) { return; }
                 rallyRat = false;
                 if (currentBehaviorState == State.Swarming || IsPlayerNearANest(player)) // TODO: Test this
                 {

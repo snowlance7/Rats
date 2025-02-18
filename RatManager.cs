@@ -52,6 +52,8 @@ namespace Rats
 
         public static void InitConfigs()
         {
+            updateInterval = configBatchUpdateInterval.Value;
+            groupCount = configBatchGroupCount.Value;
             defenseRadius = configDefenseRadius.Value;
             timeToIncreaseThreat = configTimeToIncreaseThreat.Value;
             threatToAttackPlayer = configThreatToAttackPlayer.Value;

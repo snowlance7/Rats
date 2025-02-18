@@ -105,7 +105,7 @@ namespace Rats
                     SpawnRatKing(ratKingSummonChancePoison);
 
                     int openNests = GetOpenNestCount();
-                    if (openNests <= 0)
+                    if (openNests <= 1)
                     {
                         SpawnRatKing(ratKingSummonChanceNests, true);
                     }
@@ -122,20 +122,11 @@ namespace Rats
             log("PoisonInNest: " + PoisonInNest);
         }
 
-        /*public void AddPoison(float amount)
-        {
-            PoisonInNest = Mathf.Min(PoisonInNest + amount, poisonToCloseNest);
-            float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
-            currentMat.Lerp(GoldMat, RustMat, t);
-            renderer.material = currentMat;
-            log("PoisonInNest: " + PoisonInNest);
-        }*/
-
         void SpawnRatKing(float spawnChance = 1f, bool rampage = false)
         {
             if (!IsServerOrHost) { return; }
 
-            if (RatKingAI.Instance == null)
+            if (RatKingAI.Instance == null && configEnableRatKing.Value)
             {
                 if (UnityEngine.Random.Range(0f, 1f) > spawnChance) { return; }
 
