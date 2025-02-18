@@ -33,8 +33,7 @@ namespace Rats
         {
             DissonanceComms comms = FindObjectOfType<DissonanceComms>();
             float detectedVolumeAmplitude = Mathf.Clamp(comms.FindPlayer(comms.LocalPlayerName).Amplitude * 35f, 0f, 1f);
-            logger.LogDebug(detectedVolumeAmplitude);
-
+            log(detectedVolumeAmplitude);
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.SubmitChat_performed))]
@@ -42,14 +41,14 @@ namespace Rats
         {
             string msg = __instance.chatTextField.text;
             string[] args = msg.Split(" ");
-            //logger.LogDebug(msg);
+            //log(msg);
 
             switch (args[0])
             {
                 case "/spawnRat":
                     RatNest nest = RatManager.GetClosestNest(localPlayer.transform.position);
                     nest.SpawnRats(int.Parse(args[1]));
-                    logger.LogDebug($"Spawning {args[1]} rats");
+                    log($"Spawning {args[1]} rats");
                     break;
                 case "/spawnNest":
                     Vector3 position = localPlayer.transform.position + localPlayer.transform.forward * 1f;
@@ -62,7 +61,7 @@ namespace Rats
                 case "/enemies":
                     foreach (var enemy in GetEnemies())
                     {
-                        logger.LogDebug(enemy.enemyType.name);
+                        log(enemy.enemyType.name);
                     }
                     break;
                 case "/refresh":
@@ -72,16 +71,16 @@ namespace Rats
                 case "/levels":
                     foreach (var level in StartOfRound.Instance.levels)
                     {
-                        logger.LogDebug(level.name);
+                        log(level.name);
                     }
                     break;
                 case "/dungeon":
-                    logger.LogDebug(RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.name);
+                    log(RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.name);
                     break;
                 case "/dungeons":
                     foreach (var dungeon in RoundManager.Instance.dungeonFlowTypes)
                     {
-                        logger.LogDebug(dungeon.dungeonFlow.name);
+                        log(dungeon.dungeonFlow.name);
                     }
                     break;
                 default:
@@ -91,7 +90,7 @@ namespace Rats
 
         public static List<SpawnableEnemyWithRarity> GetEnemies()
         {
-            logger.LogDebug("Getting enemies");
+            log("Getting enemies");
             List<SpawnableEnemyWithRarity> enemies = new List<SpawnableEnemyWithRarity>();
             enemies = GameObject.Find("Terminal")
                 .GetComponentInChildren<Terminal>()
@@ -101,7 +100,7 @@ namespace Rats
                 .GroupBy(x => x.enemyType.name, (k, v) => v.First())
                 .ToList();
 
-            logger.LogDebug($"Enemy types: {enemies.Count}");
+            log($"Enemy types: {enemies.Count}");
             return enemies;
         }
 

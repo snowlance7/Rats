@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using GameNetcodeStuff;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,6 @@ namespace Rats
 
         public static List<RatAI> SpawnedRats = [];
         private List<List<RatAI>> ratGroups = new List<List<RatAI>>(); // Groups for batch updates
-        private float updateInterval = 0.2f; // Time between group updates
 
         public static List<EnemyVent> Vents { get { return RoundManager.Instance.allEnemyVents.ToList(); } }
         public static Dictionary<EnemyAI, int> EnemyHitCount = [];
@@ -46,6 +46,9 @@ namespace Rats
         public static int enemyFoodPerHPPoint = 10;
         public static int maxRats = 50;
         public static float poisonToCloseNest = 1f;
+
+        static float updateInterval = 0.2f; // Time between group updates
+        static int groupCount = 5;
 
         public static void InitConfigs()
         {
@@ -90,6 +93,7 @@ namespace Rats
             SpawnedRats.Add(rat);
             RecalculateGroups();
         }
+
         public void RemoveRat(RatAI rat)
         {
             SpawnedRats.Remove(rat);
@@ -98,18 +102,20 @@ namespace Rats
 
         private void RecalculateGroups()
         {
-            // Reset groups
             ratGroups.Clear();
-            for (int i = 0; i < 5; i++)
-            {
-                ratGroups.Add(new List<RatAI>());
-            }
 
-            // Distribute rats into groups
-            for (int i = 0; i < SpawnedRats.Count; i++)
+            if (SpawnedRats.Count == 0 || groupCount <= 0)
+                return; // No need to process if no rats exist
+
+            int baseSize = SpawnedRats.Count / groupCount; // Base number of rats per group
+            int remainder = SpawnedRats.Count % groupCount; // Extra rats to distribute
+
+            int index = 0;
+            for (int i = 0; i < groupCount; i++)
             {
-                int groupIndex = i % 5;
-                ratGroups[groupIndex].Add(SpawnedRats[i]);
+                int currentSize = baseSize + (i < remainder ? 1 : 0); // Distribute extra rats evenly
+                ratGroups.Add(SpawnedRats.Skip(index).Take(currentSize).ToList());
+                index += currentSize;
             }
         }
 
@@ -118,18 +124,26 @@ namespace Rats
             int groupIndex = 0;
             while (true)
             {
-                if (ratGroups.Count > 0 && ratGroups[groupIndex].Count > 0)
+                if (ratGroups.Count > 0) // Ensure there are groups to update
                 {
-                    foreach (RatAI rat in ratGroups[groupIndex])
+                    groupIndex %= ratGroups.Count; // Prevent out-of-bounds index
+
+                    if (ratGroups[groupIndex].Count > 0)
                     {
-                        rat.DoAIInterval(); // Call the update method on each rat
+                        log($"Updating {ratGroups[groupIndex].Count} rats in group {groupIndex}");
+                        foreach (RatAI rat in ratGroups[groupIndex])
+                        {
+                            rat.DoAIInterval(); // Call the update method on each rat
+                        }
                     }
+
+                    groupIndex++; // Move to the next group
                 }
 
-                groupIndex = (groupIndex + 1) % 5; // Cycle through groups
                 yield return new WaitForSeconds(updateInterval);
             }
         }
+
 
         public static bool CalculatePath(Vector3 fromPos, Vector3 toPos)
         {
@@ -187,6 +201,17 @@ namespace Rats
             if (!IsServerOrHost) { return; }
             GameObject ratNest = Instantiate(RatNestPrefab, position, Quaternion.identity);
             ratNest.GetComponent<NetworkObject>().Spawn(true);
+        }
+    }
+    public static class ListExtensions
+    {
+        public static List<List<T>> SplitIntoChunks<T>(this List<T> source, int chunkSize)
+        {
+            return source
+                .Select((item, index) => new { item, index })
+                .GroupBy(x => x.index / chunkSize)
+                .Select(g => g.Select(x => x.item).ToList())
+                .ToList();
         }
     }
 }

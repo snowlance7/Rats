@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using GameNetcodeStuff;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -118,7 +119,7 @@ namespace Rats
             float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
 
             renderer.material.Lerp(GoldMat, RustMat, t);
-            logger.LogDebug("PoisonInNest: " + PoisonInNest);
+            log("PoisonInNest: " + PoisonInNest);
         }
 
         /*public void AddPoison(float amount)
@@ -127,7 +128,7 @@ namespace Rats
             float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
             currentMat.Lerp(GoldMat, RustMat, t);
             renderer.material = currentMat;
-            logger.LogDebug("PoisonInNest: " + PoisonInNest);
+            log("PoisonInNest: " + PoisonInNest);
         }*/
 
         void SpawnRatKing(float spawnChance = 1f, bool rampage = false)
@@ -182,8 +183,16 @@ namespace Rats
         {
             if (amount == 0) { return; }
             log("Spawning rats from food: " + amount);
+            StartCoroutine(SpawnRatsCoroutine(amount));
+        }
+
+        IEnumerator SpawnRatsCoroutine(int amount)
+        {
+            yield return null;
+
             for (int i = 0; i < amount; i++)
             {
+                yield return null;
                 SpawnRat();
             }
         }

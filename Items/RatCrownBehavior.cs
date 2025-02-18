@@ -11,7 +11,7 @@ using static Rats.Plugin;
 
 /*DissonanceComms comms = FindObjectOfType<DissonanceComms>();
 float detectedVolumeAmplitude = Mathf.Clamp(comms.FindPlayer(comms.LocalPlayerName).Amplitude * 35f, 0f, 1f);
-logger.LogDebug(detectedVolumeAmplitude);*/
+log(detectedVolumeAmplitude);*/
 
 namespace Rats.Items
 {
@@ -19,8 +19,8 @@ namespace Rats.Items
     {
         private static ManualLogSource logger = LoggerInstance;
 
-        readonly Vector3 posOffsetWearing = new Vector3(0f, 0f, 0f);
-        readonly Vector3 rotOffsetWearing = new Vector3(0f, 0f, 0f);
+        readonly Vector3 posOffsetWearing = new Vector3(0.3f, -0.1f, -0.4f);
+        readonly Vector3 rotOffsetWearing = new Vector3(90f, 115f, 0f);
 
         VoicePlayerState localPlayerComms;
         bool wearingCrown;
@@ -54,7 +54,7 @@ namespace Rats.Items
                 float volume = GetPlayerVolume();
                 if (volume  >= volumeToRallyRats)
                 {
-                    logger.LogDebug("Rallying rats with crown");
+                    log("Rallying rats with crown");
                     rallyCooldown = 0f;
                     RallyRatsServerRpc(); // TODO: TEST THIS
                 }

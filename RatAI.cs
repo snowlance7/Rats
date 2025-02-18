@@ -118,6 +118,15 @@ namespace Rats
             log($"Rat spawned");
         }
 
+        public override void OnNetworkDespawn()
+        {
+            base.OnNetworkDespawn();
+            if (RatManager.Instance != null)
+            {
+                RatManager.Instance.RemoveRat(this);
+            }
+        }
+
         public void Update()
         {
             if (isEnemyDead || StartOfRound.Instance.allPlayersDead)
@@ -408,7 +417,7 @@ namespace Rats
                 PlayerControllerB player = CheckLineOfSightForPlayer(60f, 60, 5);
                 if (PlayerIsTargetable(player))
                 {
-                    if (player.currentlyHeldObjectServer != null) { logger.LogDebug(player.currentlyHeldObjectServer.itemProperties.name); }
+                    if (player.currentlyHeldObjectServer != null) { log(player.currentlyHeldObjectServer.itemProperties.name); }
                     if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.itemProperties.name == "RatCrownItem" && !player.currentlyHeldObjectServer.isPocketed)
                     {
                         targetPlayer = player;

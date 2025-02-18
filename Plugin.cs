@@ -149,13 +149,13 @@ namespace Rats
             configFoodToSpawnRat = Config.Bind("Nest", "Food Required to Spawn Rat", 5, "The amount of food needed in the nest to spawn a new rat.");
             configEnemyFoodPerHPPoint = Config.Bind("Nest", "Food Per HP Point", 10, "How much food points one HP will equal for enemies. ex: if 10 thumper will give 40 food points.");
 
-            // SpawnedRats
+            // Rats
             configUseJermaRats = Config.Bind("Rats", "Use Jerma Rats", false, "Uses a lower quality model for the rats with no animations. Can help with performance if enabled.");
             configDefenseRadius = Config.Bind("Rats", "Defense Radius", 5f, "The radius in which defense rats protect the nest.");
             configTimeToIncreaseThreat = Config.Bind("Rats", "Time to Increase Threat", 2.5f, "The time needed to add a threat point for a player when they are in line of sight of the rat.");
             configThreatToAttackPlayer = Config.Bind("Rats", "Threat to Attack Player", 100, "The threat level at which rats begin attacking the player.");
             configThreatToAttackEnemy = Config.Bind("Rats", "Threat to Attack Enemy", 50, "The threat level at which rats begin attacking enemy entities.");
-            configSwarmRadius = Config.Bind("Rats", "Swarm Radius", 3f, "The radius in which rats swarm around their target.");
+            configSwarmRadius = Config.Bind("Rats", "Swarm Radius", 1f, "The radius in which rats swarm around their target.");
             configMaxDefenseRats = Config.Bind("Rats", "Maximum Defense Rats", 10, "The maximum number of defense rats assigned to protect the nest.");
             configRatsNeededToAttack = Config.Bind("Rats", "Rats Needed to Attack", 5, "The minimum number of rats required to start an attack.");
             configDistanceNeededToLoseRats = Config.Bind("Rats", "Distance Needed to Lose Rats", 25f, "The distance the player must be from rats to lose them.");
@@ -245,7 +245,7 @@ namespace Rats
             Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
         }
 
-        public static void log(string message)
+        public static void log(object message)
         {
             if (IsLoggingEnabled || TESTING.testing)
             {
