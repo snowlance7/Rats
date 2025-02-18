@@ -339,7 +339,7 @@ namespace Rats
         IEnumerator RoamCoroutine()
         {
             yield return null;
-            while (ratCoroutine != null)
+            while (ratCoroutine != null && agent.enabled)
             {
                 targetNode = GetRandomNode();
                 Vector3 position = RoundManager.Instance.GetNavMeshPosition(targetNode.position, RoundManager.Instance.navHit, 1.75f, agent.areaMask);

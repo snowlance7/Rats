@@ -221,6 +221,14 @@ namespace Rats
             LoggerInstance.LogDebug($"Registering RatSpawn");
             RegisterInsideMapObjectWithConfig(RatSpawnPrefab, configSewerGrateSpawnWeightCurve.Value);
 
+            // Rat
+            GameObject rat = ModAssets.LoadAsset<GameObject>("Assets/ModAssets/Rat.prefab");
+            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(rat);
+
+            // Jerma Rat
+            GameObject jermaRat = ModAssets.LoadAsset<GameObject>("Assets/ModAssets/JermaRat.prefab");
+            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(jermaRat);
+
             // Rat poison
             Item RatPoison = ModAssets.LoadAsset<Item>("Assets/ModAssets/RatPoisonItem.asset");
             LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(RatPoison.spawnPrefab);

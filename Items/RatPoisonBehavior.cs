@@ -33,6 +33,7 @@ namespace Rats.Items
 
         public override void SetControlTipsForItem()
         {
+            if (playerHeldBy != localPlayer) { return; }
             string[] toolTips = itemProperties.toolTips;
             toolTips[0] = $"Pour [LMB] ({currentFluid.ToString("F1")}L left)";
             HUDManager.Instance.ChangeControlTipMultiple(toolTips, holdingItem: true, itemProperties);

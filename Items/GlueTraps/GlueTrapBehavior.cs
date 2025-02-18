@@ -27,6 +27,7 @@ namespace Rats.Items.GlueTraps
 
         public override void SetControlTipsForItem()
         {
+            if (playerHeldBy != localPlayer) { return; }
             string[] toolTips = itemProperties.toolTips;
             toolTips[0] = $"Drop Glue Trap [LMB] ({glueTrapAmount} left)";
             HUDManager.Instance.ChangeControlTipMultiple(toolTips, holdingItem: true, itemProperties);
@@ -39,8 +40,11 @@ namespace Rats.Items.GlueTraps
             if (buttonDown && glueTrapAmount > 0)
             {
                 if (!Physics.Raycast(transform.position, -Vector3.up, out var hitInfo, 80f, 268437761, QueryTriggerInteraction.Ignore)) { return; }
-                GameObject glueBoardObj = Instantiate(GlueBoardPrefab, hitInfo.point, playerHeldBy.transform.rotation);
-                if (IsServerOrHost) { glueBoardObj.GetComponent<NetworkObject>().Spawn(true); }
+                if (IsServerOrHost)
+                {
+                    GameObject glueBoardObj = Instantiate(GlueBoardPrefab, hitInfo.point, playerHeldBy.transform.rotation);
+                    glueBoardObj.GetComponent<NetworkObject>().Spawn(true);
+                }
                 glueTrapAmount--;
                 SetControlTipsForItem();
             }
