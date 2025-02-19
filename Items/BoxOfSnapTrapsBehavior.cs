@@ -15,7 +15,7 @@ namespace Rats.Items
         public GameObject SnapTrapPrefab;
         public ScanNodeProperties ScanNode;
 
-        // Configs // TODO: Set up configs
+        // Configs
         int snapTrapAmount;
 
         public override void Start()
@@ -23,7 +23,7 @@ namespace Rats.Items
             base.Start();
             ScanNode.subText = "";
             snapTrapAmount = configSnapTrapAmount.Value;
-            SetControlTipsForItem();
+            FallToGround();
         }
 
         public override void SetControlTipsForItem()
@@ -45,6 +45,12 @@ namespace Rats.Items
                 snapTrapAmount--;
                 SetControlTipsForItem();
             }
+        }
+
+        public override void GrabItem()
+        {
+            base.GrabItem();
+            SetControlTipsForItem();
         }
 
         public override int GetItemDataToSave()

@@ -22,7 +22,7 @@ namespace Rats.Items.GlueTraps
             base.Start();
             ScanNode.subText = "";
             glueTrapAmount = configGlueBoardAmount.Value;
-            SetControlTipsForItem();
+            FallToGround();
         }
 
         public override void SetControlTipsForItem()
@@ -48,6 +48,12 @@ namespace Rats.Items.GlueTraps
                 glueTrapAmount--;
                 SetControlTipsForItem();
             }
+        }
+
+        public override void GrabItem()
+        {
+            base.GrabItem();
+            SetControlTipsForItem();
         }
 
         public override int GetItemDataToSave()

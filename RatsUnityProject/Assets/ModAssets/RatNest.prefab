@@ -96,7 +96,7 @@ GameObject:
   - component: {fileID: 326393155352455427}
   m_Layer: 22
   m_Name: ScanNode
-  m_TagString: DoNotSet
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -354,6 +354,7 @@ MonoBehaviour:
   GoldMat: {fileID: 2100000, guid: b38c25b4183b7d447bf249da8ea37c3a, type: 2}
   RustMat: {fileID: 2100000, guid: 7df256b91f6df034f91aad9b55131423, type: 2}
   planeRenderer: {fileID: 3126048708855535446}
+  YellowMat: {fileID: 2100000, guid: 06b6dd1b7949db746b7bf2a866cd28d5, type: 2}
   Apparatus: {fileID: 0}
   IsOpen: 1
   IsRatKing: 0
@@ -378,5 +379,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.03687218, y: 0.02974902, z: 0.037517305}
-  m_Center: {x: -0.00013347268, y: 0.008876214, z: -0.000035470726}
+  m_Size: {x: 0.036872182, y: 0.040930275, z: 0.037517305}
+  m_Center: {x: -0.00013347268, y: 0.014042353, z: -0.000035470726}

@@ -36,9 +36,8 @@ namespace Rats.Items.GlueTraps
             base.ActivatePhysicsTrigger(other);
 
             Plugin.LoggerInstance.LogDebug("In ActivatePhysicsTrigger()");
-            if (ratsOnBoard.Count >= configMaxRatsOnGlueTrap.Value && !grabbable)
+            if (ratsOnBoard.Count >= configMaxRatsOnGlueTrap.Value)
             {
-                grabbable = true;
                 return;
             }
 
@@ -69,8 +68,6 @@ namespace Rats.Items.GlueTraps
             yield return new WaitForSeconds(1f);
             AddRatToBoardClientRpc(rat.transform.position, rat.transform.rotation);
             rat.NetworkObject.Despawn(true);
-            //rat.agent.speed = 0f;
-            //ParentRatToBoardClientRpc(rat.NetworkObject);
         }
 
         public override int GetItemDataToSave()
@@ -113,17 +110,5 @@ namespace Rats.Items.GlueTraps
             ratsOnBoard.Add(rat);
             SetScrapValue(ratsOnBoard.Count * configScrapValuePerRat.Value);
         }
-
-        /*[ClientRpc]
-        public void ParentRatToBoardClientRpc(NetworkObjectReference netRef)
-        {
-            log("In ParentRatToBoardClientRpc()");
-            if (!netRef.TryGet(out NetworkObject netObj)) {  return; }
-            RatAI rat = netObj.GetComponent<RatAI>();
-            rat.KillEnemy();
-            rat.agent.enabled = false;
-            rat.gameObject.transform.SetParent(transform);
-            ratsOnGlueTrap++;
-        }*/
     }
 }

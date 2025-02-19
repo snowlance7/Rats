@@ -28,7 +28,7 @@ namespace Rats.Items
             ScanNode.subText = "";
             currentFluid = configRatPoisonMaxFluid.Value;
             pourRate = configRatPoisonPourRate.Value;
-            SetControlTipsForItem();
+            FallToGround();
         }
 
         public override void SetControlTipsForItem()
@@ -101,6 +101,12 @@ namespace Rats.Items
                     }
                 }
             }
+        }
+
+        public override void GrabItem()
+        {
+            base.GrabItem();
+            SetControlTipsForItem();
         }
 
         public override int GetItemDataToSave()

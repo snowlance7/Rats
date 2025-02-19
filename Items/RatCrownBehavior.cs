@@ -36,6 +36,7 @@ namespace Rats.Items
 
             DissonanceComms comms = FindObjectOfType<DissonanceComms>();
             localPlayerComms = comms.FindPlayer(comms.LocalPlayerName);
+            FallToGround();
         }
 
         public override void Update()
@@ -56,7 +57,7 @@ namespace Rats.Items
                 {
                     log("Rallying rats with crown");
                     rallyCooldown = 0f;
-                    RallyRatsServerRpc(); // TODO: TEST THIS
+                    RallyRatsServerRpc();
                 }
             }
         }

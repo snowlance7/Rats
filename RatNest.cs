@@ -28,9 +28,11 @@ namespace Rats
         public Material GoldMat;
         public Material RustMat;
         public MeshRenderer planeRenderer;
+        public Material YellowMat;
 #pragma warning restore 0649
 
         public static List<RatNest> Nests = [];
+        public static Dictionary<EnemyAI, int> EnemyFoodAmount = [];
         public LungProp? Apparatus;
         bool appyPulled;
 
@@ -38,7 +40,6 @@ namespace Rats
         public bool IsRatKing = false;
 
         public List<RatAI> DefenseRats = [];
-        public static Dictionary<EnemyAI, int> EnemyFoodAmount = [];
         float timeSinceSpawnRat;
         float nextRatSpawnTime;
         int food;
@@ -78,7 +79,7 @@ namespace Rats
             if (Apparatus != null && !Apparatus.isLungDocked && !appyPulled)
             {
                 appyPulled = true;
-                SpawnRatKing(ratKingSummonChanceApparatus);
+                SpawnRatKingOnServer(ratKingSummonChanceApparatus);
             }
 
             if (!IsServerOrHost) { return; }
@@ -102,12 +103,12 @@ namespace Rats
                 {
                     IsOpen = false;
 
-                    SpawnRatKing(ratKingSummonChancePoison);
+                    SpawnRatKingOnServer(ratKingSummonChancePoison);
 
                     int openNests = GetOpenNestCount();
                     if (openNests <= 1)
                     {
-                        SpawnRatKing(ratKingSummonChanceNests, true);
+                        SpawnRatKingOnServer(ratKingSummonChanceNests, true);
                     }
                 }
             }
@@ -115,14 +116,21 @@ namespace Rats
 
         public void AddPoison(float amount)
         {
+            if (IsRatKing) { return; }
+
             PoisonInNest = Mathf.Min(PoisonInNest + amount, poisonToCloseNest);
             float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
 
             renderer.material.Lerp(GoldMat, RustMat, t);
             log("PoisonInNest: " + PoisonInNest);
+
+            if (PoisonInNest >= poisonToCloseNest)
+            {
+                planeRenderer.material = YellowMat;
+            }
         }
 
-        void SpawnRatKing(float spawnChance = 1f, bool rampage = false)
+        void SpawnRatKingOnServer(float spawnChance = 1f, bool rampage = false)
         {
             if (!IsServerOrHost) { return; }
 
@@ -165,7 +173,7 @@ namespace Rats
             if (RatManager.SpawnedRats.Count < maxRats || TESTING.testing)
             {
                 GameObject ratObj = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
-                ratObj.GetComponent<NetworkObject>().Spawn(destroyWithScene: true);
+                ratObj.GetComponent<NetworkObject>().Spawn();
                 RatManager.Instance.RegisterRat(ratObj.GetComponent<RatAI>());
             }
         }
@@ -186,30 +194,6 @@ namespace Rats
                 yield return null;
                 SpawnRat();
             }
-        }
-
-        public override void OnDestroy()
-        {
-            EnemyHitCount.Clear();
-            EnemyThreatCounter.Clear();
-            PlayerThreatCounter.Clear();
-            EnemyFoodAmount.Clear();
-            Apparatus = null;
-
-            foreach (RatAI rat in SpawnedRats)
-            {
-                if (!rat.NetworkObject.IsSpawned) { continue; }
-                rat.NetworkObject.Despawn(true);
-            }
-
-            SpawnedRats.Clear();
-            if (RatManager.Instance != null)
-            {
-                Destroy(RatManager.Instance.gameObject);
-            }
-            Nests.Clear();
-
-            base.OnDestroy();
         }
 
         [ClientRpc]

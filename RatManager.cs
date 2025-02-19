@@ -13,7 +13,7 @@ namespace Rats
 {
     public class RatManager : MonoBehaviour
     {
-        public static RatManager Instance { get; private set; }
+        public static RatManager? Instance { get; private set; }
 
         public static GameObject RatNestPrefab;
 
@@ -78,7 +78,7 @@ namespace Rats
         {
             if (Instance == null)
             {
-                Instance = GameObject.Instantiate(new GameObject("RatManager")).AddComponent<RatManager>();
+                Instance = GameObject.Instantiate(new GameObject("RatManager"), Vector3.zero, Quaternion.identity, RoundManager.Instance.mapPropsContainer.transform).AddComponent<RatManager>();
                 LoggerInstance.LogDebug("Init RatManager");
             }
         }
@@ -88,6 +88,33 @@ namespace Rats
             if (!IsServerOrHost) { return; }
             LoggerInstance.LogDebug("Starting batch updater");
             StartCoroutine(BatchUpdateRoutine());
+        }
+
+        public void OnDestroy()
+        {
+            if (!IsServerOrHost) { return; }
+
+            EnemyHitCount.Clear();
+            EnemyThreatCounter.Clear();
+            PlayerThreatCounter.Clear();
+            RatNest.EnemyFoodAmount.Clear();
+
+            foreach (RatAI rat in SpawnedRats)
+            {
+                if (!rat.NetworkObject.IsSpawned) { continue; }
+                rat.NetworkObject.Despawn(true);
+            }
+
+            SpawnedRats.Clear();
+
+            foreach (RatNest nest in RatNest.Nests)
+            {
+                if (!nest.NetworkObject.IsSpawned) { continue; }
+                nest.NetworkObject.Despawn(true);
+            }
+
+            RatNest.Nests.Clear();
+            Instance = null;
         }
 
         public void RegisterRat(RatAI rat)
@@ -201,7 +228,7 @@ namespace Rats
         public static void SpawnNest(Vector3 position)
         {
             if (!IsServerOrHost) { return; }
-            GameObject ratNest = Instantiate(RatNestPrefab, position, Quaternion.identity);
+            GameObject ratNest = Instantiate(RatNestPrefab, position, Quaternion.identity, RoundManager.Instance.mapPropsContainer.transform);
             ratNest.GetComponent<NetworkObject>().Spawn(true);
         }
     }
