@@ -53,6 +53,7 @@ namespace Rats
         public static ConfigEntry<bool> configEnableRatKing;
         public static ConfigEntry<string> configRatKingLevelRarities;
         public static ConfigEntry<string> configRatKingCustomLevelRarities;
+        public static ConfigEntry<float> configRatKingSummonChanceRatDeath;
         public static ConfigEntry<float> configRatKingSummonChancePoison;
         public static ConfigEntry<float> configRatKingSummonChanceApparatus;
         public static ConfigEntry<float> configRatKingSummonChanceNests;
@@ -73,6 +74,7 @@ namespace Rats
         public static ConfigEntry<float> configDefenseRadius;
         public static ConfigEntry<float> configTimeToIncreaseThreat;
         public static ConfigEntry<int> configThreatToAttackPlayer;
+        public static ConfigEntry<int> configHighPlayerThreat;
         public static ConfigEntry<int> configThreatToAttackEnemy;
         public static ConfigEntry<float> configSwarmRadius;
         public static ConfigEntry<int> configMaxDefenseRats;
@@ -138,9 +140,10 @@ namespace Rats
             configEnableRatKing = Config.Bind("Rat King", "Enable Rat King", true, "Set to false to disable spawning the rat king.");
             configRatKingLevelRarities = Config.Bind("Rat King Rarities", "Level Rarities", "All: 20", "Rarities for each level. Example formatting: ExperimentationLevel:5, AssuranceLevel:6, VowLevel:9, OffenseLevel:10, AdamanceLevel:10, MarchLevel:10, RendLevel:75, DineLevel:75, TitanLevel:75, ArtificeLevel:20, EmbrionLevel:25, Modded:15");
             configRatKingCustomLevelRarities = Config.Bind("Rat King Rarities", "Custom Level Rarities", "", "Rarities for modded levels. Same formatting as level rarities.");
+            configRatKingSummonChanceRatDeath = Config.Bind("Rat King", "Rat Death Summon Chance", 0.01f, "The chance the rat king will spawn when killing a rat at high threat.");
             configRatKingSummonChancePoison = Config.Bind("Rat King", "Poison Summon Chance", 0.5f, "The chance the rat king will spawn when disabling a nest with rat poison.");
-            configRatKingSummonChanceApparatus = Config.Bind("Rat King", "Apparatus Summon Chance", 0.01f, "The chance the rat king will spawn when pulling the apparatus.");
-            configRatKingSummonChanceNests = Config.Bind("Rat King", "All Nests Disabled Summon Chance", 0.8f, "The chance the rat king will spawn when all the nests are disabled.");
+            configRatKingSummonChanceApparatus = Config.Bind("Rat King", "Apparatus Summon Chance", 0.05f, "The chance the rat king will spawn when pulling the apparatus.");
+            configRatKingSummonChanceNests = Config.Bind("Rat King", "All Nests Disabled Summon Chance", 0.85f, "The chance the rat king will spawn when all the nests are disabled.");
             configRatKingDamage = Config.Bind("Rat King", "Damage", 25, "The amount of damage the rat king does.");
             configRatKingRallyCooldown = Config.Bind("Rat King", "Rally Cooldown", 30f, "The cooldown for the rat kings rally ability.");
             configRatKingLoseDistance = Config.Bind("Rat King", "Distance to Lose Rat King", 20f, "The distance from the rat king you need to be to lose him. Does not apply when rampaged or hunting.");
@@ -158,6 +161,7 @@ namespace Rats
             configDefenseRadius = Config.Bind("Rats", "Defense Radius", 5f, "The radius in which defense rats protect the nest.");
             configTimeToIncreaseThreat = Config.Bind("Rats", "Time to Increase Threat", 2.5f, "The time needed to add a threat point for a player when they are in line of sight of the rat.");
             configThreatToAttackPlayer = Config.Bind("Rats", "Threat to Attack Player", 100, "The threat level at which rats begin attacking the player.");
+            configHighPlayerThreat = Config.Bind("Rats", "High Player Threat", 250, "The threat level at which rats will call for the rat king and the rat king will attack players.");
             configThreatToAttackEnemy = Config.Bind("Rats", "Threat to Attack Enemy", 50, "The threat level at which rats begin attacking enemy entities.");
             configSwarmRadius = Config.Bind("Rats", "Swarm Radius", 3f, "The radius in which rats swarm around their target.");
             configMaxDefenseRats = Config.Bind("Rats", "Maximum Defense Rats", 10, "The maximum number of defense rats assigned to protect the nest.");

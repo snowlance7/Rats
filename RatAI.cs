@@ -685,6 +685,11 @@ namespace Rats
             if (IsServerOrHost && playerWhoHit != null)
             {
                 AddThreat(playerWhoHit, 1);
+
+                if (PlayerThreatCounter[playerWhoHit] > highPlayerThreat && Nest != null)
+                {
+                    Nest.SpawnRatKingOnServer(configRatKingSummonChanceRatDeath.Value);
+                }
             }
         }
 
@@ -876,7 +881,7 @@ namespace Rats
 
                 if (defenseRat) { return; }
 
-                if (threat > highThreatToAttackPlayer && RatKingAI.Instance != null && RatKingAI.Instance.currentBehaviourStateIndex == (int)RatKingAI.State.Roaming)
+                if (threat > highPlayerThreat && RatKingAI.Instance != null && RatKingAI.Instance.currentBehaviourStateIndex == (int)RatKingAI.State.Roaming)
                 {
                     if (RatKingAI.Instance.targetPlayer == null)
                     {

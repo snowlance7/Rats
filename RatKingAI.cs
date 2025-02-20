@@ -243,7 +243,7 @@ namespace Rats
             foreach (var player in StartOfRound.Instance.allPlayerScripts)
             {
                 if (!PlayerIsTargetable(player)) { continue; }
-                AddThreat(player, highThreatToAttackPlayer, false);
+                AddThreat(player, highPlayerThreat, false);
             }
 
             SwitchToBehaviourClientRpc((int)State.Rampaging);
@@ -449,7 +449,7 @@ namespace Rats
 
             PlaySqueakSFXClientRpc();
 
-            if (RatManager.PlayerThreatCounter[player] > highThreatToAttackPlayer)
+            if (RatManager.PlayerThreatCounter[player] > highPlayerThreat)
             {
                 Rally(player); // TODO: Keeps walking here STILL TO THIS DAY KEEPS WALKING WHYYYYYYYYYYYY
             }

@@ -31,7 +31,7 @@ namespace Rats
         public static float timeToIncreaseThreat = 3f;
         public static int threatToAttackPlayer = 100;
         public static int threatToAttackEnemy = 50;
-        public static int highThreatToAttackPlayer = 250;
+        public static int highPlayerThreat = 250;
         public static int enemyHitsToDoDamage = 10;
         public static int playerFoodAmount = 30;
         public static float ratKingSummonChancePoison = 0.5f;
@@ -57,6 +57,7 @@ namespace Rats
             defenseRadius = configDefenseRadius.Value;
             timeToIncreaseThreat = configTimeToIncreaseThreat.Value;
             threatToAttackPlayer = configThreatToAttackPlayer.Value;
+            highPlayerThreat = configHighPlayerThreat.Value;
             threatToAttackEnemy = configThreatToAttackEnemy.Value;
             enemyHitsToDoDamage = configEnemyHitsToDoDamage.Value;
             playerFoodAmount = configPlayerFoodAmount.Value;

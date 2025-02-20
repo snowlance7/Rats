@@ -130,7 +130,7 @@ namespace Rats
             }
         }
 
-        void SpawnRatKingOnServer(float spawnChance = 1f, bool rampage = false)
+        public void SpawnRatKingOnServer(float spawnChance = 1f, bool rampage = false)
         {
             if (!IsServerOrHost) { return; }
 
