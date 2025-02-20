@@ -71,6 +71,7 @@ namespace Rats
                 NetworkObject.Despawn(true);
                 return;
             }
+            logger.LogDebug("Setting RatKingAI.Instance to this");
             Instance = this;
             log("Finished spawning Rat King");
 
@@ -108,6 +109,7 @@ namespace Rats
             thisEnemyIndex = RoundManager.Instance.numberOfEnemiesInScene;
             RoundManager.Instance.numberOfEnemiesInScene++;
             allAINodes = RoundManager.Instance.insideAINodes;
+            RoundManager.Instance.SpawnedEnemies.Add(this);
             path1 = new NavMeshPath();
             ventAnimationFinished = true;
             if (IsServerOrHost)

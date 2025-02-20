@@ -76,13 +76,13 @@ namespace Rats
                 transform.position = RatKingAI.Instance.NestTransform.position;
             }
 
+            if (!IsServerOrHost) { return; }
+
             if (Apparatus != null && !Apparatus.isLungDocked && !appyPulled)
             {
                 appyPulled = true;
                 SpawnRatKingOnServer(ratKingSummonChanceApparatus);
             }
-
-            if (!IsServerOrHost) { return; }
 
             if (IsOpen)
             {
@@ -141,7 +141,7 @@ namespace Rats
                 Transform? node = GetRandomNode();
                 if (node == null) { LoggerInstance.LogError("node was null cant spawn rat king"); return; }
                 RatKingAI ratKing = GameObject.Instantiate(RatKingPrefab, node.transform.position, Quaternion.identity).GetComponent<RatKingAI>();
-                ratKing.NetworkObject.Spawn();
+                ratKing.NetworkObject.Spawn(true);
             }
 
             if (rampage && RatKingAI.Instance != null)
@@ -196,6 +196,30 @@ namespace Rats
             }
         }
 
+        [ServerRpc(RequireOwnership = false)]
+        public void SyncPoisonStateServerRpc(float poisonAmount)
+        {
+            if (!IsServerOrHost) { return; }
+            SyncPoisonStateClientRpc(poisonAmount);
+        }
+
+        [ClientRpc]
+        public void SyncPoisonStateClientRpc(float poisonAmount)
+        {
+            if (IsRatKing) { return; }
+
+            PoisonInNest = Mathf.Min(poisonAmount, poisonToCloseNest);
+            float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
+
+            renderer.material.Lerp(GoldMat, RustMat, t);
+            log("PoisonInNest: " + PoisonInNest);
+
+            if (PoisonInNest >= poisonToCloseNest)
+            {
+                planeRenderer.material = YellowMat;
+            }
+        }
+
         [ClientRpc]
         public void SetAsRatKingNestClientRpc()
         {
@@ -204,6 +228,8 @@ namespace Rats
             RatNestMesh.SetActive(false);
 
             ScanNode.enabled = false;
+
+            if (RatKingAI.Instance == null) { return; }
             RatKingAI.Instance.KingNest = this;
         }
     }

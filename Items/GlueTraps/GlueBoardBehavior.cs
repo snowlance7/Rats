@@ -66,6 +66,7 @@ namespace Rats.Items.GlueTraps
 
             rat.KillEnemyOnOwnerClient();
             yield return new WaitForSeconds(1f);
+            logger.LogDebug("Calling AddRatToBoardClientRpc");
             AddRatToBoardClientRpc(rat.transform.position, rat.transform.rotation);
             rat.NetworkObject.Despawn(true);
         }
@@ -106,6 +107,7 @@ namespace Rats.Items.GlueTraps
 
             GameObject prefab = configUseJermaRats.Value ? RatPropJerma : RatProp;
             GameObject rat = Instantiate(prefab, pos, rot);
+            logger.LogDebug("Parenting rat to board");
             rat.transform.SetParent(transform);
             ratsOnBoard.Add(rat);
             SetScrapValue(ratsOnBoard.Count * configScrapValuePerRat.Value);

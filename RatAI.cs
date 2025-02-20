@@ -108,7 +108,6 @@ namespace Rats
 
             currentBehaviorState = State.ReturnToNest;
             Nest = GetClosestNest(transform.position);
-            RatManager.SpawnedRats.Add(this);
 
             if (IsServerOrHost)
             {
@@ -192,6 +191,7 @@ namespace Rats
         {
             foreach (var nest in RatNest.Nests)
             {
+                if (nest == null) { logger.LogError("nest is null in ResetRat()"); continue; }
                 nest.DefenseRats.Remove(this);
             }
 
@@ -930,9 +930,11 @@ namespace Rats
             creatureAnimator.SetTrigger(hashDie);
             creatureAnimator.Update(0);
 
+            if (!IsServerOrHost) { return; }
+
             StopAllCoroutines();
             agent.enabled = false;
-            RatManager.SpawnedRats.Remove(this);
+            RatManager.Instance.RemoveRat(this);
             ResetRat();
         }
 

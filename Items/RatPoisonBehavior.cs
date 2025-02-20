@@ -21,6 +21,7 @@ namespace Rats.Items
         float pourRate;
         bool pouring;
         float currentFluid;
+        RatNest? PouringIntoNest;
 
         public override void Start()
         {
@@ -69,6 +70,10 @@ namespace Rats.Items
             {
                 particleSystem.Stop();
                 ItemAudio.Stop();
+                if (localPlayer == playerHeldBy && PouringIntoNest != null)
+                {
+                    PouringIntoNest.SyncPoisonStateServerRpc(PouringIntoNest.PoisonInNest);
+                }
             }
         }
 
@@ -93,10 +98,14 @@ namespace Rats.Items
                     return;
                 }
 
+                if (localPlayer != playerHeldBy) { return; }
+
+                // Run on client
                 if (Physics.Raycast(PourDirection.position, -Vector3.up, out var hitInfo, 80f))
                 {
                     if (hitInfo.collider.gameObject.TryGetComponent(out RatNest nest))
                     {
+                        PouringIntoNest = nest;
                         nest.AddPoison(pourRate * Time.deltaTime);
                     }
                 }
@@ -107,6 +116,12 @@ namespace Rats.Items
         {
             base.GrabItem();
             SetControlTipsForItem();
+        }
+
+        public override void DiscardItem()
+        {
+            base.DiscardItem();
+            SetPouring(false);
         }
 
         public override int GetItemDataToSave()

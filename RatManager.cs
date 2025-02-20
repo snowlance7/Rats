@@ -18,7 +18,7 @@ namespace Rats
         public static GameObject RatNestPrefab;
 
         public static List<RatAI> SpawnedRats = [];
-        private List<List<RatAI>> ratGroups = new List<List<RatAI>>(); // Groups for batch updates
+        List<List<RatAI>> ratGroups = new List<List<RatAI>>(); // Groups for batch updates
 
         public static List<EnemyVent> Vents { get { return RoundManager.Instance.allEnemyVents.ToList(); } }
         public static Dictionary<EnemyAI, int> EnemyHitCount = [];
@@ -85,7 +85,6 @@ namespace Rats
 
         public void Start()
         {
-            if (!IsServerOrHost) { return; }
             LoggerInstance.LogDebug("Starting batch updater");
             StartCoroutine(BatchUpdateRoutine());
         }
@@ -93,13 +92,12 @@ namespace Rats
         public void OnDestroy()
         {
             if (!IsServerOrHost) { return; }
-
             EnemyHitCount.Clear();
             EnemyThreatCounter.Clear();
             PlayerThreatCounter.Clear();
             RatNest.EnemyFoodAmount.Clear();
 
-            foreach (RatAI rat in SpawnedRats)
+            foreach (RatAI rat in SpawnedRats.ToList())
             {
                 if (!rat.NetworkObject.IsSpawned) { continue; }
                 rat.NetworkObject.Despawn(true);
@@ -107,11 +105,11 @@ namespace Rats
 
             SpawnedRats.Clear();
 
-            foreach (RatNest nest in RatNest.Nests)
+            /*foreach (RatNest nest in RatNest.Nests.ToList())
             {
                 if (!nest.NetworkObject.IsSpawned) { continue; }
                 nest.NetworkObject.Despawn(true);
-            }
+            }*/
 
             RatNest.Nests.Clear();
             Instance = null;
@@ -176,11 +174,18 @@ namespace Rats
 
         public static bool CalculatePath(Vector3 fromPos, Vector3 toPos)
         {
-            Vector3 from = RoundManager.Instance.GetNavMeshPosition(fromPos, RoundManager.Instance.navHit, 1.75f);
-            Vector3 to = RoundManager.Instance.GetNavMeshPosition(toPos, RoundManager.Instance.navHit, 1.75f);
+            try
+            {
+                Vector3 from = RoundManager.Instance.GetNavMeshPosition(fromPos, RoundManager.Instance.navHit, 1.75f);
+                Vector3 to = RoundManager.Instance.GetNavMeshPosition(toPos, RoundManager.Instance.navHit, 1.75f);
 
-            NavMeshPath path = new();
-            return NavMesh.CalculatePath(from, to, -1, path) && Vector3.Distance(path.corners[path.corners.Length - 1], RoundManager.Instance.GetNavMeshPosition(to, RoundManager.Instance.navHit, 2.7f)) <= 1.55f; // TODO: Test this
+                NavMeshPath path = new();
+                return NavMesh.CalculatePath(from, to, -1, path) && Vector3.Distance(path.corners[path.corners.Length - 1], RoundManager.Instance.GetNavMeshPosition(to, RoundManager.Instance.navHit, 2.7f)) <= 1.55f; // TODO: Test this
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public static Transform? GetRandomNode(bool outside = false)
@@ -214,7 +219,7 @@ namespace Rats
 
             foreach (var nest in RatNest.Nests)
             {
-                if (!nest.IsOpen) { continue; }
+                if (nest == null || !nest.IsOpen) { continue; }
                 float distance = Vector3.Distance(position, nest.transform.position);
                 if (distance >= closestDistance) { continue; }
                 if (checkForPath && !CalculatePath(position, nest.transform.position)) { continue; }

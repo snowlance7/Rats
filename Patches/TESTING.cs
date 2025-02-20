@@ -27,6 +27,7 @@ namespace Rats
     {
         private static ManualLogSource logger = Plugin.LoggerInstance;
         public static bool testing = false;
+        public static bool noSpawning = false;
 
         [HarmonyPostfix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.PingScan_performed))]
         public static void PingScan_performedPostFix()
@@ -56,6 +57,10 @@ namespace Rats
                     testing = !testing;
                     HUDManager.Instance.DisplayTip("Testing", testing.ToString());
                     break;
+                case "/spawning":
+                    noSpawning = !noSpawning;
+                    HUDManager.Instance.DisplayTip("NoSpawning", noSpawning.ToString());
+                    break;
                 case "/enemies":
                     foreach (var enemy in GetEnemies())
                     {
@@ -84,6 +89,12 @@ namespace Rats
                 default:
                     break;
             }
+        }
+        [HarmonyPrefix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnEnemyFromVent))]
+        public static bool SpawnEnemyFromVentPreFix()
+        {
+            if (noSpawning) { return false; }
+            return true;
         }
 
         public static List<SpawnableEnemyWithRarity> GetEnemies()
