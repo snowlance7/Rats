@@ -92,6 +92,7 @@ namespace Rats
 
         public void OnDestroy()
         {
+            log("In OnDestroy() for RatManager");
             if (!IsServerOrHost) { return; }
             EnemyHitCount.Clear();
             EnemyThreatCounter.Clear();
@@ -100,6 +101,7 @@ namespace Rats
 
             foreach (RatAI rat in SpawnedRats.ToList())
             {
+                if (rat == null) { continue; }
                 if (!rat.NetworkObject.IsSpawned) { continue; }
                 rat.NetworkObject.Despawn(true);
             }

@@ -170,9 +170,13 @@ namespace Rats
 
         void SpawnRat()
         {
+            if (StartOfRound.Instance.inShipPhase || StartOfRound.Instance.shipIsLeaving) { return; }
+
             if (RatManager.SpawnedRats.Count < maxRats || TESTING.testing)
             {
-                GameObject ratObj = GameObject.Instantiate(RatPrefab, transform.position, Quaternion.identity);
+                GameObject prefab = configUseJermaRats.Value ? JermaRatPrefab : RatPrefab;
+
+                GameObject ratObj = GameObject.Instantiate(prefab, transform.position, Quaternion.identity);
                 ratObj.GetComponent<NetworkObject>().Spawn();
                 RatManager.Instance.RegisterRat(ratObj.GetComponent<RatAI>());
             }

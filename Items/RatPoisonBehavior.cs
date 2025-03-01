@@ -57,6 +57,7 @@ namespace Rats.Items
 
         void SetPouring(bool value)
         {
+            if (playerHeldBy == null) { return; }
             pouring = value;
             playerHeldBy.activatingItem = pouring;
             ItemAnimator.SetBool("pour", pouring);
@@ -75,6 +76,16 @@ namespace Rats.Items
                     PouringIntoNest.SyncPoisonStateServerRpc(PouringIntoNest.PoisonInNest);
                 }
             }
+        }
+
+        public override void DiscardItem()
+        {
+            base.DiscardItem();
+            pouring = false;
+            ItemAnimator.SetBool("pour", pouring);
+
+            ItemAudio.Stop();
+            particleSystem.Stop();
         }
 
         public override void Update()
@@ -116,12 +127,6 @@ namespace Rats.Items
         {
             base.GrabItem();
             SetControlTipsForItem();
-        }
-
-        public override void DiscardItem()
-        {
-            base.DiscardItem();
-            SetPouring(false);
         }
 
         public override int GetItemDataToSave()
