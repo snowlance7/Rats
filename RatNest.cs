@@ -119,9 +119,9 @@ namespace Rats
             if (IsRatKing) { return; }
 
             PoisonInNest = Mathf.Min(PoisonInNest + amount, poisonToCloseNest);
-            float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
+            //float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
 
-            renderer.material.Lerp(GoldMat, RustMat, t);
+            //renderer.material.Lerp(GoldMat, RustMat, t);
             log("PoisonInNest: " + PoisonInNest);
 
             if (PoisonInNest >= poisonToCloseNest)
@@ -213,9 +213,9 @@ namespace Rats
             if (IsRatKing) { return; }
 
             PoisonInNest = Mathf.Min(poisonAmount, poisonToCloseNest);
-            float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
+            //float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
 
-            renderer.material.Lerp(GoldMat, RustMat, t);
+            //renderer.material.Lerp(GoldMat, RustMat, t);
             log("PoisonInNest: " + PoisonInNest);
 
             if (PoisonInNest >= poisonToCloseNest)

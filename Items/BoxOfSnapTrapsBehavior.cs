@@ -23,7 +23,6 @@ namespace Rats.Items
             base.Start();
             ScanNode.subText = "";
             snapTrapAmount = configSnapTrapAmount.Value;
-            FallToGround();
         }
 
         public override void SetControlTipsForItem()

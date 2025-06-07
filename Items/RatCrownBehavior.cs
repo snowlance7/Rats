@@ -36,7 +36,6 @@ namespace Rats.Items
 
             DissonanceComms comms = FindObjectOfType<DissonanceComms>();
             localPlayerComms = comms.FindPlayer(comms.LocalPlayerName);
-            FallToGround();
         }
 
         public override void Update()

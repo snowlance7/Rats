@@ -5,7 +5,7 @@
         <AssemblyName>Snowlance.Rats</AssemblyName>
         <Product>Rats</Product>
         <!-- Change to whatever version you're currently on. -->
-        <Version>1.2.1</Version>
+        <Version>1.2.2</Version>
     </PropertyGroup>
 
     <!-- Project Properties -->
@@ -50,6 +50,7 @@
       <None Remove="RatsUnityProject\**" />
     </ItemGroup>
     <ItemGroup>
+      <None Remove=".editorconfig" />
       <None Remove=".gitattributes" />
       <None Remove=".gitignore" />
     </ItemGroup>
@@ -60,7 +61,7 @@
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
         <PackageReference Include="BepInEx.Core" Version="5.*" PrivateAssets="all" />
         <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" PrivateAssets="all" />
-        <PackageReference Include="Evaisa.LethalLib" Version="0.16.1" />
+        <PackageReference Include="Evaisa.LethalLib" Version="1.1.0" />
         <PackageReference Include="LethalCompany.GameLibs.Steam" Version="*-*" Publicize="true" PrivateAssets="all" />
         <PackageReference Include="UnityEngine.Modules" Version="2022.3.9" IncludeAssets="compile" PrivateAssets="all" />
     </ItemGroup>
@@ -78,4 +79,7 @@
     <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
         <Exec Command="dotnet netcode-patch &quot;$(TargetPath)&quot; @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')" />
     </Target>
+    <ItemGroup>
+      <EditorConfigFiles Remove="C:\Users\snowl\source\repos\Rats\.editorconfig" />
+    </ItemGroup>
 </Project>
