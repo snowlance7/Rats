@@ -69,10 +69,10 @@ namespace Rats
             }*/
 
             nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
-            //IsOpen = false; // TESTING
+            IsOpen = false; // TESTING
         }
 
-        public void Update()
+        public void Update() // TODO: spawning rat king and spamming errors after filled with poison
         {
             if (IsRatKing && RatKingAI.Instance != null)
             {
