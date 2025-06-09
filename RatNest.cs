@@ -18,23 +18,30 @@ namespace Rats
     {
         private static ManualLogSource logger = LoggerInstance;
 
-#pragma warning disable 0649
-        public GameObject RatPrefab = null!;
-        public GameObject RatKingPrefab = null!;
-        public GameObject JermaRatPrefab = null!;
-        public GameObject RatNestMesh = null!;
-        public ScanNodeProperties ScanNode = null!;
-        public MeshRenderer renderer;
-        public Material GoldMat;
-        public Material RustMat;
-        public MeshRenderer planeRenderer;
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        public GameObject RatPrefab;
+        public GameObject RatKingPrefab;
+        public GameObject JermaRatPrefab;
+
+        public GameObject RatNestMesh;
+        public ScanNodeProperties ScanNode;
+        public MeshRenderer voidPlaneRenderer;
+
+        public GameObject PoisonLiquidPlane;
         public Material YellowMat;
-#pragma warning restore 0649
+        public ParticleSystem GasParticleSystem;
+
+        public Animator NestAnimator;
+        public AudioSource NestAudio;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+
+        readonly float poisonUpOffset = 0.0219f;
+
+        Vector3 poisonPlaneStart;
+        Vector3 poisonPlaneEnd;
 
         public static List<RatNest> Nests = [];
         public static Dictionary<EnemyAI, int> EnemyFoodAmount = [];
-        public LungProp? Apparatus;
-        bool appyPulled;
 
         public bool IsOpen = true;
         public bool IsRatKing = false;
@@ -51,19 +58,15 @@ namespace Rats
             log("Sewer grate spawned at: " + transform.position);
             Nests.Add(this);
 
-            if (Apparatus == null)
-            {
-                Apparatus = FindObjectsOfType<LungProp>().Where(x => x.isLungDocked).FirstOrDefault();
-            }
-
-            AddPoison(Time.deltaTime);
+            poisonPlaneStart = PoisonLiquidPlane.transform.position;
+            poisonPlaneEnd = poisonPlaneStart + (Vector3.up * poisonUpOffset);
 
             if (!IsServerOrHost) { return; }
 
-            if (RatManager.Instance == null)
+            /*if (RatManager.Instance == null)
             {
                 RatManager.Init();
-            }
+            }*/
 
             nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
             //IsOpen = false; // TESTING
@@ -77,12 +80,6 @@ namespace Rats
             }
 
             if (!IsServerOrHost) { return; }
-
-            if (Apparatus != null && !Apparatus.isLungDocked && !appyPulled)
-            {
-                appyPulled = true;
-                SpawnRatKingOnServer(ratKingSummonChanceApparatus);
-            }
 
             if (IsOpen)
             {
@@ -102,6 +99,9 @@ namespace Rats
                 if (PoisonInNest >= poisonToCloseNest)
                 {
                     IsOpen = false;
+                    GasParticleSystem.Play();
+                    NestAnimator.SetTrigger("destroy");
+                    NestAudio.Play();
 
                     SpawnRatKingOnServer(ratKingSummonChancePoison);
 
@@ -111,22 +111,6 @@ namespace Rats
                         SpawnRatKingOnServer(ratKingSummonChanceNests, true);
                     }
                 }
-            }
-        }
-
-        public void AddPoison(float amount)
-        {
-            if (IsRatKing) { return; }
-
-            PoisonInNest = Mathf.Min(PoisonInNest + amount, poisonToCloseNest);
-            //float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
-
-            //renderer.material.Lerp(GoldMat, RustMat, t);
-            log("PoisonInNest: " + PoisonInNest);
-
-            if (PoisonInNest >= poisonToCloseNest)
-            {
-                planeRenderer.material = YellowMat;
             }
         }
 
@@ -150,7 +134,7 @@ namespace Rats
             }
         }
 
-        public void AddEnemyFoodAmount(EnemyAI enemy)
+        public void AddEnemyFoodAmount(EnemyAI enemy) // TODO: add enemy blacklist/whitelist
         {
             int maxHP = enemy.enemyType.enemyPrefab.GetComponent<EnemyAI>().enemyHP;
             int foodAmount = maxHP * enemyFoodPerHPPoint;
@@ -170,9 +154,9 @@ namespace Rats
 
         void SpawnRat()
         {
-            if (StartOfRound.Instance.inShipPhase || StartOfRound.Instance.shipIsLeaving) { return; }
+            if (!TESTING.testing && (StartOfRound.Instance.inShipPhase || StartOfRound.Instance.shipIsLeaving)) { return; }
 
-            if (RatManager.SpawnedRats.Count < maxRats || TESTING.testing)
+            if (RatManager.SpawnedRats.Count < maxRats)
             {
                 GameObject prefab = configUseJermaRats.Value ? JermaRatPrefab : RatPrefab;
 
@@ -201,27 +185,21 @@ namespace Rats
         }
 
         [ServerRpc(RequireOwnership = false)]
-        public void SyncPoisonStateServerRpc(float poisonAmount)
+        public void AddPoisonServerRpc(float amount)
         {
-            if (!IsServerOrHost) { return; }
-            SyncPoisonStateClientRpc(poisonAmount);
+            if (!IsServerOrHost || IsRatKing) { return; }
+            AddPoisonClientRpc(amount);
         }
 
         [ClientRpc]
-        public void SyncPoisonStateClientRpc(float poisonAmount)
+        public void AddPoisonClientRpc(float amount)
         {
-            if (IsRatKing) { return; }
+            voidPlaneRenderer.material = YellowMat;
+            PoisonInNest = Mathf.Min(PoisonInNest + amount, poisonToCloseNest);
+            float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
 
-            PoisonInNest = Mathf.Min(poisonAmount, poisonToCloseNest);
-            //float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
-
-            //renderer.material.Lerp(GoldMat, RustMat, t);
+            PoisonLiquidPlane.transform.position = Vector3.Lerp(poisonPlaneStart, poisonPlaneEnd, t);
             log("PoisonInNest: " + PoisonInNest);
-
-            if (PoisonInNest >= poisonToCloseNest)
-            {
-                planeRenderer.material = YellowMat;
-            }
         }
 
         [ClientRpc]

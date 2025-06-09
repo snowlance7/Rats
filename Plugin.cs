@@ -55,7 +55,6 @@ namespace Rats
         public static ConfigEntry<string> configRatKingCustomLevelRarities;
         public static ConfigEntry<float> configRatKingSummonChanceRatDeath;
         public static ConfigEntry<float> configRatKingSummonChancePoison;
-        public static ConfigEntry<float> configRatKingSummonChanceApparatus;
         public static ConfigEntry<float> configRatKingSummonChanceNests;
         public static ConfigEntry<int> configRatKingDamage;
         public static ConfigEntry<float> configRatKingRallyCooldown;
@@ -95,7 +94,6 @@ namespace Rats
         public static ConfigEntry<int> configGlueBoardAmount;
         public static ConfigEntry<int> configScrapValuePerRat;
         public static ConfigEntry<int> configMaxRatsOnGlueTrap;
-
 
         // Box Of Snap traps
         public static ConfigEntry<int> configSnapTrapsPrice;
@@ -142,7 +140,6 @@ namespace Rats
             configRatKingCustomLevelRarities = Config.Bind("Rat King Rarities", "Custom Level Rarities", "", "Rarities for modded levels. Same formatting as level rarities.");
             configRatKingSummonChanceRatDeath = Config.Bind("Rat King", "Rat Death Summon Chance", 0.01f, "The chance the rat king will spawn when killing a rat at high threat.");
             configRatKingSummonChancePoison = Config.Bind("Rat King", "Poison Summon Chance", 0.5f, "The chance the rat king will spawn when disabling a nest with rat poison.");
-            configRatKingSummonChanceApparatus = Config.Bind("Rat King", "Apparatus Summon Chance", 0.05f, "The chance the rat king will spawn when pulling the apparatus.");
             configRatKingSummonChanceNests = Config.Bind("Rat King", "All Nests Disabled Summon Chance", 0.85f, "The chance the rat king will spawn when all the nests are disabled.");
             configRatKingDamage = Config.Bind("Rat King", "Damage", 25, "The amount of damage the rat king does.");
             configRatKingRallyCooldown = Config.Bind("Rat King", "Rally Cooldown", 30f, "The cooldown for the rat kings rally ability.");

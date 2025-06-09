@@ -15,7 +15,7 @@ namespace Rats
     {
         private static ManualLogSource logger = LoggerInstance;
 
-#pragma warning disable 0649
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         public AudioClip[] SqueakSFX;
         public AudioClip[] AttackSFX;
         public AudioClip[] HitSFX;
@@ -31,7 +31,7 @@ namespace Rats
         public int enemyHP;
         public AudioSource creatureSFX;
         public AudioSource creatureVoice;
-#pragma warning restore 0649
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
         public bool IsJermaRat;
 
@@ -117,22 +117,10 @@ namespace Rats
             log($"Rat spawned");
         }
 
-        public override void OnNetworkDespawn()
-        {
-            base.OnNetworkDespawn();
-            if (RatManager.Instance != null)
-            {
-                RatManager.Instance.RemoveRat(this);
-            }
-        }
+        public override void OnNetworkDespawn() => RatManager.Instance?.RemoveRat(this);
 
         public void Update()
         {
-            if (isEnemyDead || StartOfRound.Instance.allPlayersDead)
-            {
-                return;
-            };
-
             timeSinceCollision += Time.deltaTime;
             timeSinceAddThreat += Time.deltaTime;
         }

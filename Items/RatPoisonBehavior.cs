@@ -1,4 +1,5 @@
 ﻿using BepInEx.Logging;
+using GameNetcodeStuff;
 using System;
 using System.Collections;
 using System.Text;
@@ -11,17 +12,21 @@ namespace Rats.Items
     {
         private static ManualLogSource logger = LoggerInstance;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         public AudioSource ItemAudio;
         public ParticleSystem particleSystem;
         public Animator ItemAnimator;
         public Transform PourDirection;
         public ScanNodeProperties ScanNode;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+
+        public PlayerControllerB? lastPlayerHeldBy;
 
         readonly float downAngle = 0.7f;
-        float pourRate;
         bool pouring;
         float currentFluid;
-        RatNest? PouringIntoNest;
+
+        float pourRate;
 
         public override void Start()
         {
@@ -31,65 +36,15 @@ namespace Rats.Items
             pourRate = configRatPoisonPourRate.Value;
         }
 
-        public override void SetControlTipsForItem()
-        {
-            if (playerHeldBy != localPlayer) { return; }
-            string[] toolTips = itemProperties.toolTips;
-            toolTips[0] = $"Pour [LMB] ({currentFluid.ToString("F1")}L left)";
-            HUDManager.Instance.ChangeControlTipMultiple(toolTips, holdingItem: true, itemProperties);
-        }
-
-        public override void ItemActivate(bool used, bool buttonDown = true)
-        {
-            base.ItemActivate(used, buttonDown);
-
-            bool lookingDown = isPlayerLookingDown();
-            bool isPouring = buttonDown && lookingDown && currentFluid > 0f;
-
-            SetPouring(isPouring);
-        }
-
-        bool isPlayerLookingDown()
-        {
-            return Vector3.Dot(playerHeldBy.gameplayCamera.transform.forward, Vector3.down) > downAngle;
-        }
-
-        void SetPouring(bool value)
-        {
-            if (playerHeldBy == null) { return; }
-            pouring = value;
-            playerHeldBy.activatingItem = pouring;
-            ItemAnimator.SetBool("pour", pouring);
-
-            if (pouring)
-            {
-                particleSystem.Play();
-                ItemAudio.Play();
-            }
-            else
-            {
-                particleSystem.Stop();
-                ItemAudio.Stop();
-                if (localPlayer == playerHeldBy && PouringIntoNest != null)
-                {
-                    PouringIntoNest.SyncPoisonStateServerRpc(PouringIntoNest.PoisonInNest);
-                }
-            }
-        }
-
-        public override void DiscardItem()
-        {
-            base.DiscardItem();
-            pouring = false;
-            ItemAnimator.SetBool("pour", pouring);
-
-            ItemAudio.Stop();
-            particleSystem.Stop();
-        }
-
         public override void Update()
         {
             base.Update();
+
+            if (playerHeldBy != null)
+            {
+                lastPlayerHeldBy = playerHeldBy;
+            }
+
             if (pouring)
             {
                 currentFluid -= pourRate * Time.deltaTime;
@@ -108,18 +63,63 @@ namespace Rats.Items
                     return;
                 }
 
-                if (localPlayer != playerHeldBy) { return; }
+                if (playerHeldBy == null || localPlayer != playerHeldBy) { return; }
 
                 // Run on client
                 if (Physics.Raycast(PourDirection.position, -Vector3.up, out var hitInfo, 80f))
                 {
-                    if (hitInfo.collider.gameObject.TryGetComponent(out RatNest nest))
+                    if (hitInfo.collider.gameObject.TryGetComponent(out RatNest nest) && !nest.IsRatKing && nest.PoisonInNest < RatManager.poisonToCloseNest)
                     {
-                        PouringIntoNest = nest;
-                        nest.AddPoison(pourRate * Time.deltaTime);
+                        nest.AddPoisonServerRpc(pourRate * Time.deltaTime);
                     }
                 }
             }
+        }
+
+        public override void SetControlTipsForItem()
+        {
+            if (playerHeldBy == null) { return; }
+            if (playerHeldBy != localPlayer) { return; }
+            string[] toolTips = itemProperties.toolTips;
+            toolTips[0] = $"Pour [LMB] ({currentFluid.ToString("F1")}L left)";
+            HUDManager.Instance.ChangeControlTipMultiple(toolTips, holdingItem: true, itemProperties);
+        }
+
+        public override void ItemActivate(bool used, bool buttonDown = true)
+        {
+            base.ItemActivate(used, buttonDown);
+
+            bool lookingDown = isPlayerLookingDown();
+            bool isPouring = buttonDown && lookingDown && currentFluid > 0f;
+
+            SetPouring(isPouring);
+        }
+
+        bool isPlayerLookingDown() => Vector3.Dot(playerHeldBy.gameplayCamera.transform.forward, Vector3.down) > downAngle;
+
+        void SetPouring(bool _pouring)
+        {
+            if (lastPlayerHeldBy == null) { return; }
+            pouring = _pouring;
+            lastPlayerHeldBy.activatingItem = pouring;
+            ItemAnimator.SetBool("pour", pouring);
+
+            if (pouring)
+            {
+                particleSystem.Play();
+                ItemAudio.Play();
+            }
+            else
+            {
+                particleSystem.Stop();
+                ItemAudio.Stop();
+            }
+        }
+
+        public override void DiscardItem()
+        {
+            base.DiscardItem();
+            SetPouring(false);
         }
 
         public override void GrabItem()
@@ -128,14 +128,7 @@ namespace Rats.Items
             SetControlTipsForItem();
         }
 
-        public override int GetItemDataToSave()
-        {
-            return (int)currentFluid;
-        }
-
-        public override void LoadItemSaveData(int saveData)
-        {
-            currentFluid = (float)saveData;
-        }
+        public override int GetItemDataToSave() => (int)currentFluid;
+        public override void LoadItemSaveData(int saveData) => currentFluid = (float)saveData;
     }
 }

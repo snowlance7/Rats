@@ -13,14 +13,18 @@ namespace Rats
 {
     public class RatManager : MonoBehaviour
     {
-        public static RatManager? Instance { get; private set; }
+        private static RatManager? _instance;
+        public static RatManager Instance => _instance ??= GameObject.Instantiate(new GameObject("RatManager"), Vector3.zero, Quaternion.identity, RoundManager.Instance.mapPropsContainer.transform).AddComponent<RatManager>();
 
+
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         public static GameObject RatNestPrefab;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
         public static List<RatAI> SpawnedRats = [];
         List<List<RatAI>> ratGroups = new List<List<RatAI>>(); // Groups for batch updates
 
-        public static List<EnemyVent> Vents { get { return RoundManager.Instance.allEnemyVents.ToList(); } }
+        public static List<EnemyVent> Vents => RoundManager.Instance.allEnemyVents.ToList();
         public static Dictionary<EnemyAI, int> EnemyHitCount = [];
         public static Dictionary<PlayerControllerB, int> PlayerThreatCounter = [];
         public static Dictionary<EnemyAI, int> EnemyThreatCounter = [];
@@ -35,7 +39,6 @@ namespace Rats
         public static int enemyHitsToDoDamage = 10;
         public static int playerFoodAmount = 30;
         public static float ratKingSummonChancePoison = 0.5f;
-        public static float ratKingSummonChanceApparatus = 0.01f;
         public static float ratKingSummonChanceNests = 0.8f;
         public static float squeakChance = 0.1f;
 
@@ -62,7 +65,6 @@ namespace Rats
             enemyHitsToDoDamage = configEnemyHitsToDoDamage.Value;
             playerFoodAmount = configPlayerFoodAmount.Value;
             ratKingSummonChancePoison = configRatKingSummonChancePoison.Value;
-            ratKingSummonChanceApparatus = configRatKingSummonChanceApparatus.Value;
             ratKingSummonChanceNests = configRatKingSummonChanceNests.Value;
             squeakChance = configSqueakChance.Value;
 
@@ -73,15 +75,6 @@ namespace Rats
             maxRats = configMaxRats.Value;
             IsLoggingEnabled = configEnableDebugging.Value;
             poisonToCloseNest = configPoisonToCloseNest.Value;
-        }
-
-        public static void Init()
-        {
-            if (Instance == null)
-            {
-                Instance = GameObject.Instantiate(new GameObject("RatManager"), Vector3.zero, Quaternion.identity, RoundManager.Instance.mapPropsContainer.transform).AddComponent<RatManager>();
-                LoggerInstance.LogDebug("Init RatManager");
-            }
         }
 
         public void Start()
@@ -115,7 +108,6 @@ namespace Rats
             }*/
 
             RatNest.Nests.Clear();
-            Instance = null;
         }
 
         public void RegisterRat(RatAI rat)

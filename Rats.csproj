@@ -50,7 +50,6 @@
       <None Remove="RatsUnityProject\**" />
     </ItemGroup>
     <ItemGroup>
-      <None Remove=".editorconfig" />
       <None Remove=".gitattributes" />
       <None Remove=".gitignore" />
     </ItemGroup>
@@ -79,7 +78,4 @@
     <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
         <Exec Command="dotnet netcode-patch &quot;$(TargetPath)&quot; @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')" />
     </Target>
-    <ItemGroup>
-      <EditorConfigFiles Remove="C:\Users\snowl\source\repos\Rats\.editorconfig" />
-    </ItemGroup>
 </Project>

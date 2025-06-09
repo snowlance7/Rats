@@ -22,7 +22,7 @@ using static Rats.Plugin;
 
 namespace Rats
 {
-    //[HarmonyPatch]
+    [HarmonyPatch]
     internal class TESTING : MonoBehaviour
     {
         private static ManualLogSource logger = Plugin.LoggerInstance;
@@ -44,18 +44,19 @@ namespace Rats
 
             switch (args[0])
             {
+                case "/testing":
+                    testing = !testing;
+                    HUDManager.Instance.DisplayTip("Testing", testing.ToString());
+                    break;
                 case "/spawnRat":
-                    RatNest nest = RatManager.GetClosestNest(localPlayer.transform.position);
-                    nest.SpawnRats(int.Parse(args[1]));
-                    log($"Spawning {args[1]} rats");
+                    RatNest? nest = RatManager.GetClosestNest(localPlayer.transform.position);
+                    logger.LogDebug("Spawning rats from TESTING");
+                    nest?.SpawnRats(int.Parse(args[1]));
+                    logger.LogDebug($"Spawning {args[1]} rats");
                     break;
                 case "/spawnNest":
                     Vector3 position = localPlayer.transform.position + localPlayer.transform.forward * 1f;
                     RatManager.SpawnNest(position);
-                    break;
-                case "/testing":
-                    testing = !testing;
-                    HUDManager.Instance.DisplayTip("Testing", testing.ToString());
                     break;
                 case "/spawning":
                     noSpawning = !noSpawning;
