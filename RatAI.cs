@@ -35,7 +35,6 @@ namespace Rats
 
         public bool IsJermaRat;
 
-        float updateDestinationInterval;
         public bool isEnemyDead;
         bool moveTowardsDestination;
         Vector3 destination;
@@ -62,7 +61,7 @@ namespace Rats
         float timeSinceAddThreat;
         float spinTimer;
 
-        private NavMeshPath path1;
+        private NavMeshPath? path1;
         Coroutine? ratCoroutine;
         //bool sickRat;
         public bool rallyRat;
@@ -78,6 +77,7 @@ namespace Rats
         float distanceToLoseRats;
         int ratDamage;
         float AIIntervalTime;
+        private bool roaming;
 
         public enum State
         {
@@ -103,7 +103,6 @@ namespace Rats
             ratDamage = configRatDamage.Value;
             ChristmasHat.SetActive(configHolidayRats.Value);
 
-            updateDestinationInterval = AIIntervalTime;
             path1 = new NavMeshPath();
 
             currentBehaviorState = State.ReturnToNest;
@@ -114,7 +113,7 @@ namespace Rats
                 SwitchToBehaviorState(State.Routine);
             }
 
-            log($"Rat spawned");
+            logger.LogDebug($"Rat spawned");
         }
 
         public override void OnNetworkDespawn() => RatManager.Instance?.RemoveRat(this);
@@ -141,7 +140,7 @@ namespace Rats
                     break;
                 case State.Routine:
 
-                    if (Nest.DefenseRats.Count < maxDefenseRats) // defense
+                    if (Nest?.DefenseRats.Count < maxDefenseRats) // defense
                     {
                         Nest.DefenseRats.Add(this);
                         defenseRat = true;
@@ -179,8 +178,7 @@ namespace Rats
         {
             foreach (var nest in RatNest.Nests)
             {
-                if (nest == null) { logger.LogError("nest is null in ResetRat()"); continue; }
-                nest.DefenseRats.Remove(this);
+                nest?.DefenseRats.Remove(this);
             }
 
             rallyRat = false;
@@ -193,8 +191,6 @@ namespace Rats
             {
                 return;
             };
-
-            //LoggerInstance.LogDebug("Doing AI interval");
 
             if (moveTowardsDestination)
             {
@@ -210,15 +206,13 @@ namespace Rats
                     {
                         // Add food to nest
                         if (holdingFood)
-                        {
-                            Nest.AddFood();
-                        }
+                            Nest?.AddFood();
                         holdingFood = false;
 
                         if (returningBodyToNest)
                         {
                             DropBody(true);
-                            Nest.AddFood(playerFoodAmount);
+                            Nest?.AddFood(playerFoodAmount);
                         }
 
                         pathingToNest = false;
@@ -229,7 +223,7 @@ namespace Rats
                     if (Nest == null || !Nest.IsOpen || !SetDestinationToPosition(Nest.transform.position, checkForPath: true))
                     {
                         Nest = GetClosestNest(transform.position, true);
-                        if (Nest == null)
+                        if (Nest == null && !roaming)
                         {
                             pathingToNest = false;
                             Roam();
@@ -246,7 +240,7 @@ namespace Rats
 
                     if (grabbingBody)
                     {
-                        GrabbableObject deadBody = targetPlayer.deadBody.grabBodyObject;
+                        GrabbableObject deadBody = targetPlayer!.deadBody.grabBodyObject;
                         if (SetDestinationToPosition(deadBody.transform.position, true))
                         {
                             //if (Vector3.Distance(transform.position, deadBody.transform.position) < 1f)
@@ -424,7 +418,7 @@ namespace Rats
             }
         }
 
-        public bool CheckLineOfSightForPosition(Vector3 objectPosition, float width = 45f, int range = 60, float proximityAwareness = -1f, Transform overrideEye = null)
+        public bool CheckLineOfSightForPosition(Vector3 objectPosition, float width = 45f, int range = 60, float proximityAwareness = -1f, Transform? overrideEye = null)
         {
             if (!isOutside)
             {
@@ -449,7 +443,7 @@ namespace Rats
             return false;
         }
 
-        public PlayerControllerB CheckLineOfSightForPlayer(float width = 45f, int range = 60, int proximityAwareness = -1)
+        public PlayerControllerB? CheckLineOfSightForPlayer(float width = 45f, int range = 60, int proximityAwareness = -1)
         {
             for (int i = 0; i < StartOfRound.Instance.allPlayerScripts.Length; i++)
             {
@@ -481,20 +475,18 @@ namespace Rats
 
         void Roam()
         {
-            if (ratCoroutine != null)
-            {
-                StopCoroutine(ratCoroutine);
-            }
-
+            RoamStop();
             ratCoroutine = StartCoroutine(RoamCoroutine());
+            roaming = true;
         }
 
         void RoamStop()
         {
             if (ratCoroutine != null)
             {
-                StopAllCoroutines();
+                StopCoroutine(ratCoroutine);
                 ratCoroutine = null;
+                roaming = false;
             }
         }
 
@@ -503,11 +495,12 @@ namespace Rats
             yield return null;
             while (ratCoroutine != null && agent.enabled)
             {
+                yield return new WaitForSeconds(AIIntervalTime);
                 float timeStopped = 0f;
                 targetNode = GetRandomNode(isOutside);
                 if (targetNode == null) { continue; }
                 Vector3 position = targetNode.transform.position;
-                if (!SetDestinationToPosition(position)) { continue; }
+                if (!SetDestinationToPosition(position, true)) { continue; }
                 while (agent.enabled)
                 {
                     yield return new WaitForSeconds(AIIntervalTime);
@@ -527,7 +520,7 @@ namespace Rats
         IEnumerator SwarmCoroutine(PlayerControllerB player, float radius)
         {
             yield return null;
-            log("Starting swarm on player");
+            logger.LogDebug("Starting swarm on player");
             while (ratCoroutine != null && player != null)
             {
                 if (player == null || player.isPlayerDead) { break; }
@@ -753,7 +746,7 @@ namespace Rats
                     if (collidedEnemy != null && collidedEnemy.enemyType.canDie)
                     {
                         if (RatKingAI.Instance != null && RatKingAI.Instance == collidedEnemy) { return; }
-                        log("Collided with: " + collidedEnemy.enemyType.enemyName);
+                        logger.LogDebug("Collided with: " + collidedEnemy.enemyType.enemyName);
                         timeSinceCollision = 0f;
 
                         if (collidedEnemy.isEnemyDead)
@@ -834,7 +827,7 @@ namespace Rats
                 }
 
                 int threat = RatManager.EnemyThreatCounter[enemy];
-                log($"{enemy.enemyType.enemyName}: {threat} threat");
+                logger.LogDebug($"{enemy.enemyType.enemyName}: {threat} threat");
 
                 if (defenseRat) { return; }
 
@@ -865,7 +858,7 @@ namespace Rats
                 }
 
                 int threat = RatManager.PlayerThreatCounter[player];
-                log($"{player.playerUsername}: {threat} threat");
+                logger.LogDebug($"{player.playerUsername}: {threat} threat");
 
                 if (defenseRat) { return; }
 
@@ -873,7 +866,7 @@ namespace Rats
                 {
                     if (RatKingAI.Instance.targetPlayer == null)
                     {
-                        log("Calling Rat King");
+                        logger.LogDebug("Calling Rat King");
                         targetEnemy = null;
                         targetPlayer = player;
                         PlayRallySFXClientRpc();

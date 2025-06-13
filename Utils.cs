@@ -1,8 +1,11 @@
 ﻿using BepInEx.Logging;
 using GameNetcodeStuff;
+using HarmonyLib;
+using LethalLib.Extras;
 using LethalLib.Modules;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
@@ -14,13 +17,80 @@ namespace Rats
     {
         private static ManualLogSource logger = LoggerInstance;
 
-        private static GameObject[]? outsideAINodes;
-        private static GameObject[]? insideAINodes;
-        private static Vector3[]? outsideNodePositions;
-        private static Vector3[]? insideNodePositions;
+        public static bool inTestRoom => StartOfRound.Instance?.testRoom != null;
+        public static bool testing = false;
+        public static bool spawningAllowed = true;
+        public static bool trailerMode = false;
 
-        public static void RegisterItem(string itemPath, string levelRarities = "", string customLevelRarities = "", int minValue = 0, int maxValue = 0)
+        public static GameObject[]? outsideAINodes;
+        public static GameObject[]? insideAINodes;
+        public static Vector3[]? outsideNodePositions;
+        public static Vector3[]? insideNodePositions;
+
+        public static void ChatCommand(string[] args)
         {
+            switch (args[0])
+            {
+                case "/spawning":
+                    spawningAllowed = !spawningAllowed;
+                    HUDManager.Instance.DisplayTip("Spawning Allowed", spawningAllowed.ToString());
+                    break;
+                case "/hazards":
+                    Dictionary<string, GameObject> hazards = Utils.GetAllHazards();
+
+                    foreach (var hazard in hazards)
+                    {
+                        logger.LogDebug(hazard);
+                    }
+                    break;
+                case "/testing":
+                    testing = !testing;
+                    HUDManager.Instance.DisplayTip("Testing", testing.ToString());
+                    break;
+                case "/surfaces":
+                    foreach (var surface in StartOfRound.Instance.footstepSurfaces)
+                    {
+                        logger.LogDebug(surface.surfaceTag);
+                    }
+                    break;
+                case "/enemies":
+                    foreach (var enemy in Utils.GetEnemies())
+                    {
+                        logger.LogDebug(enemy.enemyType.name);
+                    }
+                    break;
+                case "/refresh":
+                    RoundManager.Instance.RefreshEnemiesList();
+                    HoarderBugAI.RefreshGrabbableObjectsInMapList();
+                    break;
+                case "/levels":
+                    foreach (var level in StartOfRound.Instance.levels)
+                    {
+                        logger.LogDebug(level.name);
+                    }
+                    break;
+                case "/dungeon":
+                    logger.LogDebug(RoundManager.Instance.dungeonGenerator.Generator.DungeonFlow.name);
+                    break;
+                case "/dungeons":
+                    foreach (var dungeon in RoundManager.Instance.dungeonFlowTypes)
+                    {
+                        logger.LogDebug(dungeon.dungeonFlow.name);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public static void LogChat(string msg)
+        {
+            HUDManager.Instance.AddChatMessage(msg, "Server");
+        }
+
+        public static void RegisterItem(bool enable, string itemPath, string levelRarities = "", string customLevelRarities = "", int minValue = 0, int maxValue = 0)
+        {
+            if (!enable) { return; }
             Item item = ModAssets!.LoadAsset<Item>(itemPath);
             if (item == null) { LoggerInstance.LogError($"Error: Couldn't get prefab from {itemPath}"); return; }
             LoggerInstance.LogDebug($"Got {item.name} prefab");
@@ -33,8 +103,23 @@ namespace Rats
             LethalLib.Modules.Items.RegisterScrap(item, GetLevelRarities(levelRarities), GetCustomLevelRarities(customLevelRarities));
         }
 
-        public static void RegisterEnemy(string enemyPath, string tnPath, string tkPath, string levelRarities = "", string customLevelRarities = "")
+        public static void RegisterShopItem(bool enable, string itemPath, int price)
         {
+            if (!enable) { return; }
+            Item item = ModAssets!.LoadAsset<Item>(itemPath);
+            if (item == null) { LoggerInstance.LogError($"Error: Couldn't get prefab from {itemPath}"); return; }
+            LoggerInstance.LogDebug($"Got {item.name} prefab");
+
+            item.creditsWorth = price;
+
+            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(item.spawnPrefab);
+            Utilities.FixMixerGroups(item.spawnPrefab);
+            LethalLib.Modules.Items.RegisterShopItem(item, price);
+        }
+
+        public static void RegisterEnemy(bool enable, string enemyPath, string tnPath, string tkPath, string levelRarities = "", string customLevelRarities = "")
+        {
+            if (!enable) { return; }
             EnemyType enemy = ModAssets!.LoadAsset<EnemyType>(enemyPath);
             if (enemy == null) { LoggerInstance.LogError($"Error: Couldn't get prefab from {enemyPath}"); return; }
             LoggerInstance.LogDebug($"Got {enemy.name} prefab");
@@ -44,6 +129,126 @@ namespace Rats
 
             LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(enemy.enemyPrefab);
             Enemies.RegisterEnemy(enemy, GetLevelRarities(levelRarities), GetCustomLevelRarities(customLevelRarities), tn, tk);
+        }
+
+        // Xu's code for registering map objects with configs
+        public static GameObject? RegisterInsideMapObjectWithConfig(string mapObjectPath, string configString)
+        {
+            SpawnableMapObjectDef SpawnPrefab = ModAssets.LoadAsset<SpawnableMapObjectDef>(mapObjectPath);
+            if (SpawnPrefab == null) { LoggerInstance.LogError("Error: Couldnt get map object prefab from assets"); return null; }
+            LoggerInstance.LogDebug("Registering map object network prefab...");
+            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(SpawnPrefab.spawnableMapObject.prefabToSpawn);
+
+            /*SpawnableMapObjectDef mapObjDef = ScriptableObject.CreateInstance<SpawnableMapObjectDef>();
+            mapObjDef.spawnableMapObject = new SpawnableMapObject
+            {
+                prefabToSpawn = prefab
+            };*/
+
+
+            (Dictionary<Levels.LevelTypes, string> spawnRateByLevelType, Dictionary<string, string> spawnRateByCustomLevelType) = ConfigParsingWithCurve(configString);
+
+
+            foreach (var entry in spawnRateByLevelType)
+            {
+                //AnimationCurve animationCurve = CreateCurveFromString(entry.Value, prefab.name);
+                AnimationCurve animationCurve = CreateCurveFromString(entry.Value, SpawnPrefab.spawnableMapObject.prefabToSpawn.name);
+                MapObjects.RegisterMapObject(SpawnPrefab, entry.Key, (level) => animationCurve);
+            }
+            foreach (var entry in spawnRateByCustomLevelType)
+            {
+                //AnimationCurve animationCurve = CreateCurveFromString(entry.Value, prefab.name);
+                AnimationCurve animationCurve = CreateCurveFromString(entry.Value, SpawnPrefab.spawnableMapObject.prefabToSpawn.name);
+                MapObjects.RegisterMapObject(SpawnPrefab, Levels.LevelTypes.None, new string[] { entry.Key }, (level) => animationCurve);
+            }
+
+            return SpawnPrefab.spawnableMapObject.prefabToSpawn;
+        }
+
+        private static (Dictionary<Levels.LevelTypes, string> spawnRateByLevelType, Dictionary<string, string> spawnRateByCustomLevelType) ConfigParsingWithCurve(string configMoonRarity)
+        {
+            Dictionary<Levels.LevelTypes, string> spawnRateByLevelType = new();
+            Dictionary<string, string> spawnRateByCustomLevelType = new();
+            foreach (string entry in configMoonRarity.Split('|').Select(s => s.Trim()))
+            {
+                string[] entryParts = entry.Split('-').Select(s => s.Trim()).ToArray();
+
+                if (entryParts.Length != 2) continue;
+
+                string name = entryParts[0].ToLowerInvariant();
+
+                if (name == "custom")
+                {
+                    name = "modded";
+                }
+
+                if (System.Enum.TryParse(name, true, out Levels.LevelTypes levelType))
+                {
+                    spawnRateByLevelType[levelType] = entryParts[1];
+                }
+                else
+                {
+                    // Try appending "Level" to the name and re-attempt parsing
+                    string modifiedName = name + "level";
+                    if (System.Enum.TryParse(modifiedName, true, out levelType))
+                    {
+                        spawnRateByLevelType[levelType] = entryParts[1];
+                    }
+                    else
+                    {
+                        spawnRateByCustomLevelType[name] = entryParts[1];
+                    }
+                }
+            }
+            return (spawnRateByLevelType, spawnRateByCustomLevelType);
+        }
+
+        public static AnimationCurve CreateCurveFromString(string keyValuePairs, string nameOfThing)
+        {
+            // Split the input string into individual key-value pairs
+            string[] pairs = keyValuePairs.Split(';').Select(s => s.Trim()).ToArray();
+            if (pairs.Length == 0)
+            {
+                if (int.TryParse(keyValuePairs, out int result))
+                {
+                    return new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, result));
+                }
+                else
+                {
+                    LoggerInstance.LogError($"Invalid key-value pairs format: {keyValuePairs}");
+                    return new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 0));
+                }
+            }
+            List<Keyframe> keyframes = new();
+
+            // Iterate over each pair and parse the key and value to create keyframes
+            foreach (string pair in pairs)
+            {
+                string[] splitPair = pair.Split(',').Select(s => s.Trim()).ToArray();
+                if (splitPair.Length == 2 &&
+                    float.TryParse(splitPair[0], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float time) &&
+                    float.TryParse(splitPair[1], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float value))
+                {
+                    keyframes.Add(new Keyframe(time, value));
+                }
+                else
+                {
+                    LoggerInstance.LogError($"Failed config for hazard: {nameOfThing}");
+                    LoggerInstance.LogError($"Split pair length: {splitPair.Length}");
+                    LoggerInstance.LogError($"Could parse first value: {float.TryParse(splitPair[0], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float key1)}, instead got: {key1}, with splitPair0 being: {splitPair[0]}");
+                    LoggerInstance.LogError($"Could parse second value: {float.TryParse(splitPair[1], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float value2)}, instead got: {value2}, with splitPair1 being: {splitPair[1]}");
+                    LoggerInstance.LogError($"Invalid key,value pair format: {pair}");
+                }
+            }
+
+            // Create the animation curve with the generated keyframes and apply smoothing
+            var curve = new AnimationCurve(keyframes.ToArray());
+            for (int i = 0; i < keyframes.Count; i++)
+            {
+                curve.SmoothTangents(i, 0.5f); // Adjust the smoothing as necessary
+            }
+
+            return curve;
         }
 
         public static Dictionary<Levels.LevelTypes, int>? GetLevelRarities(string? levelsString)
@@ -118,6 +323,75 @@ namespace Rats
             }
         }
 
+        public static Vector3 GetSpeed()
+        {
+            float num3 = localPlayer.movementSpeed / localPlayer.carryWeight;
+            if (localPlayer.sinkingValue > 0.73f)
+            {
+                num3 = 0f;
+            }
+            else
+            {
+                if (localPlayer.isCrouching)
+                {
+                    num3 /= 1.5f;
+                }
+                else if (localPlayer.criticallyInjured && !localPlayer.isCrouching)
+                {
+                    num3 *= localPlayer.limpMultiplier;
+                }
+                if (localPlayer.isSpeedCheating)
+                {
+                    num3 *= 15f;
+                }
+                if (localPlayer.movementHinderedPrev > 0)
+                {
+                    num3 /= 2f * localPlayer.hinderedMultiplier;
+                }
+                if (localPlayer.drunkness > 0f)
+                {
+                    num3 *= StartOfRound.Instance.drunknessSpeedEffect.Evaluate(localPlayer.drunkness) / 5f + 1f;
+                }
+                if (!localPlayer.isCrouching && localPlayer.crouchMeter > 1.2f)
+                {
+                    num3 *= 0.5f;
+                }
+                if (!localPlayer.isCrouching)
+                {
+                    float num4 = Vector3.Dot(localPlayer.playerGroundNormal, localPlayer.walkForce);
+                    if (num4 > 0.05f)
+                    {
+                        localPlayer.slopeModifier = Mathf.MoveTowards(localPlayer.slopeModifier, num4, (localPlayer.slopeModifierSpeed + 0.45f) * Time.deltaTime);
+                    }
+                    else
+                    {
+                        localPlayer.slopeModifier = Mathf.MoveTowards(localPlayer.slopeModifier, num4, localPlayer.slopeModifierSpeed / 2f * Time.deltaTime);
+                    }
+                    num3 = Mathf.Max(num3 * 0.8f, num3 + localPlayer.slopeIntensity * localPlayer.slopeModifier);
+                }
+            }
+
+            Vector3 vector3 = new Vector3(0f, 0f, 0f);
+            int num5 = Physics.OverlapSphereNonAlloc(localPlayer.transform.position, 0.65f, localPlayer.nearByPlayers, StartOfRound.Instance.playersMask);
+            for (int i = 0; i < num5; i++)
+            {
+                vector3 += Vector3.Normalize((localPlayer.transform.position - localPlayer.nearByPlayers[i].transform.position) * 100f) * 1.2f;
+            }
+            int num6 = Physics.OverlapSphereNonAlloc(localPlayer.transform.position, 1.25f, localPlayer.nearByPlayers, 524288);
+            for (int j = 0; j < num6; j++)
+            {
+                EnemyAICollisionDetect component = localPlayer.nearByPlayers[j].gameObject.GetComponent<EnemyAICollisionDetect>();
+                if (component != null && component.mainScript != null && !component.mainScript.isEnemyDead && Vector3.Distance(localPlayer.transform.position, localPlayer.nearByPlayers[j].transform.position) < component.mainScript.enemyType.pushPlayerDistance)
+                {
+                    vector3 += Vector3.Normalize((localPlayer.transform.position - localPlayer.nearByPlayers[j].transform.position) * 100f) * component.mainScript.enemyType.pushPlayerForce;
+                }
+            }
+
+            Vector3 vector4 = localPlayer.walkForce * num3 * localPlayer.sprintMultiplier + new Vector3(0f, localPlayer.fallValue, 0f) + vector3;
+            vector4 += localPlayer.externalForces;
+            return vector4;
+        }
+
         public static void FreezePlayer(PlayerControllerB player, bool value)
         {
             player.disableInteract = value;
@@ -138,7 +412,9 @@ namespace Rats
             scavengerModel.transform.Find("LOD1").gameObject.SetActive(!value);
             scavengerModel.transform.Find("LOD2").gameObject.SetActive(!value);
             scavengerModel.transform.Find("LOD3").gameObject.SetActive(!value);
-            player.playerBadgeMesh.gameObject.SetActive(value);
+            scavengerModel.transform.Find("metarig/spine/spine.001/spine.002/spine.003/LevelSticker").gameObject.SetActive(!value);
+            scavengerModel.transform.Find("metarig/spine/spine.001/spine.002/spine.003/BetaBadge").gameObject.SetActive(!value);
+
         }
 
         public static List<SpawnableEnemyWithRarity> GetEnemies()
@@ -298,7 +574,7 @@ namespace Rats
             return positions;
         }
 
-        public static GameObject[] GetOutsideAINodes()
+        private static GameObject[] FindOutsideAINodes()
         {
             if (outsideAINodes == null || outsideAINodes.Length == 0 || outsideAINodes[0] == null)
             {
@@ -314,7 +590,7 @@ namespace Rats
             return outsideAINodes;
         }
 
-        public static GameObject[] GetInsideAINodes()
+        private static GameObject[] FindInsideAINodes()
         {
             if (insideAINodes == null || insideAINodes.Length == 0 || insideAINodes[0] == null)
             {
@@ -329,5 +605,46 @@ namespace Rats
             return insideAINodes;
         }
 
+        public static PlayerControllerB[] GetNearbyPlayers(Vector3 position, float distance = 10f, List<PlayerControllerB>? ignoredPlayers = null)
+        {
+            List<PlayerControllerB> players = [];
+
+            foreach (var player in StartOfRound.Instance.allPlayerScripts)
+            {
+                if (player == null || !player.isPlayerControlled) { continue; }
+                if (ignoredPlayers != null && ignoredPlayers.Contains(player)) { continue; }
+                if (Vector3.Distance(position, player.transform.position) > distance) { continue; }
+                players.Add(player);
+            }
+
+            return players.ToArray();
+        }
+    }
+
+    [HarmonyPatch]
+    public class UtilsPatches
+    {
+        private static ManualLogSource logger = LoggerInstance;
+
+        [HarmonyPrefix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnInsideEnemiesFromVentsIfReady))]
+        public static bool SpawnInsideEnemiesFromVentsIfReadyPrefix()
+        {
+            if (!Utils.spawningAllowed) { return false; }
+            return true;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnDaytimeEnemiesOutside))]
+        public static bool SpawnDaytimeEnemiesOutsidePrefix()
+        {
+            if (!Utils.spawningAllowed) { return false; }
+            return true;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnEnemiesOutside))]
+        public static bool SpawnEnemiesOutsidePrefix()
+        {
+            if (!Utils.spawningAllowed) { return false; }
+            return true;
+        }
     }
 }

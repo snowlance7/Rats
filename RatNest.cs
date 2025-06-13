@@ -55,7 +55,7 @@ namespace Rats
 
         public void Start()
         {
-            log("Sewer grate spawned at: " + transform.position);
+            logger.LogDebug("Sewer grate spawned at: " + transform.position);
             Nests.Add(this);
 
             poisonPlaneStart = PoisonLiquidPlane.transform.position;
@@ -154,7 +154,7 @@ namespace Rats
 
         void SpawnRat()
         {
-            if (!TESTING.testing && (StartOfRound.Instance.inShipPhase || StartOfRound.Instance.shipIsLeaving)) { return; }
+            if (!Utils.testing && (StartOfRound.Instance.inShipPhase || StartOfRound.Instance.shipIsLeaving)) { return; }
 
             if (RatManager.SpawnedRats.Count < maxRats)
             {
@@ -169,7 +169,7 @@ namespace Rats
         public void SpawnRats(int amount)
         {
             if (amount == 0) { return; }
-            log("Spawning rats from food: " + amount);
+            logger.LogDebug("Spawning rats from food: " + amount);
             StartCoroutine(SpawnRatsCoroutine(amount));
         }
 
@@ -199,7 +199,7 @@ namespace Rats
             float t = Mathf.Clamp01(PoisonInNest / poisonToCloseNest);
 
             PoisonLiquidPlane.transform.position = Vector3.Lerp(poisonPlaneStart, poisonPlaneEnd, t);
-            log("PoisonInNest: " + PoisonInNest);
+            logger.LogDebug("PoisonInNest: " + PoisonInNest);
         }
 
         [ClientRpc]

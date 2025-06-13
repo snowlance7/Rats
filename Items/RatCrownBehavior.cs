@@ -11,7 +11,7 @@ using static Rats.Plugin;
 
 /*DissonanceComms comms = FindObjectOfType<DissonanceComms>();
 float detectedVolumeAmplitude = Mathf.Clamp(comms.FindPlayer(comms.LocalPlayerName).Amplitude * 35f, 0f, 1f);
-log(detectedVolumeAmplitude);*/
+logger.LogDebug(detectedVolumeAmplitude);*/
 
 namespace Rats.Items
 {
@@ -54,7 +54,7 @@ namespace Rats.Items
                 float volume = GetPlayerVolume();
                 if (volume  >= volumeToRallyRats)
                 {
-                    log("Rallying rats with crown");
+                    logger.LogDebug("Rallying rats with crown");
                     rallyCooldown = 0f;
                     RallyRatsServerRpc();
                 }

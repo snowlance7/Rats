@@ -22,27 +22,27 @@ namespace Rats
         public static RatKingAI? Instance { get; private set; }
         public bool ratKingCanDie = false;
 
-#pragma warning disable 0649
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         public ScanNodeProperties ScanNode;
-        public AudioClip[] SqueakSFX;
-        public AudioClip[] AttackSFX;
-        public AudioClip[] HitSFX;
-        public AudioClip[] NibbleSFX;
-        public AudioClip ScreamSFX;
-        public Transform RatMouth;
-        public GameObject NestPrefab;
-        public GameObject RatCrownPrefab;
-        public GameObject RatMesh;
-        public GameObject CrownMesh;
-        public NetworkAnimator networkAnimator;
-        public Transform NestTransform;
-#pragma warning restore 0649
+		public AudioClip[] SqueakSFX;
+		public AudioClip[] AttackSFX;
+		public AudioClip[] HitSFX;
+		public AudioClip[] NibbleSFX;
+		public AudioClip ScreamSFX;
+		public Transform RatMouth;
+		public GameObject NestPrefab;
+		public GameObject RatCrownPrefab;
+		public GameObject RatMesh;
+		public GameObject CrownMesh;
+		public NetworkAnimator networkAnimator;
+		public Transform NestTransform;
 
-        bool inRallyAnimation;
+		public RatNest KingNest;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+
+		bool inRallyAnimation;
 
         int hashRunSpeed;
-
-        public RatNest KingNest;
 
         float timeSinceCollision;
         float timeSinceAddThreat;
@@ -67,17 +67,17 @@ namespace Rats
             if (Instance != null && Instance != this)
             {
                 if (!IsServerOrHost) { return; }
-                log("There is already a Rat King in the scene. Removing this one.");
+                logger.LogDebug("There is already a Rat King in the scene. Removing this one.");
                 NetworkObject.Despawn(true);
                 return;
             }
             logger.LogDebug("Setting RatKingAI.Instance to this");
             Instance = this;
-            log("Finished spawning Rat King");
+            logger.LogDebug("Finished spawning Rat King");
 
 
             if (!IsServerOrHost) { return; }
-            log("Spawning KingNest");
+            logger.LogDebug("Spawning KingNest");
             KingNest = GameObject.Instantiate(NestPrefab, NestTransform).GetComponent<RatNest>();
             KingNest.NetworkObject.Spawn(true);
             KingNest.SetAsRatKingNestClientRpc();
@@ -147,7 +147,7 @@ namespace Rats
         public override void DoAIInterval()
         {
             base.DoAIInterval();
-            log(agent.speed);
+            logger.LogDebug(agent.speed);
 
             if (isEnemyDead || StartOfRound.Instance.allPlayersDead || stunNormalizedTimer > 0f || inSpecialAnimation || inRallyAnimation)
             {
@@ -172,7 +172,7 @@ namespace Rats
 
                     if (targetPlayer == null || targetPlayer.isPlayerDead || targetPlayer.disconnectedMidGame || !SetDestinationToPosition(targetPlayer.transform.position, true))
                     {
-                        log("Stop Targeting");
+                        logger.LogDebug("Stop Targeting");
                         targetPlayer = null;
                         SwitchToBehaviourClientRpc((int)State.Roaming);
                         return;
@@ -188,7 +188,7 @@ namespace Rats
 
                     if (!TargetClosestPlayerInAnyCase() || (Vector3.Distance(transform.position, targetPlayer.transform.position) > configRatKingLoseDistance.Value && !CheckLineOfSightForPosition(targetPlayer.transform.position)))
                     {
-                        log("Stop Targeting");
+                        logger.LogDebug("Stop Targeting");
                         targetPlayer = null;
                         SwitchToBehaviourClientRpc((int)State.Roaming);
                         return;
@@ -347,7 +347,7 @@ namespace Rats
                 Vector3 position = RoundManager.Instance.GetNavMeshPosition(targetNode.position, RoundManager.Instance.navHit, 1.75f, agent.areaMask);
                 if (!SetDestinationToPosition(position, true))
                 {
-                    log("RatKing couldnt reach random node, choosing a new one...");
+                    logger.LogDebug("RatKing couldnt reach random node, choosing a new one...");
                     continue;
                 }
                 while (agent.enabled)
@@ -356,9 +356,9 @@ namespace Rats
                     //if (!agent.hasPath || timeStuck > 1f)
                     if (ReachedDestination())
                     {
-                        log("Rat King has reached destination, idling...");
+                        logger.LogDebug("Rat King has reached destination, idling...");
                         yield return new WaitForSeconds(configRatKingIdleTime.Value);
-                        log("Finished idling, choosing a new position...");
+                        logger.LogDebug("Finished idling, choosing a new position...");
                         break;
                     }
                 }
@@ -378,7 +378,7 @@ namespace Rats
                     return;
                 }
 
-                log($"RatKingHP: {enemyHP}");
+                logger.LogDebug($"RatKingHP: {enemyHP}");
             }
 
             if (!IsServerOrHost || playerWhoHit == null) { return; }
@@ -443,7 +443,7 @@ namespace Rats
             }
 
             int threat = RatManager.PlayerThreatCounter[player];
-            log($"{player.playerUsername}: {threat} threat");
+            logger.LogDebug($"{player.playerUsername}: {threat} threat");
 
             if (!aggro) { return; }
 
@@ -464,7 +464,7 @@ namespace Rats
         public void Rally(PlayerControllerB player)
         {
             if (timeSinceRally < configRatKingRallyCooldown.Value) { return; }
-            log("Rallying");
+            logger.LogDebug("Rallying");
             timeSinceRally = 0f;
             inSpecialAnimation = true;
             inRallyAnimation = true;
@@ -477,7 +477,7 @@ namespace Rats
         public void FinishRallyAnim() // Animation function "rally"
         {
             if (!IsServerOrHost) { return; }
-            log("Finishing rally animation");
+            logger.LogDebug("Finishing rally animation");
             inSpecialAnimation = false;
             inRallyAnimation = false;
 
@@ -494,12 +494,12 @@ namespace Rats
         public void PlayRallySFX() // Animation function
         {
             creatureVoice.PlayOneShot(ScreamSFX);
-            log("Played rally sfx");
+            logger.LogDebug("Played rally sfx");
         }
 
         public void FinishEatingBody() // Animation function
         {
-            log("Finishing eating body");
+            logger.LogDebug("Finishing eating body");
             DropBodyOnLocalClient(true);
             inSpecialAnimation = false;
 
@@ -514,7 +514,7 @@ namespace Rats
 
         public void UnsetInSpecialAnimation() // Animation function
         {
-            log("In UnsetInSpecialAnimation()");
+            logger.LogDebug("In UnsetInSpecialAnimation()");
             inSpecialAnimation = false;
             RoundManager.PlayRandomClip(creatureSFX, SqueakSFX);
         }*/

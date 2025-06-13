@@ -32,16 +32,11 @@ namespace Rats
 
         public static AssetBundle ModAssets;
 
-        public static bool IsLoggingEnabled;
-
         // Configs
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         // General
         public static ConfigEntry<bool> configHolidayRats;
-
-        // Debugging
-        public static ConfigEntry<bool> configEnableDebugging;
 
         // Performance
         public static ConfigEntry<int> configMaxRats;
@@ -50,7 +45,7 @@ namespace Rats
         public static ConfigEntry<float> configBatchUpdateInterval;
 
         // RatKing
-        public static ConfigEntry<bool> configEnableRatKing;
+        public static ConfigEntry<bool> configRatKingEnable;
         public static ConfigEntry<string> configRatKingLevelRarities;
         public static ConfigEntry<string> configRatKingCustomLevelRarities;
         public static ConfigEntry<float> configRatKingSummonChanceRatDeath;
@@ -84,23 +79,27 @@ namespace Rats
         public static ConfigEntry<float> configSqueakChance;
 
         // RatPoison
+        public static ConfigEntry<bool> configRatPoisonEnable;
         public static ConfigEntry<int> configRatPoisonPrice;
         public static ConfigEntry<float> configRatPoisonMaxFluid;
         public static ConfigEntry<float> configRatPoisonPourRate;
         public static ConfigEntry<float> configPoisonToCloseNest;
 
         // GlueTrap
+        public static ConfigEntry<bool> configGlueTrapEnable;
         public static ConfigEntry<int> configGlueTrapPrice;
         public static ConfigEntry<int> configGlueBoardAmount;
         public static ConfigEntry<int> configScrapValuePerRat;
         public static ConfigEntry<int> configMaxRatsOnGlueTrap;
 
         // Box Of Snap traps
+        public static ConfigEntry<bool> configSnapTrapsEnable;
         public static ConfigEntry<int> configSnapTrapsPrice;
         public static ConfigEntry<int> configSnapTrapAmount;
         public static ConfigEntry<float> configSnapTrapsDespawnTime;
 
         // Rat Crown
+        public static ConfigEntry<bool> configRatCrownEnable;
         public static ConfigEntry<int> configRatCrownMinValue;
         public static ConfigEntry<int> configRatCrownMaxValue;
 
@@ -125,9 +124,6 @@ namespace Rats
             // General
             configHolidayRats = Config.Bind("General", "Holiday Rats", false, "Rats spawn with a santa hat");
 
-            // Debugging
-            configEnableDebugging = Config.Bind("Debugging", "Enable Debugging", false, "Allows debug logs to show in the logs");
-
             // Performance
             configMaxRats = Config.Bind("Performance", "Maximum Rats", 50, "The maximum number of rats that can be on the map. Lowering this can improve performance.");
             configAIIntervalTime = Config.Bind("Performance", "AI Interval Time", 0.3f, "The interval in which rats will update their AI (Changing position, doing complex calculations, etc). Setting this higher can improve performance but can also make the rats freeze in place more often while lower values makes them constantly moving but can decrease performance. Funnily enough the rats move more rat like when this is set higher.");
@@ -135,7 +131,7 @@ namespace Rats
             configBatchUpdateInterval = Config.Bind("Performance", "Batch Update Interval", 0.2f, "The amount of time between each group update. (if you dont know what this means, just leave this config alone)");
 
             // RatKing
-            configEnableRatKing = Config.Bind("Rat King", "Enable Rat King", true, "Set to false to disable spawning the rat king.");
+            configRatKingEnable = Config.Bind("Rat King", "Enable", true, "Set to false to disable spawning the rat king.");
             configRatKingLevelRarities = Config.Bind("Rat King Rarities", "Level Rarities", "All: 20", "Rarities for each level. Example formatting: ExperimentationLevel:5, AssuranceLevel:6, VowLevel:9, OffenseLevel:10, AdamanceLevel:10, MarchLevel:10, RendLevel:75, DineLevel:75, TitanLevel:75, ArtificeLevel:20, EmbrionLevel:25, Modded:15");
             configRatKingCustomLevelRarities = Config.Bind("Rat King Rarities", "Custom Level Rarities", "", "Rarities for modded levels. Same formatting as level rarities.");
             configRatKingSummonChanceRatDeath = Config.Bind("Rat King", "Rat Death Summon Chance", 0.01f, "The chance the rat king will spawn when killing a rat at high threat.");
@@ -146,7 +142,7 @@ namespace Rats
             configRatKingLoseDistance = Config.Bind("Rat King", "Distance to Lose Rat King", 20f, "The distance from the rat king you need to be to lose him. Does not apply when rampaged or hunting.");
             configRatKingIdleTime = Config.Bind("Rat King", "Idle Time", 5f, "The amount of time the rat king will spend idling when reaching a destination during his roam routine.");
 
-            // KingNest
+            // Nest
             configSewerGrateSpawnWeightCurve = Config.Bind("Nest", "Spawn Weight Curve", "Vanilla - 0,0 ; 1,2 | Custom - 0,0 ; 1,2", "The MoonName - CurveSpawnWeight for the SewerGrate(Rat nest).");
             configMinRatSpawnTime = Config.Bind("Nest", "Minimum Rat Spawn Time", 5, "The minimum time in seconds before a rat can spawn from the nest.");
             configMaxRatSpawnTime = Config.Bind("Nest", "Maximum Rat Spawn Time", 20, "The maximum time in seconds before a rat can spawn from the nest.");
@@ -169,24 +165,27 @@ namespace Rats
             configSqueakChance = Config.Bind("Rats", "Squeak Chance", 0.01f, "The chance a rat will squeak when completing a run cycle (every second)");
 
             // RatPoison
+            configRatPoisonEnable = Config.Bind("Rat Poison", "Enable", true, "Whether or not to enable");
             configRatPoisonPrice = Config.Bind("Rat Poison", "Store Price", 40, "The cost of rat poison in the store.");
             configRatPoisonMaxFluid = Config.Bind("Rat Poison", "Max Fluid", 5f, "The amount of rat poison in a container of rat poison.");
             configRatPoisonPourRate = Config.Bind("Rat Poison", "Pour Rate", 0.1f, "How fast the rat poison pours out of the container.");
             configPoisonToCloseNest = Config.Bind("Rat Poison", "Poison To Close Nest", 1f, "The amount of poison you need to pour in a rat nest to disable it. Disabling a nest prevents rats from spawning and has a chance to spawn the rat king.");
 
             // GlueTrap
+            configGlueTrapEnable = Config.Bind("Glue Trap", "Enable", true, "Whether or not to enable");
             configGlueTrapPrice = Config.Bind("Glue Trap", "Store Price", 20, "The cost of the glue trap in the store.");
             configGlueBoardAmount = Config.Bind("Glue Trap", "Glue Board Amount", 4, "The amount of glue boards you get in the glue trap item.");
             configScrapValuePerRat = Config.Bind("Glue Trap", "Scrap Value Per Rat", 2, "The scrap value added to the glue board per rat stuck.");
             configMaxRatsOnGlueTrap = Config.Bind("Glue Trap", "Maximum Rats on Glue Trap", 5, "The maximum number of rats that can be caught on a single glue trap before it becomes full.");
 
-
             // BoxOfSnapTraps
+            configSnapTrapsEnable = Config.Bind("Snap Traps", "Enable", true, "Whether or not to enable");
             configSnapTrapsPrice = Config.Bind("Snap Traps", "Store Price", 50, "The cost of the box of snap traps in the store.");
             configSnapTrapAmount = Config.Bind("Snap Traps", "Snap Trap Amount", 100, "The amount of snap traps that come with a Box Of Snap Traps.");
             configSnapTrapsDespawnTime = Config.Bind("Snap Traps", "Despawn Time", 10f, "The time for snap traps to despawn after being triggered.");
 
             // Rat Crown
+            configRatCrownEnable = Config.Bind("Rat Crown", "Enable", true, "Whether or not to enable");
             configRatCrownMinValue = Config.Bind("Rat Crown", "Minimum Scrap Value", 300, "The minimum scrap value of the crown.");
             configRatCrownMaxValue = Config.Bind("Rat Crown", "Maximum Scrap Value", 500, "The maximum scrap value of the crown.");
 
@@ -201,26 +200,18 @@ namespace Rats
             }
             LoggerInstance.LogDebug($"Got AssetBundle at: {Path.Combine(sAssemblyLocation, "rats_assets")}");
 
-            EnemyType RatKing = ModAssets.LoadAsset<EnemyType>("Assets/ModAssets/RatKingEnemy.asset");
-            if (RatKing == null) { LoggerInstance.LogError("Error: Couldnt get Rat from assets"); return; }
-            LoggerInstance.LogDebug($"Got Rat prefab");
-
-            TerminalNode RatTN = ModAssets.LoadAsset<TerminalNode>("Assets/ModAssets/Bestiary/RatKingTN.asset");
-            TerminalKeyword RatTK = ModAssets.LoadAsset<TerminalKeyword>("Assets/ModAssets/Bestiary/RatKingTK.asset");
-
-            LoggerInstance.LogDebug("Registering enemy network prefab...");
-            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(RatKing.enemyPrefab);
-            LoggerInstance.LogDebug("Registering enemy...");
-            Enemies.RegisterEnemy(RatKing, GetLevelRarities(configRatKingLevelRarities.Value), GetCustomLevelRarities(configRatKingCustomLevelRarities.Value), RatTN, RatTK);
+            // Rat King
+            Utils.RegisterEnemy(configRatKingEnable.Value, "Assets/ModAssets/RatKingEnemy.asset", "Assets/ModAssets/Bestiary/RatKingTN.asset", "Assets/ModAssets/Bestiary/RatKingTK.asset", configRatKingLevelRarities.Value, configRatKingCustomLevelRarities.Value);
 
             SpawnableMapObjectDef RatSpawnPrefab = ModAssets.LoadAsset<SpawnableMapObjectDef>("Assets/ModAssets/RatSpawn.asset");
             if (RatSpawnPrefab == null) { LoggerInstance.LogError("Error: Couldnt get RatSpawnPrefab from assets"); return; }
             LoggerInstance.LogDebug("Registering rat spawn network prefab...");
             LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(RatSpawnPrefab.spawnableMapObject.prefabToSpawn);
-            RatManager.RatNestPrefab = RatSpawnPrefab.spawnableMapObject.prefabToSpawn;
 
+            // Rat Spawn
             LoggerInstance.LogDebug($"Registering RatSpawn");
-            RegisterInsideMapObjectWithConfig(RatSpawnPrefab, configSewerGrateSpawnWeightCurve.Value);
+            RatManager.RatNestPrefab = Utils.RegisterInsideMapObjectWithConfig("Assets/ModAssets/RatSpawn.asset", configSewerGrateSpawnWeightCurve.Value);
+            if (RatManager.RatNestPrefab == null) { LoggerInstance.LogError("Couldnt load rat nest prefab, make sure the spawn weight config is set up correctly"); return; }
 
             // Rat
             GameObject rat = ModAssets.LoadAsset<GameObject>("Assets/ModAssets/Rat.prefab");
@@ -231,162 +222,22 @@ namespace Rats
             LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(jermaRat);
 
             // Rat poison
-            Item RatPoison = ModAssets.LoadAsset<Item>("Assets/ModAssets/RatPoisonItem.asset");
-            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(RatPoison.spawnPrefab);
-            LethalLib.Modules.Utilities.FixMixerGroups(RatPoison.spawnPrefab);
-            LethalLib.Modules.Items.RegisterShopItem(RatPoison, configRatPoisonPrice.Value);
+            Utils.RegisterShopItem(configRatPoisonEnable.Value, "Assets/ModAssets/RatPoisonItem.asset", configRatPoisonPrice.Value);
 
             // Glue trap
-            Item GlueTrap = ModAssets.LoadAsset<Item>("Assets/ModAssets/GlueTrapItem.asset");
-            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(GlueTrap.spawnPrefab);
-            LethalLib.Modules.Utilities.FixMixerGroups(GlueTrap.spawnPrefab);
-            LethalLib.Modules.Items.RegisterShopItem(GlueTrap, configGlueTrapPrice.Value);
+            Utils.RegisterShopItem(configGlueTrapEnable.Value, "Assets/ModAssets/GlueTrapItem.asset", configGlueTrapPrice.Value);
 
             // Glue Board
-            Item Glueboard = ModAssets.LoadAsset<Item>("Assets/ModAssets/GlueBoardItem.asset");
-            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(Glueboard.spawnPrefab);
-            LethalLib.Modules.Utilities.FixMixerGroups(Glueboard.spawnPrefab);
-            LethalLib.Modules.Items.RegisterItem(Glueboard);
+            Utils.RegisterItem(configGlueTrapEnable.Value, "Assets/ModAssets/GlueBoardItem.asset");
 
             // Box Of Snap Traps
-            Item SnapTraps = ModAssets.LoadAsset<Item>("Assets/ModAssets/BoxOfSnapTrapsItem.asset");
-            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(SnapTraps.spawnPrefab);
-            LethalLib.Modules.Utilities.FixMixerGroups(SnapTraps.spawnPrefab);
-            LethalLib.Modules.Items.RegisterShopItem(SnapTraps, configSnapTrapsPrice.Value);
+            Utils.RegisterShopItem(configSnapTrapsEnable.Value, "Assets/ModAssets/BoxOfSnapTrapsItem.asset", configSnapTrapsPrice.Value);
 
             // Rat Crowwn
-            Item RatCrown = ModAssets.LoadAsset<Item>("Assets/ModAssets/RatCrownItem.asset");
-
-            RatCrown.minValue = configRatCrownMinValue.Value;
-            RatCrown.maxValue = configRatCrownMaxValue.Value;
-
-            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(RatCrown.spawnPrefab);
-            LethalLib.Modules.Utilities.FixMixerGroups(RatCrown.spawnPrefab);
-            LethalLib.Modules.Items.RegisterScrap(RatCrown, 0);
+            Utils.RegisterItem(configRatCrownEnable.Value, "Assets/ModAssets/RatCrownItem.asset", "", "", configRatCrownMinValue.Value, configRatCrownMaxValue.Value);
 
             // Finished
             Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
-        }
-
-        public static void log(object message)
-        {
-            if (IsLoggingEnabled || TESTING.testing)
-            {
-                LoggerInstance.LogDebug(message);
-            }
-        }
-
-        // Xu's code for registering map objects with configs
-        protected void RegisterInsideMapObjectWithConfig(SpawnableMapObjectDef mapObjDef, string configString)
-        {
-            /*SpawnableMapObjectDef mapObjDef = ScriptableObject.CreateInstance<SpawnableMapObjectDef>();
-            mapObjDef.spawnableMapObject = new SpawnableMapObject
-            {
-                prefabToSpawn = prefab
-            };*/
-
-
-            (Dictionary<Levels.LevelTypes, string> spawnRateByLevelType, Dictionary<string, string> spawnRateByCustomLevelType) = ConfigParsingWithCurve(configString);
-
-
-            foreach (var entry in spawnRateByLevelType)
-            {
-                //AnimationCurve animationCurve = CreateCurveFromString(entry.Value, prefab.name);
-                AnimationCurve animationCurve = CreateCurveFromString(entry.Value, mapObjDef.spawnableMapObject.prefabToSpawn.name);
-                MapObjects.RegisterMapObject(mapObjDef, entry.Key, (level) => animationCurve);
-            }
-            foreach (var entry in spawnRateByCustomLevelType)
-            {
-                //AnimationCurve animationCurve = CreateCurveFromString(entry.Value, prefab.name);
-                AnimationCurve animationCurve = CreateCurveFromString(entry.Value, mapObjDef.spawnableMapObject.prefabToSpawn.name);
-                MapObjects.RegisterMapObject(mapObjDef, Levels.LevelTypes.None, new string[] { entry.Key }, (level) => animationCurve);
-            }
-        }
-
-        protected (Dictionary<Levels.LevelTypes, string> spawnRateByLevelType, Dictionary<string, string> spawnRateByCustomLevelType) ConfigParsingWithCurve(string configMoonRarity)
-        {
-            Dictionary<Levels.LevelTypes, string> spawnRateByLevelType = new();
-            Dictionary<string, string> spawnRateByCustomLevelType = new();
-            foreach (string entry in configMoonRarity.Split('|').Select(s => s.Trim()))
-            {
-                string[] entryParts = entry.Split('-').Select(s => s.Trim()).ToArray();
-
-                if (entryParts.Length != 2) continue;
-
-                string name = entryParts[0].ToLowerInvariant();
-
-                if (name == "custom")
-                {
-                    name = "modded";
-                }
-
-                if (System.Enum.TryParse(name, true, out Levels.LevelTypes levelType))
-                {
-                    spawnRateByLevelType[levelType] = entryParts[1];
-                }
-                else
-                {
-                    // Try appending "Level" to the name and re-attempt parsing
-                    string modifiedName = name + "level";
-                    if (System.Enum.TryParse(modifiedName, true, out levelType))
-                    {
-                        spawnRateByLevelType[levelType] = entryParts[1];
-                    }
-                    else
-                    {
-                        spawnRateByCustomLevelType[name] = entryParts[1];
-                    }
-                }
-            }
-            return (spawnRateByLevelType, spawnRateByCustomLevelType);
-        }
-
-        public AnimationCurve CreateCurveFromString(string keyValuePairs, string nameOfThing)
-        {
-            // Split the input string into individual key-value pairs
-            string[] pairs = keyValuePairs.Split(';').Select(s => s.Trim()).ToArray();
-            if (pairs.Length == 0)
-            {
-                if (int.TryParse(keyValuePairs, out int result))
-                {
-                    return new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, result));
-                }
-                else
-                {
-                    LoggerInstance.LogError($"Invalid key-value pairs format: {keyValuePairs}");
-                    return new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 0));
-                }
-            }
-            List<Keyframe> keyframes = new();
-
-            // Iterate over each pair and parse the key and value to create keyframes
-            foreach (string pair in pairs)
-            {
-                string[] splitPair = pair.Split(',').Select(s => s.Trim()).ToArray();
-                if (splitPair.Length == 2 &&
-                    float.TryParse(splitPair[0], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float time) &&
-                    float.TryParse(splitPair[1], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float value))
-                {
-                    keyframes.Add(new Keyframe(time, value));
-                }
-                else
-                {
-                    LoggerInstance.LogError($"Failed config for hazard: {nameOfThing}");
-                    LoggerInstance.LogError($"Split pair length: {splitPair.Length}");
-                    LoggerInstance.LogError($"Could parse first value: {float.TryParse(splitPair[0], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float key1)}, instead got: {key1}, with splitPair0 being: {splitPair[0]}");
-                    LoggerInstance.LogError($"Could parse second value: {float.TryParse(splitPair[1], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float value2)}, instead got: {value2}, with splitPair1 being: {splitPair[1]}");
-                    LoggerInstance.LogError($"Invalid key,value pair format: {pair}");
-                }
-            }
-
-            // Create the animation curve with the generated keyframes and apply smoothing
-            var curve = new AnimationCurve(keyframes.ToArray());
-            for (int i = 0; i < keyframes.Count; i++)
-            {
-                curve.SmoothTangents(i, 0.5f); // Adjust the smoothing as necessary
-            }
-
-            return curve;
         }
 
         public Dictionary<Levels.LevelTypes, int> GetLevelRarities(string levelsString)

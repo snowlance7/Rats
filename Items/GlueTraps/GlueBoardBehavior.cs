@@ -58,11 +58,11 @@ namespace Rats.Items.GlueTraps
             {
                 rat.agent.speed = Mathf.Lerp(startSpeed, 0f, elapsedTime / delay);
                 elapsedTime += Time.deltaTime;
-                log("Elapsed Time: " + elapsedTime);
+                logger.LogDebug("Elapsed Time: " + elapsedTime);
                 yield return null;
             }
 
-            log("Finished slowing, calling rpc now");
+            logger.LogDebug("Finished slowing, calling rpc now");
 
             rat.KillEnemyOnOwnerClient();
             yield return new WaitForSeconds(1f);
@@ -103,7 +103,7 @@ namespace Rats.Items.GlueTraps
         [ClientRpc]
         public void AddRatToBoardClientRpc(Vector3 pos, Quaternion rot)
         {
-            log("In ParentRatToBoardClientRpc()");
+            logger.LogDebug("In ParentRatToBoardClientRpc()");
 
             GameObject prefab = configUseJermaRats.Value ? RatPropJerma : RatProp;
             GameObject rat = Instantiate(prefab, pos, rot);

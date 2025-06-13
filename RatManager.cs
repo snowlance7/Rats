@@ -13,12 +13,13 @@ namespace Rats
 {
     public class RatManager : MonoBehaviour
     {
+        private static ManualLogSource logger = LoggerInstance;
         private static RatManager? _instance;
         public static RatManager Instance => _instance ??= GameObject.Instantiate(new GameObject("RatManager"), Vector3.zero, Quaternion.identity, RoundManager.Instance.mapPropsContainer.transform).AddComponent<RatManager>();
 
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        public static GameObject RatNestPrefab;
+        public static GameObject? RatNestPrefab;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
         public static List<RatAI> SpawnedRats = [];
@@ -73,7 +74,6 @@ namespace Rats
             foodToSpawnRat = configFoodToSpawnRat.Value;
             enemyFoodPerHPPoint = configEnemyFoodPerHPPoint.Value;
             maxRats = configMaxRats.Value;
-            IsLoggingEnabled = configEnableDebugging.Value;
             poisonToCloseNest = configPoisonToCloseNest.Value;
         }
 
@@ -85,7 +85,7 @@ namespace Rats
 
         public void OnDestroy()
         {
-            log("In OnDestroy() for RatManager");
+            logger.LogDebug("In OnDestroy() for RatManager");
             if (!IsServerOrHost) { return; }
             EnemyHitCount.Clear();
             EnemyThreatCounter.Clear();
@@ -100,13 +100,6 @@ namespace Rats
             }
 
             SpawnedRats.Clear();
-
-            /*foreach (RatNest nest in RatNest.Nests.ToList())
-            {
-                if (!nest.NetworkObject.IsSpawned) { continue; }
-                nest.NetworkObject.Despawn(true);
-            }*/
-
             RatNest.Nests.Clear();
         }
 
@@ -152,7 +145,7 @@ namespace Rats
 
                     if (ratGroups[groupIndex].Count > 0)
                     {
-                        log($"Updating {ratGroups[groupIndex].Count} rats in group {groupIndex}");
+                        //logger.LogDebug($"Updating {ratGroups[groupIndex].Count} rats in group {groupIndex}");
                         foreach (RatAI rat in ratGroups[groupIndex])
                         {
                             rat.DoAIInterval(); // Call the update method on each rat
