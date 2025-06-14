@@ -669,7 +669,7 @@ namespace Rats
 
                 if (PlayerThreatCounter[playerWhoHit] > highPlayerThreat && Nest != null)
                 {
-                    Nest.SpawnRatKingOnServer(configRatKingSummonChanceRatDeath.Value);
+                    Nest.SpawnRatKing(configRatKingSummonChanceRatDeath.Value);
                 }
             }
         }

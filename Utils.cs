@@ -619,6 +619,34 @@ namespace Rats
 
             return players.ToArray();
         }
+
+        public static Vector3 GetClosestExitFromPosition(Vector3 position)
+        {
+            Vector3 closestPosition = Vector3.zero;
+            float closestDistance = Mathf.Infinity;
+
+            foreach (var entranceTeleport in UnityEngine.Object.FindObjectsOfType<EntranceTeleport>(includeInactive: false))
+            {
+                if (entranceTeleport.exitPoint == null)
+                {
+                    if (!entranceTeleport.FindExitPoint())
+                    {
+                        logger.LogError("Couldnt find exit point for entrance");
+                        continue;
+                    }
+                }
+                if (!CalculatePath(position, entranceTeleport.exitPoint.position)) { continue; }
+                float distance = Vector3.Distance(entranceTeleport.exitPoint.position, position);
+
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestPosition = entranceTeleport.exitPoint.position;
+                }
+            }
+
+            return closestPosition;
+        }
     }
 
     [HarmonyPatch]

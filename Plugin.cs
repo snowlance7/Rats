@@ -22,15 +22,17 @@ namespace Rats
     [BepInDependency(LethalLib.Plugin.ModGUID)]
     public class Plugin : BaseUnityPlugin
     {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         public static Plugin PluginInstance;
         public static ManualLogSource LoggerInstance;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         private readonly Harmony harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
         public static PlayerControllerB localPlayer { get { return GameNetworkManager.Instance.localPlayerController; } }
         public static bool IsServerOrHost { get { return NetworkManager.Singleton.IsServer || NetworkManager.Singleton.IsHost; } }
         public static PlayerControllerB PlayerFromId(ulong id) { return StartOfRound.Instance.allPlayerScripts[StartOfRound.Instance.ClientPlayerList[id]]; }
 
 
-        public static AssetBundle ModAssets;
+        public static AssetBundle? ModAssets;
 
         // Configs
 
@@ -238,78 +240,6 @@ namespace Rats
 
             // Finished
             Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
-        }
-
-        public Dictionary<Levels.LevelTypes, int> GetLevelRarities(string levelsString)
-        {
-            try
-            {
-                Dictionary<Levels.LevelTypes, int> levelRaritiesDict = new Dictionary<Levels.LevelTypes, int>();
-
-                if (levelsString != null && levelsString != "")
-                {
-                    string[] levels = levelsString.Split(',');
-
-                    foreach (string level in levels)
-                    {
-                        string[] levelSplit = level.Split(':');
-                        if (levelSplit.Length != 2) { continue; }
-                        string levelType = levelSplit[0].Trim();
-                        string levelRarity = levelSplit[1].Trim();
-
-                        if (Enum.TryParse<Levels.LevelTypes>(levelType, out Levels.LevelTypes levelTypeEnum) && int.TryParse(levelRarity, out int levelRarityInt))
-                        {
-                            levelRaritiesDict.Add(levelTypeEnum, levelRarityInt);
-                        }
-                        else
-                        {
-                            LoggerInstance.LogError($"Error: Invalid level rarity: {levelType}:{levelRarity}");
-                        }
-                    }
-                }
-                return levelRaritiesDict;
-            }
-            catch (Exception e)
-            {
-                Logger.LogError($"Error: {e}");
-                return null!;
-            }
-        }
-
-        public Dictionary<string, int> GetCustomLevelRarities(string levelsString)
-        {
-            try
-            {
-                Dictionary<string, int> customLevelRaritiesDict = new Dictionary<string, int>();
-
-                if (levelsString != null)
-                {
-                    string[] levels = levelsString.Split(',');
-
-                    foreach (string level in levels)
-                    {
-                        string[] levelSplit = level.Split(':');
-                        if (levelSplit.Length != 2) { continue; }
-                        string levelType = levelSplit[0].Trim();
-                        string levelRarity = levelSplit[1].Trim();
-
-                        if (int.TryParse(levelRarity, out int levelRarityInt))
-                        {
-                            customLevelRaritiesDict.Add(levelType, levelRarityInt);
-                        }
-                        else
-                        {
-                            LoggerInstance.LogError($"Error: Invalid level rarity: {levelType}:{levelRarity}");
-                        }
-                    }
-                }
-                return customLevelRaritiesDict;
-            }
-            catch (Exception e)
-            {
-                Logger.LogError($"Error: {e}");
-                return null!;
-            }
         }
 
         private static void InitializeNetworkBehaviours()

@@ -112,10 +112,6 @@ namespace Rats
             RoundManager.Instance.SpawnedEnemies.Add(this);
             path1 = new NavMeshPath();
             ventAnimationFinished = true;
-            if (IsServerOrHost)
-            {
-                SwitchToBehaviourClientRpc((int)State.Roaming);
-            }
         }
 
         public override void Update()

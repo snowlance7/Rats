@@ -103,22 +103,22 @@ namespace Rats
                     NestAnimator.SetTrigger("destroy");
                     NestAudio.Play();
 
-                    SpawnRatKingOnServer(ratKingSummonChancePoison);
+                    SpawnRatKing(ratKingSummonChancePoison);
 
                     int openNests = GetOpenNestCount();
                     if (openNests <= 1)
                     {
-                        SpawnRatKingOnServer(ratKingSummonChanceNests, true);
+                        SpawnRatKing(ratKingSummonChanceNests, true);
                     }
                 }
             }
         }
 
-        public void SpawnRatKingOnServer(float spawnChance = 1f, bool rampage = false)
+        public void SpawnRatKing(float spawnChance = 1f, bool rampage = false)
         {
-            if (!IsServerOrHost) { return; }
+            if (!IsServerOrHost) { logger.LogError("Only server can call functions in RatNest"); return; }
 
-            if (RatKingAI.Instance == null && configEnableRatKing.Value)
+            if (RatKingAI.Instance == null && configRatKingEnable.Value)
             {
                 if (UnityEngine.Random.Range(0f, 1f) > spawnChance) { return; }
 
@@ -143,6 +143,7 @@ namespace Rats
 
         public void AddFood(int amount = 1)
         {
+            if (!IsServerOrHost) { logger.LogError("Only server can call functions in RatNest"); return; }
             food += amount;
 
             int ratsToSpawn = food / foodToSpawnRat;
@@ -192,7 +193,7 @@ namespace Rats
         }
 
         [ClientRpc]
-        public void AddPoisonClientRpc(float amount)
+        void AddPoisonClientRpc(float amount)
         {
             voidPlaneRenderer.material = YellowMat;
             PoisonInNest = Mathf.Min(PoisonInNest + amount, poisonToCloseNest);
