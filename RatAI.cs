@@ -1,6 +1,7 @@
 ﻿using BepInEx.Logging;
 using GameNetcodeStuff;
 using System.Collections;
+using System.Linq;
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
@@ -67,6 +68,7 @@ namespace Rats
         public bool rallyRat;
         public bool defenseRat;
         bool pathingToNest;
+        bool roaming;
 
         // Constants
         const float idleTime = 1f;
@@ -77,7 +79,6 @@ namespace Rats
         float distanceToLoseRats;
         int ratDamage;
         float AIIntervalTime;
-        private bool roaming;
 
         public enum State
         {
@@ -396,8 +397,13 @@ namespace Rats
                     grabbingBody = true;
                     return;
                 }
-                PlayerControllerB player = CheckLineOfSightForPlayer(60f, 60, 5);
-                if (PlayerIsTargetable(player))
+                EnemyAI? enemy = CheckLineOfSightForEnemy(30);
+                if (enemy != null && enemy.enemyType.canDie)
+                {
+                    AddThreat(enemy);
+                }
+                PlayerControllerB? player = CheckLineOfSightForPlayer(60f, 60, 5);
+                if (player != null && PlayerIsTargetable(player))
                 {
                     if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.itemProperties.name == "RatCrownItem" && !player.currentlyHeldObjectServer.isPocketed)
                     {
@@ -407,13 +413,9 @@ namespace Rats
                         return;
                     }
 
+                    if (TESTING.ignorePlayerThreat) { return; }
                     AddThreat(player);
                     return;
-                }
-                EnemyAI? enemy = CheckLineOfSightForEnemy(30);
-                if (enemy != null && enemy.enemyType.canDie)
-                {
-                    AddThreat(enemy);
                 }
             }
         }
@@ -737,67 +739,61 @@ namespace Rats
 
         public void OnCollideWithEnemy(Collider other, EnemyAI? collidedEnemy = null)
         {
-            if (IsServerOrHost)
+            rallyRat = false;
+            if (isEnemyDead || currentBehaviorState == State.ReturnToNest || Nest == null) { return; }
+            if (timeSinceCollision < 1f) { return; }
+            if (collidedEnemy == null || !collidedEnemy.enemyType.canDie) { return; }
+            if (!RatManager.enemyWhiteList.Contains(collidedEnemy.enemyType.name)) { return; }
+            if (RatKingAI.Instance != null && RatKingAI.Instance == collidedEnemy) { return; }
+            logger.LogDebug("Collided with: " + collidedEnemy.enemyType.enemyName);
+            timeSinceCollision = 0f;
+
+            if (collidedEnemy.isEnemyDead)
             {
-                rallyRat = false;
-                if (isEnemyDead || currentBehaviorState == State.ReturnToNest || Nest == null) { return; }
-                if (timeSinceCollision > 1f)
+                if (RatNest.EnemyFoodAmount.ContainsKey(collidedEnemy))
                 {
-                    if (collidedEnemy != null && collidedEnemy.enemyType.canDie)
+                    if (RatNest.EnemyFoodAmount[collidedEnemy] <= 1)
                     {
-                        if (RatKingAI.Instance != null && RatKingAI.Instance == collidedEnemy) { return; }
-                        logger.LogDebug("Collided with: " + collidedEnemy.enemyType.enemyName);
-                        timeSinceCollision = 0f;
-
-                        if (collidedEnemy.isEnemyDead)
-                        {
-                            if (RatNest.EnemyFoodAmount.ContainsKey(collidedEnemy))
-                            {
-                                if (RatNest.EnemyFoodAmount[collidedEnemy] <= 1)
-                                {
-                                    holdingFood = RatNest.EnemyFoodAmount[collidedEnemy] == 1;
-                                    RoundManager.Instance.DespawnEnemyOnServer(collidedEnemy.NetworkObject);
-                                    return;
-                                }
-                                else
-                                {
-                                    RatNest.EnemyFoodAmount[collidedEnemy] -= 1;
-                                    holdingFood = true;
-                                }
-                            }
-                            else
-                            {
-                                RatManager.EnemyHitCount.Remove(collidedEnemy);
-                                Nest.AddEnemyFoodAmount(collidedEnemy);
-                                RatNest.EnemyFoodAmount[collidedEnemy] -= 1;
-                                holdingFood = true;
-                            }
-
-                            SwitchToBehaviorState(State.ReturnToNest);
-                        }
-                        else
-                        {
-                            if (!RatManager.EnemyHitCount.ContainsKey(collidedEnemy))
-                            {
-                                RatManager.EnemyHitCount.Add(collidedEnemy, enemyHitsToDoDamage);
-                            }
-
-                            RatManager.EnemyHitCount[collidedEnemy] -= 1;
-
-                            if (RatManager.EnemyHitCount[collidedEnemy] <= 0)
-                            {
-                                collidedEnemy.HitEnemy(1, null, true);
-                                RatManager.EnemyHitCount[collidedEnemy] = enemyHitsToDoDamage;
-                            }
-                        }
+                        holdingFood = RatNest.EnemyFoodAmount[collidedEnemy] == 1;
+                        RoundManager.Instance.DespawnEnemyOnServer(collidedEnemy.NetworkObject);
+                        return;
                     }
+                    else
+                    {
+                        RatNest.EnemyFoodAmount[collidedEnemy] -= 1;
+                        holdingFood = true;
+                    }
+                }
+                else
+                {
+                    RatManager.EnemyHitCount.Remove(collidedEnemy);
+                    Nest.AddEnemyFoodAmount(collidedEnemy);
+                    RatNest.EnemyFoodAmount[collidedEnemy] -= 1;
+                    holdingFood = true;
+                }
+
+                SwitchToBehaviorState(State.ReturnToNest);
+            }
+            else
+            {
+                if (!RatManager.EnemyHitCount.ContainsKey(collidedEnemy))
+                {
+                    RatManager.EnemyHitCount.Add(collidedEnemy, enemyHitsToDoDamage);
+                }
+
+                RatManager.EnemyHitCount[collidedEnemy] -= 1;
+
+                if (RatManager.EnemyHitCount[collidedEnemy] <= 0)
+                {
+                    collidedEnemy.HitEnemy(1, null, true);
+                    RatManager.EnemyHitCount[collidedEnemy] = enemyHitsToDoDamage;
                 }
             }
 
             if (holdingFood)
             {
                 RoundManager.PlayRandomClip(creatureSFX, NibbleSFX, true, 1f, -1);
-                if (collidedEnemy != null && localPlayer.HasLineOfSightToPosition(collidedEnemy.transform.position))
+                if (localPlayer.HasLineOfSightToPosition(transform.position))
                 {
                     localPlayer.IncreaseFearLevelOverTime(0.8f);
                 }

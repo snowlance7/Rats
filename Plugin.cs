@@ -79,6 +79,7 @@ namespace Rats
         public static ConfigEntry<int> configPlayerFoodAmount;
         public static ConfigEntry<int> configRatDamage;
         public static ConfigEntry<float> configSqueakChance;
+        public static ConfigEntry<string> configEnemyWhitelist;
 
         // RatPoison
         public static ConfigEntry<bool> configRatPoisonEnable;
@@ -165,6 +166,7 @@ namespace Rats
             configPlayerFoodAmount = Config.Bind("Rats", "Player Food Amount", 30, "How much food points a player corpse gives when brought to the nest.");
             configRatDamage = Config.Bind("Rats", "Rat Damage", 2, "The damage dealt by a rat when attacking.");
             configSqueakChance = Config.Bind("Rats", "Squeak Chance", 0.01f, "The chance a rat will squeak when completing a run cycle (every second)");
+            configEnemyWhitelist = Config.Bind("Rats", "Enemy Whitelist", "Centipede,HoarderBug,Butler,Crawler,SandSpider,RatKingEnemy", "Whitelist of enemies the rats can kill and eat. Names should be the enemyType.name value of each enemy. You can find a list of these names in the README.");
 
             // RatPoison
             configRatPoisonEnable = Config.Bind("Rat Poison", "Enable", true, "Whether or not to enable");

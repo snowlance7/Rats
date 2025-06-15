@@ -69,7 +69,6 @@ namespace Rats
             }*/
 
             nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
-            IsOpen = false; // TESTING
         }
 
         public void Update() // TODO: spawning rat king and spamming errors after filled with poison
@@ -101,6 +100,7 @@ namespace Rats
                     IsOpen = false;
                     GasParticleSystem.Play();
                     NestAnimator.SetTrigger("destroy");
+                    ScanNode.gameObject.SetActive(false);
                     NestAudio.Play();
 
                     SpawnRatKing(ratKingSummonChancePoison);

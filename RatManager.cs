@@ -42,6 +42,7 @@ namespace Rats
         public static float ratKingSummonChancePoison = 0.5f;
         public static float ratKingSummonChanceNests = 0.8f;
         public static float squeakChance = 0.1f;
+        public static string[] enemyWhiteList = [];
 
         // Nests
         public static float minRatSpawnTime = 10f;
@@ -79,6 +80,8 @@ namespace Rats
 
         public void Start()
         {
+            enemyWhiteList = configEnemyWhitelist.Value.Split(",");
+
             LoggerInstance.LogDebug("Starting batch updater");
             StartCoroutine(BatchUpdateRoutine());
         }

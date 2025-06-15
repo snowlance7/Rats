@@ -27,6 +27,8 @@ namespace Rats
     {
         private static ManualLogSource logger = LoggerInstance;
 
+        public static bool ignorePlayerThreat;
+
         [HarmonyPostfix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.PingScan_performed))]
         public static void PingScan_performedPostFix()
         {
@@ -40,10 +42,14 @@ namespace Rats
         {
             string msg = __instance.chatTextField.text;
             string[] args = msg.Split(" ");
-            logger.LogDebug(msg);
+            //logger.LogDebug(msg);
 
             switch (args[0])
             {
+                case "/threat":
+                    ignorePlayerThreat = !ignorePlayerThreat;
+                    HUDManager.Instance.DisplayTip("Rats: ignorePlayerThreat", ignorePlayerThreat.ToString());
+                    break;
                 default:
                     Utils.ChatCommand(args);
                     break;
