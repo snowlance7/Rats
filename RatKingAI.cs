@@ -16,7 +16,7 @@ using static Rats.RatManager;
 
 namespace Rats
 {
-    public class RatKingAI : EnemyAI
+    public class RatKingAI : EnemyAI // TODO: Rat kings nest shows up when its supposed to be invisible
     {
         private static ManualLogSource logger = LoggerInstance;
         public static RatKingAI? Instance { get; private set; }
