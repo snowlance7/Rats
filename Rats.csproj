@@ -5,7 +5,7 @@
         <AssemblyName>Snowlance.Rats</AssemblyName>
         <Product>Rats</Product>
         <!-- Change to whatever version you're currently on. -->
-        <Version>1.2.2</Version>
+        <Version>1.2.3</Version>
     </PropertyGroup>
 
     <!-- Project Properties -->
@@ -50,6 +50,9 @@
       <None Remove="RatsUnityProject\**" />
     </ItemGroup>
     <ItemGroup>
+      <Compile Remove="SCP178Behavior.cs" />
+    </ItemGroup>
+    <ItemGroup>
       <None Remove=".gitattributes" />
       <None Remove=".gitignore" />
     </ItemGroup>
@@ -61,7 +64,7 @@
         <PackageReference Include="BepInEx.Core" Version="5.*" PrivateAssets="all" />
         <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" PrivateAssets="all" />
         <PackageReference Include="Evaisa.LethalLib" Version="1.1.1" />
-        <PackageReference Include="LethalCompany.GameLibs.Steam" Version="*-*" Publicize="true" PrivateAssets="all" />
+        <PackageReference Include="LethalCompany.GameLibs.Steam" Version="73.0.0-ngd.0" Publicize="true" PrivateAssets="all" />
         <PackageReference Include="UnityEngine.Modules" Version="2022.3.9" IncludeAssets="compile" PrivateAssets="all" />
     </ItemGroup>
 
@@ -74,8 +77,8 @@
       <Folder Include="ThunderStore\Rats\" />
     </ItemGroup>
 
-    <!-- Netcode Patcher Post-Build Event -->
-    <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
-        <Exec Command="dotnet netcode-patch &quot;$(TargetPath)&quot; @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')" />
-    </Target>
+  <!-- Netcode Patcher Post-Build Event -->
+  <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
+    <Exec Command="netcode-patch -uv 2022.3.62 -nv 1.12.0 -tv 1.0.0 &quot;$(TargetPath)&quot; @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')" />
+  </Target>
 </Project>

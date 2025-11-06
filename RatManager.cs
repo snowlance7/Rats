@@ -32,51 +32,28 @@ namespace Rats
 
         //// Global Configs
 
-        public static float defenseRadius = 5f;
-        public static float timeToIncreaseThreat = 3f;
-        public static int threatToAttackPlayer = 100;
-        public static int threatToAttackEnemy = 50;
-        public static int highPlayerThreat = 250;
-        public static int enemyHitsToDoDamage = 10;
-        public static int playerFoodAmount = 30;
-        public static float ratKingSummonChancePoison = 0.5f;
-        public static float ratKingSummonChanceNests = 0.8f;
-        public static float squeakChance = 0.1f;
+        public const float defenseRadius = 5f;
+        public const float timeToIncreaseThreat = 3f;
+        public const int threatToAttackPlayer = 100;
+        public const int threatToAttackEnemy = 50;
+        public const int highPlayerThreat = 250;
+        public const int enemyHitsToDoDamage = 10;
+        public const int playerFoodAmount = 30;
+        public const float ratKingSummonChancePoison = 0.5f;
+        public const float ratKingSummonChanceNests = 0.8f;
+        public const float squeakChance = 0.1f;
         public static string[] enemyWhiteList = [];
 
         // Nests
-        public static float minRatSpawnTime = 10f;
-        public static float maxRatSpawnTime = 30f;
-        public static int foodToSpawnRat = 5;
-        public static int enemyFoodPerHPPoint = 10;
-        public static int maxRats = 50;
-        public static float poisonToCloseNest = 1f;
+        public const float minRatSpawnTime = 10f;
+        public const float maxRatSpawnTime = 30f;
+        public const int foodToSpawnRat = 5;
+        public const int enemyFoodPerHPPoint = 10;
+        public const int maxRats = 50;
+        public const float poisonToCloseNest = 1f;
 
-        static float updateInterval = 0.2f; // Time between group updates
-        static int groupCount = 5;
-
-        public static void InitConfigs()
-        {
-            updateInterval = configBatchUpdateInterval.Value;
-            groupCount = configBatchGroupCount.Value;
-            defenseRadius = configDefenseRadius.Value;
-            timeToIncreaseThreat = configTimeToIncreaseThreat.Value;
-            threatToAttackPlayer = configThreatToAttackPlayer.Value;
-            highPlayerThreat = configHighPlayerThreat.Value;
-            threatToAttackEnemy = configThreatToAttackEnemy.Value;
-            enemyHitsToDoDamage = configEnemyHitsToDoDamage.Value;
-            playerFoodAmount = configPlayerFoodAmount.Value;
-            ratKingSummonChancePoison = configRatKingSummonChancePoison.Value;
-            ratKingSummonChanceNests = configRatKingSummonChanceNests.Value;
-            squeakChance = configSqueakChance.Value;
-
-            minRatSpawnTime = configMinRatSpawnTime.Value;
-            maxRatSpawnTime = configMaxRatSpawnTime.Value;
-            foodToSpawnRat = configFoodToSpawnRat.Value;
-            enemyFoodPerHPPoint = configEnemyFoodPerHPPoint.Value;
-            maxRats = configMaxRats.Value;
-            poisonToCloseNest = configPoisonToCloseNest.Value;
-        }
+        const float updateInterval = 0.2f; // Time between group updates
+        const int groupCount = 5;
 
         public void Start()
         {

@@ -80,7 +80,7 @@ namespace Rats
         public static ConfigEntry<int> configRatDamage;
         public static ConfigEntry<float> configSqueakChance;
         public static ConfigEntry<string> configEnemyWhitelist;
-        private ConfigEntry<string> configRatsTakePlayerCorpses;
+        private ConfigEntry<bool> configRatsTakePlayerCorpses;
 
         // RatPoison
         public static ConfigEntry<bool> configRatPoisonEnable;

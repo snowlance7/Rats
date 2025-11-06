@@ -1,3 +1,6 @@
+## 1.2.3
+- v73 Compatibility
+
 ## 1.2.2
 - v70 Compatability
 - Nest temporary visual bug fix
