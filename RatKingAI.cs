@@ -34,10 +34,6 @@ namespace Rats
 		public GameObject RatCrownPrefab;
 		public GameObject RatMesh;
 		public GameObject CrownMesh;
-		public NetworkAnimator networkAnimator;
-		public Transform NestTransform;
-
-		public RatNest KingNest;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
 		bool inRallyAnimation;
@@ -112,6 +108,8 @@ namespace Rats
             RoundManager.Instance.SpawnedEnemies.Add(this);
             path1 = new NavMeshPath();
             ventAnimationFinished = true;
+
+            RatManager.Init();
         }
 
         public override void Update()
@@ -429,28 +427,28 @@ namespace Rats
 
             timeSinceAddThreat = 0f;
 
-            if (RatManager.PlayerThreatCounter.ContainsKey(player))
+            if (RatManager.playerThreatCounter.ContainsKey(player))
             {
-                RatManager.PlayerThreatCounter[player] += amount;
+                RatManager.playerThreatCounter[player] += amount;
             }
             else
             {
-                RatManager.PlayerThreatCounter.Add(player, amount);
+                RatManager.playerThreatCounter.Add(player, amount);
             }
 
-            int threat = RatManager.PlayerThreatCounter[player];
+            int threat = RatManager.playerThreatCounter[player];
             logger.LogDebug($"{player.playerUsername}: {threat} threat");
 
             if (!aggro) { return; }
 
             PlaySqueakSFXClientRpc();
 
-            if (RatManager.PlayerThreatCounter[player] > highPlayerThreat)
+            if (RatManager.playerThreatCounter[player] > highPlayerThreat)
             {
                 Rally(player); // TODO: Keeps walking here STILL TO THIS DAY KEEPS WALKING WHYYYYYYYYYYYY
             }
 
-            if (RatManager.PlayerThreatCounter[player] > threatToAttackPlayer)
+            if (RatManager.playerThreatCounter[player] > threatToAttackPlayer)
             {
                 targetPlayer = player;
                 SwitchToBehaviourClientRpc((int)State.Attacking);
@@ -477,7 +475,7 @@ namespace Rats
             inSpecialAnimation = false;
             inRallyAnimation = false;
 
-            foreach (var rat in SpawnedRats)
+            foreach (var rat in Instances)
             {
                 //if (rat.defenseRat) { continue; }
 

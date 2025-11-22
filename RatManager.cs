@@ -1,12 +1,8 @@
 ﻿using BepInEx.Logging;
 using GameNetcodeStuff;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.AI;
 using static Rats.Plugin;
 
 namespace Rats
@@ -14,206 +10,62 @@ namespace Rats
     public class RatManager : MonoBehaviour
     {
         private static ManualLogSource logger = LoggerInstance;
-        private static RatManager? _instance;
-        public static RatManager Instance => _instance ??= GameObject.Instantiate(new GameObject("RatManager"), Vector3.zero, Quaternion.identity, RoundManager.Instance.mapPropsContainer.transform).AddComponent<RatManager>();
 
+        public static RatManager? Instance;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        public static GameObject? RatNestPrefab;
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        public static List<EnemyVent> vents => RoundManager.Instance.allEnemyVents.ToList();
 
-        public static List<RatAI> SpawnedRats = [];
-        List<List<RatAI>> ratGroups = new List<List<RatAI>>(); // Groups for batch updates
+        public Dictionary<EnemyAI, int> enemyHitCount = [];
 
-        public static List<EnemyVent> Vents => RoundManager.Instance.allEnemyVents.ToList();
-        public static Dictionary<EnemyAI, int> EnemyHitCount = [];
-        public static Dictionary<PlayerControllerB, int> PlayerThreatCounter = [];
-        public static Dictionary<EnemyAI, int> EnemyThreatCounter = [];
+        public Dictionary<PlayerControllerB, int> playerThreatCounter = [];
+        public Dictionary<EnemyAI, int> enemyThreatCounter = [];
 
-        //// Global Configs
+        int batchIndex = 0;
 
-        public const float defenseRadius = 5f;
-        public const float timeToIncreaseThreat = 3f;
-        public const int threatToAttackPlayer = 100;
-        public const int threatToAttackEnemy = 50;
-        public const int highPlayerThreat = 250;
-        public const int enemyHitsToDoDamage = 10;
-        public const int playerFoodAmount = 30;
-        public const float ratKingSummonChancePoison = 0.5f;
-        public const float ratKingSummonChanceNests = 0.8f;
-        public const float squeakChance = 0.1f;
-        public static string[] enemyWhiteList = [];
+        // Configs
+        const float updateInterval = 0.2f;
 
-        // Nests
-        public const float minRatSpawnTime = 10f;
-        public const float maxRatSpawnTime = 30f;
-        public const int foodToSpawnRat = 5;
-        public const int enemyFoodPerHPPoint = 10;
-        public const int maxRats = 50;
-        public const float poisonToCloseNest = 1f;
-
-        const float updateInterval = 0.2f; // Time between group updates
-        const int groupCount = 5;
-
-        public void Start()
+        public static void Init()
         {
-            enemyWhiteList = configEnemyWhitelist.Value.Split(",");
-
-            LoggerInstance.LogDebug("Starting batch updater");
-            StartCoroutine(BatchUpdateRoutine());
+            if (Instance != null) { return; }
+            Instance = GameObject.Instantiate(new GameObject("RatManager"), Vector3.zero, Quaternion.identity, RoundManager.Instance.mapPropsContainer.transform).AddComponent<RatManager>();
         }
 
         public void OnDestroy()
         {
-            logger.LogDebug("In OnDestroy() for RatManager");
-            if (!IsServerOrHost) { return; }
-            EnemyHitCount.Clear();
-            EnemyThreatCounter.Clear();
-            PlayerThreatCounter.Clear();
-            RatNest.EnemyFoodAmount.Clear();
+            Instance = null;
+        }
 
-            foreach (RatAI rat in SpawnedRats.ToList())
+        public void Update()
+        {
+            // Run one batch per interval
+            if (Time.frameCount % Mathf.CeilToInt(updateInterval / Time.deltaTime) == 0)
             {
-                if (rat == null) { continue; }
-                if (!rat.NetworkObject.IsSpawned) { continue; }
-                rat.NetworkObject.Despawn(true);
-            }
-
-            SpawnedRats.Clear();
-            RatNest.Nests.Clear();
-        }
-
-        public void RegisterRat(RatAI rat)
-        {
-            SpawnedRats.Add(rat);
-            RecalculateGroups();
-        }
-
-        public void RemoveRat(RatAI rat)
-        {
-            SpawnedRats.Remove(rat);
-            RecalculateGroups();
-        }
-
-        private void RecalculateGroups()
-        {
-            ratGroups.Clear();
-
-            if (SpawnedRats.Count == 0 || groupCount <= 0)
-                return; // No need to process if no rats exist
-
-            int baseSize = SpawnedRats.Count / groupCount; // Base number of rats per group
-            int remainder = SpawnedRats.Count % groupCount; // Extra rats to distribute
-
-            int index = 0;
-            for (int i = 0; i < groupCount; i++)
-            {
-                int currentSize = baseSize + (i < remainder ? 1 : 0); // Distribute extra rats evenly
-                ratGroups.Add(SpawnedRats.Skip(index).Take(currentSize).ToList());
-                index += currentSize;
+                //logger.LogDebug("Running batch");
+                RunBatch();
             }
         }
 
-        private IEnumerator BatchUpdateRoutine()
+        void RunBatch()
         {
-            int groupIndex = 0;
-            while (true)
+            int total = RatAI.Instances.Count;
+            if (total == 0) return;
+
+            // How many to process per batch (spread evenly)
+            int batchSize = Mathf.Max(1, total / Mathf.CeilToInt(1f / updateInterval));
+
+            for (int i = 0; i < batchSize; i++)
             {
-                if (ratGroups.Count > 0) // Ensure there are groups to update
+                RatAI instance = RatAI.Instances[batchIndex];
+                if (instance != null)
                 {
-                    groupIndex %= ratGroups.Count; // Prevent out-of-bounds index
-
-                    if (ratGroups[groupIndex].Count > 0)
-                    {
-                        //logger.LogDebug($"Updating {ratGroups[groupIndex].Count} rats in group {groupIndex}");
-                        foreach (RatAI rat in ratGroups[groupIndex])
-                        {
-                            rat.DoAIInterval(); // Call the update method on each rat
-                        }
-                    }
-
-                    groupIndex++; // Move to the next group
+                    instance.DoAIInterval();
                 }
 
-                yield return new WaitForSeconds(updateInterval);
+                batchIndex++;
+                if (batchIndex >= total)
+                    batchIndex = 0; // wrap around
             }
-        }
-
-
-        public static bool CalculatePath(Vector3 fromPos, Vector3 toPos)
-        {
-            try
-            {
-                Vector3 from = RoundManager.Instance.GetNavMeshPosition(fromPos, RoundManager.Instance.navHit, 1.75f);
-                Vector3 to = RoundManager.Instance.GetNavMeshPosition(toPos, RoundManager.Instance.navHit, 1.75f);
-
-                NavMeshPath path = new();
-                return NavMesh.CalculatePath(from, to, -1, path) && Vector3.Distance(path.corners[path.corners.Length - 1], RoundManager.Instance.GetNavMeshPosition(to, RoundManager.Instance.navHit, 2.7f)) <= 1.55f; // TODO: Test this
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public static Transform? GetRandomNode(bool outside = false)
-        {
-            try
-            {
-                GameObject[] nodes = outside ? RoundManager.Instance.outsideAINodes : RoundManager.Instance.insideAINodes;
-
-                int randIndex = UnityEngine.Random.Range(0, nodes.Length);
-                return nodes[randIndex].transform;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public static int GetOpenNestCount()
-        {
-            return RatNest.Nests.Where(x => x.IsOpen).Count();
-        }
-
-        public static RatNest? GetClosestNest(Vector3 position, bool checkForPath = false)
-        {
-            float closestDistance = 4000f;
-            RatNest closestNest = null!;
-            if (RatKingAI.Instance != null)
-            {
-                closestNest = RatKingAI.Instance.KingNest;
-            }
-
-            foreach (var nest in RatNest.Nests)
-            {
-                if (nest == null || !nest.IsOpen) { continue; }
-                float distance = Vector3.Distance(position, nest.transform.position);
-                if (distance >= closestDistance) { continue; }
-                if (checkForPath && !CalculatePath(position, nest.transform.position)) { continue; }
-                closestDistance = distance;
-                closestNest = nest;
-            }
-
-            return closestNest;
-        }
-
-        public static void SpawnNest(Vector3 position)
-        {
-            if (!IsServerOrHost) { return; }
-            GameObject ratNest = Instantiate(RatNestPrefab, position, Quaternion.identity, RoundManager.Instance.mapPropsContainer.transform);
-            ratNest.GetComponent<NetworkObject>().Spawn(true);
-        }
-    }
-    public static class ListExtensions
-    {
-        public static List<List<T>> SplitIntoChunks<T>(this List<T> source, int chunkSize)
-        {
-            return source
-                .Select((item, index) => new { item, index })
-                .GroupBy(x => x.index / chunkSize)
-                .Select(g => g.Select(x => x.item).ToList())
-                .ToList();
         }
     }
 }

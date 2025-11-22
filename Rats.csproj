@@ -5,7 +5,7 @@
         <AssemblyName>Snowlance.Rats</AssemblyName>
         <Product>Rats</Product>
         <!-- Change to whatever version you're currently on. -->
-        <Version>1.2.3</Version>
+        <Version>1.3.0</Version>
     </PropertyGroup>
 
     <!-- Project Properties -->
@@ -50,6 +50,7 @@
       <None Remove="RatsUnityProject\**" />
     </ItemGroup>
     <ItemGroup>
+      <Compile Remove="RatAI - Copy.cs" />
       <Compile Remove="SCP178Behavior.cs" />
     </ItemGroup>
     <ItemGroup>
@@ -75,6 +76,12 @@
     <ItemGroup>
       <Folder Include="Assets\" />
       <Folder Include="ThunderStore\Rats\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="PathfindingLib">
+        <HintPath>..\Zaggy1024-PathfindingLib-2.4.1\PathfindingLib.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
   <!-- Netcode Patcher Post-Build Event -->

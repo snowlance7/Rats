@@ -68,7 +68,7 @@ namespace Rats.Items
                 // Run on client
                 if (Physics.Raycast(PourDirection.position, -Vector3.up, out var hitInfo, 80f))
                 {
-                    if (hitInfo.collider.gameObject.TryGetComponent(out RatNest nest) && !nest.IsRatKing && nest.PoisonInNest < RatManager.poisonToCloseNest)
+                    if (hitInfo.collider.gameObject.TryGetComponent(out RatNest nest) && !nest.IsRatKing && nest.poisonInNest < RatManager.poisonToCloseNest)
                     {
                         nest.AddPoisonServerRpc(pourRate * Time.deltaTime);
                     }

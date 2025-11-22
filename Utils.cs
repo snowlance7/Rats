@@ -5,10 +5,10 @@ using LethalLib.Extras;
 using LethalLib.Modules;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Animations.Rigging;
 using static Rats.Plugin;
 
 namespace Rats
@@ -17,23 +17,53 @@ namespace Rats
     {
         private static ManualLogSource logger = LoggerInstance;
 
-        public static bool inTestRoom => StartOfRound.Instance?.testRoom != null;
-        public static bool testing = false;
-        public static bool spawningAllowed = true;
+        public static bool isBeta = true; // TODO: Set to false before release
+        public static bool testing => _testing && isBeta;
+        public static bool _testing = false;
+
         public static bool trailerMode = false;
 
-        public static GameObject[]? outsideAINodes;
-        public static GameObject[]? insideAINodes;
-        public static Vector3[]? outsideNodePositions;
-        public static Vector3[]? insideNodePositions;
+        public static bool inTestRoom => StartOfRound.Instance?.testRoom != null;
+        public static bool disableSpawning = false;
+        public static bool disableTargetting = false;
+        public static bool DEBUG_disableMoving = false;
+
+        public static bool localPlayerFrozen = false;
+
+        public static GameObject[] allAINodes => insideAINodes.Concat(outsideAINodes).ToArray();
+
+        public static GameObject[] insideAINodes
+        {
+            get
+            {
+                if (RoundManager.Instance.insideAINodes != null && RoundManager.Instance.insideAINodes.Length > 0)
+                {
+                    return RoundManager.Instance.insideAINodes;
+                }
+
+                return GameObject.FindGameObjectsWithTag("AINode");
+            }
+        }
+        public static GameObject[] outsideAINodes
+        {
+            get
+            {
+                if (RoundManager.Instance.outsideAINodes != null && RoundManager.Instance.outsideAINodes.Length > 0)
+                {
+                    return RoundManager.Instance.outsideAINodes;
+                }
+
+                return GameObject.FindGameObjectsWithTag("OutsideAINode");
+            }
+        }
 
         public static void ChatCommand(string[] args)
         {
             switch (args[0])
             {
                 case "/spawning":
-                    spawningAllowed = !spawningAllowed;
-                    HUDManager.Instance.DisplayTip("Spawning Allowed", spawningAllowed.ToString());
+                    disableSpawning = !disableSpawning;
+                    HUDManager.Instance.DisplayTip("Disable Spawning", disableSpawning.ToString());
                     break;
                 case "/hazards":
                     Dictionary<string, GameObject> hazards = Utils.GetAllHazards();
@@ -44,8 +74,8 @@ namespace Rats
                     }
                     break;
                 case "/testing":
-                    testing = !testing;
-                    HUDManager.Instance.DisplayTip("Testing", testing.ToString());
+                    _testing = !_testing;
+                    HUDManager.Instance.DisplayTip("Testing", _testing.ToString());
                     break;
                 case "/surfaces":
                     foreach (var surface in StartOfRound.Instance.footstepSurfaces)
@@ -88,9 +118,8 @@ namespace Rats
             HUDManager.Instance.AddChatMessage(msg, "Server");
         }
 
-        public static void RegisterItem(bool enable, string itemPath, string levelRarities = "", string customLevelRarities = "", int minValue = 0, int maxValue = 0)
+        public static void RegisterItem(string itemPath, bool enable, string levelRarities = "", string customLevelRarities = "", int minValue = 0, int maxValue = 0)
         {
-            if (!enable) { return; }
             Item item = ModAssets!.LoadAsset<Item>(itemPath);
             if (item == null) { LoggerInstance.LogError($"Error: Couldn't get prefab from {itemPath}"); return; }
             LoggerInstance.LogDebug($"Got {item.name} prefab");
@@ -103,23 +132,8 @@ namespace Rats
             LethalLib.Modules.Items.RegisterScrap(item, GetLevelRarities(levelRarities), GetCustomLevelRarities(customLevelRarities));
         }
 
-        public static void RegisterShopItem(bool enable, string itemPath, int price)
+        public static void RegisterEnemy(string enemyPath, string tnPath, string tkPath, bool enable, string levelRarities = "", string customLevelRarities = "")
         {
-            if (!enable) { return; }
-            Item item = ModAssets!.LoadAsset<Item>(itemPath);
-            if (item == null) { LoggerInstance.LogError($"Error: Couldn't get prefab from {itemPath}"); return; }
-            LoggerInstance.LogDebug($"Got {item.name} prefab");
-
-            item.creditsWorth = price;
-
-            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(item.spawnPrefab);
-            Utilities.FixMixerGroups(item.spawnPrefab);
-            LethalLib.Modules.Items.RegisterShopItem(item, price);
-        }
-
-        public static void RegisterEnemy(bool enable, string enemyPath, string tnPath, string tkPath, string levelRarities = "", string customLevelRarities = "")
-        {
-            if (!enable) { return; }
             EnemyType enemy = ModAssets!.LoadAsset<EnemyType>(enemyPath);
             if (enemy == null) { LoggerInstance.LogError($"Error: Couldn't get prefab from {enemyPath}"); return; }
             LoggerInstance.LogDebug($"Got {enemy.name} prefab");
@@ -131,124 +145,14 @@ namespace Rats
             Enemies.RegisterEnemy(enemy, GetLevelRarities(levelRarities), GetCustomLevelRarities(customLevelRarities), tn, tk);
         }
 
-        // Xu's code for registering map objects with configs
-        public static GameObject? RegisterInsideMapObjectWithConfig(string mapObjectPath, string configString)
+        public static void RegisterUnlockable(string path, bool enable, int price = -1, StoreType storeType = StoreType.None)
         {
-            SpawnableMapObjectDef SpawnPrefab = ModAssets.LoadAsset<SpawnableMapObjectDef>(mapObjectPath);
-            if (SpawnPrefab == null) { LoggerInstance.LogError("Error: Couldnt get map object prefab from assets"); return null; }
-            LoggerInstance.LogDebug("Registering map object network prefab...");
-            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(SpawnPrefab.spawnableMapObject.prefabToSpawn);
+            UnlockableItemDef unlockable = ModAssets!.LoadAsset<UnlockableItemDef>(path);
+            if (unlockable == null) { LoggerInstance.LogError($"Error: Couldn't get prefab from {path}"); return; }
+            LoggerInstance.LogDebug($"Got {unlockable.name} prefab");
 
-            /*SpawnableMapObjectDef mapObjDef = ScriptableObject.CreateInstance<SpawnableMapObjectDef>();
-            mapObjDef.spawnableMapObject = new SpawnableMapObject
-            {
-                prefabToSpawn = prefab
-            };*/
-
-
-            (Dictionary<Levels.LevelTypes, string> spawnRateByLevelType, Dictionary<string, string> spawnRateByCustomLevelType) = ConfigParsingWithCurve(configString);
-
-
-            foreach (var entry in spawnRateByLevelType)
-            {
-                //AnimationCurve animationCurve = CreateCurveFromString(entry.Value, prefab.name);
-                AnimationCurve animationCurve = CreateCurveFromString(entry.Value, SpawnPrefab.spawnableMapObject.prefabToSpawn.name);
-                MapObjects.RegisterMapObject(SpawnPrefab, entry.Key, (level) => animationCurve);
-            }
-            foreach (var entry in spawnRateByCustomLevelType)
-            {
-                //AnimationCurve animationCurve = CreateCurveFromString(entry.Value, prefab.name);
-                AnimationCurve animationCurve = CreateCurveFromString(entry.Value, SpawnPrefab.spawnableMapObject.prefabToSpawn.name);
-                MapObjects.RegisterMapObject(SpawnPrefab, Levels.LevelTypes.None, new string[] { entry.Key }, (level) => animationCurve);
-            }
-
-            return SpawnPrefab.spawnableMapObject.prefabToSpawn;
-        }
-
-        private static (Dictionary<Levels.LevelTypes, string> spawnRateByLevelType, Dictionary<string, string> spawnRateByCustomLevelType) ConfigParsingWithCurve(string configMoonRarity)
-        {
-            Dictionary<Levels.LevelTypes, string> spawnRateByLevelType = new();
-            Dictionary<string, string> spawnRateByCustomLevelType = new();
-            foreach (string entry in configMoonRarity.Split('|').Select(s => s.Trim()))
-            {
-                string[] entryParts = entry.Split('-').Select(s => s.Trim()).ToArray();
-
-                if (entryParts.Length != 2) continue;
-
-                string name = entryParts[0].ToLowerInvariant();
-
-                if (name == "custom")
-                {
-                    name = "modded";
-                }
-
-                if (System.Enum.TryParse(name, true, out Levels.LevelTypes levelType))
-                {
-                    spawnRateByLevelType[levelType] = entryParts[1];
-                }
-                else
-                {
-                    // Try appending "Level" to the name and re-attempt parsing
-                    string modifiedName = name + "level";
-                    if (System.Enum.TryParse(modifiedName, true, out levelType))
-                    {
-                        spawnRateByLevelType[levelType] = entryParts[1];
-                    }
-                    else
-                    {
-                        spawnRateByCustomLevelType[name] = entryParts[1];
-                    }
-                }
-            }
-            return (spawnRateByLevelType, spawnRateByCustomLevelType);
-        }
-
-        public static AnimationCurve CreateCurveFromString(string keyValuePairs, string nameOfThing)
-        {
-            // Split the input string into individual key-value pairs
-            string[] pairs = keyValuePairs.Split(';').Select(s => s.Trim()).ToArray();
-            if (pairs.Length == 0)
-            {
-                if (int.TryParse(keyValuePairs, out int result))
-                {
-                    return new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, result));
-                }
-                else
-                {
-                    LoggerInstance.LogError($"Invalid key-value pairs format: {keyValuePairs}");
-                    return new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 0));
-                }
-            }
-            List<Keyframe> keyframes = new();
-
-            // Iterate over each pair and parse the key and value to create keyframes
-            foreach (string pair in pairs)
-            {
-                string[] splitPair = pair.Split(',').Select(s => s.Trim()).ToArray();
-                if (splitPair.Length == 2 &&
-                    float.TryParse(splitPair[0], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float time) &&
-                    float.TryParse(splitPair[1], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float value))
-                {
-                    keyframes.Add(new Keyframe(time, value));
-                }
-                else
-                {
-                    LoggerInstance.LogError($"Failed config for hazard: {nameOfThing}");
-                    LoggerInstance.LogError($"Split pair length: {splitPair.Length}");
-                    LoggerInstance.LogError($"Could parse first value: {float.TryParse(splitPair[0], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float key1)}, instead got: {key1}, with splitPair0 being: {splitPair[0]}");
-                    LoggerInstance.LogError($"Could parse second value: {float.TryParse(splitPair[1], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out float value2)}, instead got: {value2}, with splitPair1 being: {splitPair[1]}");
-                    LoggerInstance.LogError($"Invalid key,value pair format: {pair}");
-                }
-            }
-
-            // Create the animation curve with the generated keyframes and apply smoothing
-            var curve = new AnimationCurve(keyframes.ToArray());
-            for (int i = 0; i < keyframes.Count; i++)
-            {
-                curve.SmoothTangents(i, 0.5f); // Adjust the smoothing as necessary
-            }
-
-            return curve;
+            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(unlockable.unlockable.prefabObject);
+            LethalLib.Modules.Unlockables.RegisterUnlockable(unlockable, price, storeType);
         }
 
         public static Dictionary<Levels.LevelTypes, int>? GetLevelRarities(string? levelsString)
@@ -323,6 +227,54 @@ namespace Rats
             }
         }
 
+        public static Transform? GetClosestAINodeToPosition(Vector3 pos)
+        {
+            Transform? closestTransform = null;
+            float closestDistance = Mathf.Infinity;
+
+            foreach (var node in allAINodes)
+            {
+                if (node == null) { continue; }
+
+                float distance = Vector3.Distance(pos, node.transform.position);
+                if (distance > closestDistance) { continue; }
+
+                closestDistance = distance;
+                closestTransform = node.transform;
+            }
+
+            return closestTransform;
+        }
+
+        public static Vector3 GetBestThrowDirection(Vector3 origin, Vector3 forward, int rayCount, float maxDistance, LayerMask layerMask)
+        {
+            Vector3 bestDirection = forward;
+            float farthestHit = 0f;
+
+            for (int i = 0; i < rayCount; i++)
+            {
+                float angle = i * (360f / rayCount);
+                Vector3 dir = Quaternion.Euler(0, angle, 0) * forward.normalized;
+
+                // Raycast from origin outward
+                if (Physics.Raycast(origin + Vector3.up * 0.5f, dir, out RaycastHit hit, maxDistance, layerMask))
+                {
+                    if (hit.distance > farthestHit)
+                    {
+                        bestDirection = dir;
+                        farthestHit = hit.distance;
+                    }
+                }
+                else
+                {
+                    // If nothing is hit, assume max distance (ideal throw)
+                    return dir;
+                }
+            }
+
+            return bestDirection;
+        }
+
         public static Vector3 GetSpeed()
         {
             float num3 = localPlayer.movementSpeed / localPlayer.carryWeight;
@@ -394,6 +346,7 @@ namespace Rats
 
         public static void FreezePlayer(PlayerControllerB player, bool value)
         {
+            localPlayerFrozen = value;
             player.disableInteract = value;
             player.disableLookInput = value;
             player.disableMoveInput = value;
@@ -455,7 +408,7 @@ namespace Rats
             Vector3 to = RoundManager.Instance.GetNavMeshPosition(toPos, RoundManager.Instance.navHit, 1.75f);
 
             NavMeshPath path = new();
-            return NavMesh.CalculatePath(from, to, -1, path) && Vector3.Distance(path.corners[path.corners.Length - 1], RoundManager.Instance.GetNavMeshPosition(to, RoundManager.Instance.navHit, 2.7f)) <= 1.55f; // TODO: Test this
+            return NavMesh.CalculatePath(from, to, -1, path) && Vector3.Distance(path.corners[path.corners.Length - 1], RoundManager.Instance.GetNavMeshPosition(to, RoundManager.Instance.navHit, 2.7f)) <= 1.55f;
         }
 
         public static T? GetClosestGameObjectOfType<T>(Vector3 position) where T : Component
@@ -477,6 +430,39 @@ namespace Rats
             return closest;
         }
 
+        public static void Shuffle<T>(this List<T> list)
+        {
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = UnityEngine.Random.Range(0, n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
+        }
+
+        public static GameObject? GetClosestGameObjectToPosition(this List<GameObject> list, Vector3 position)
+        {
+            GameObject? closest = null;
+            float closestDistance = Mathf.Infinity;
+
+            foreach (var item in list)
+            {
+                if (item == null) continue;
+
+                float distance = Vector3.Distance(position, item.transform.position);
+                if (distance < closestDistance)
+                {
+                    closest = item;
+                    closestDistance = distance;
+                }
+            }
+
+            return closest;
+        }
+
         public static Dictionary<string, GameObject> GetAllHazards()
         {
             Dictionary<string, GameObject> hazards = new Dictionary<string, GameObject>();
@@ -488,6 +474,30 @@ namespace Rats
                 hazards.Add(item.prefabToSpawn.name, item.prefabToSpawn);
             }
             return hazards;
+        }
+
+        public static GameObject? GetRandomNode(bool outside)
+        {
+            logger.LogDebug("Choosing random node...");
+
+            GameObject[] nodes = outside ? outsideAINodes : insideAINodes;
+
+            if (nodes.Length == 0) return null;
+
+            int randIndex = UnityEngine.Random.Range(0, nodes.Length);
+            return nodes[randIndex];
+        }
+
+        public static GameObject? GetRandomNode()
+        {
+            logger.LogDebug("Choosing random node...");
+
+            GameObject[] nodes = allAINodes;
+
+            if (nodes.Length == 0) return null;
+
+            int randIndex = UnityEngine.Random.Range(0, nodes.Length);
+            return nodes[randIndex];
         }
 
         public static Vector3 GetRandomNavMeshPositionInAnnulus(Vector3 center, float minRadius, float maxRadius, int sampleCount = 10)
@@ -574,37 +584,6 @@ namespace Rats
             return positions;
         }
 
-        private static GameObject[] FindOutsideAINodes()
-        {
-            if (outsideAINodes == null || outsideAINodes.Length == 0 || outsideAINodes[0] == null)
-            {
-                outsideAINodes = GameObject.FindGameObjectsWithTag("OutsideAINode");
-                logger.LogInfo("Finding outside AI nodes.");
-                outsideNodePositions = new Vector3[outsideAINodes.Length];
-
-                for (int i = 0; i < outsideAINodes.Length; i++)
-                {
-                    outsideNodePositions[i] = outsideAINodes[i].transform.position;
-                }
-            }
-            return outsideAINodes;
-        }
-
-        private static GameObject[] FindInsideAINodes()
-        {
-            if (insideAINodes == null || insideAINodes.Length == 0 || insideAINodes[0] == null)
-            {
-                insideAINodes = GameObject.FindGameObjectsWithTag("AINode");
-                logger.LogInfo("Finding inside AI nodes.");
-                insideNodePositions = new Vector3[insideAINodes.Length];
-                for (int i = 0; i < insideAINodes.Length; i++)
-                {
-                    insideNodePositions[i] = insideAINodes[i].transform.position;
-                }
-            }
-            return insideAINodes;
-        }
-
         public static PlayerControllerB[] GetNearbyPlayers(Vector3 position, float distance = 10f, List<PlayerControllerB>? ignoredPlayers = null)
         {
             List<PlayerControllerB> players = [];
@@ -620,32 +599,35 @@ namespace Rats
             return players.ToArray();
         }
 
-        public static Vector3 GetClosestExitFromPosition(Vector3 position)
+        public static void RebuildRig(PlayerControllerB pcb)
         {
-            Vector3 closestPosition = Vector3.zero;
-            float closestDistance = Mathf.Infinity;
-
-            foreach (var entranceTeleport in UnityEngine.Object.FindObjectsOfType<EntranceTeleport>(includeInactive: false))
+            if (pcb != null && pcb.playerBodyAnimator != null)
             {
-                if (entranceTeleport.exitPoint == null)
-                {
-                    if (!entranceTeleport.FindExitPoint())
-                    {
-                        logger.LogError("Couldnt find exit point for entrance");
-                        continue;
-                    }
-                }
-                if (!CalculatePath(position, entranceTeleport.exitPoint.position)) { continue; }
-                float distance = Vector3.Distance(entranceTeleport.exitPoint.position, position);
+                pcb.playerBodyAnimator.WriteDefaultValues();
+                pcb.playerBodyAnimator.GetComponent<RigBuilder>()?.Build();
+            }
+        }
 
-                if (distance < closestDistance)
-                {
-                    closestDistance = distance;
-                    closestPosition = entranceTeleport.exitPoint.position;
-                }
+        public static bool IsPlayerChild(PlayerControllerB player)
+        {
+            return player.thisPlayerBody.localScale.y < 1f;
+        }
+
+        public static PlayerControllerB? GetFarthestPlayerFromPosition(Vector3 position, float minDistance = 0f)
+        {
+            float farthestDistance = minDistance;
+            PlayerControllerB? farthestPlayer = null;
+
+            foreach (var player in StartOfRound.Instance.allPlayerScripts)
+            {
+                if (player == null || !player.isPlayerControlled) { continue; }
+                float distance = Vector3.Distance(position, player.transform.position);
+                if (distance < farthestDistance) { continue; }
+                farthestDistance = distance;
+                farthestPlayer = player;
             }
 
-            return closestPosition;
+            return farthestPlayer;
         }
     }
 
@@ -657,21 +639,21 @@ namespace Rats
         [HarmonyPrefix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnInsideEnemiesFromVentsIfReady))]
         public static bool SpawnInsideEnemiesFromVentsIfReadyPrefix()
         {
-            if (!Utils.spawningAllowed) { return false; }
+            if (Utils.disableSpawning) { return false; }
             return true;
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnDaytimeEnemiesOutside))]
         public static bool SpawnDaytimeEnemiesOutsidePrefix()
         {
-            if (!Utils.spawningAllowed) { return false; }
+            if (Utils.disableSpawning) { return false; }
             return true;
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnEnemiesOutside))]
         public static bool SpawnEnemiesOutsidePrefix()
         {
-            if (!Utils.spawningAllowed) { return false; }
+            if (Utils.disableSpawning) { return false; }
             return true;
         }
     }

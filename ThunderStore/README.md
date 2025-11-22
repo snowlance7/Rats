@@ -1,5 +1,7 @@
 # Rats Mod
 
+## Warning: These arent your normal rats, they have evolved in order to survive the harsh moons they live on
+
 ![Gathering Food](https://imgur.com/aBnca3P.gif)
 ![Rat Chase](https://imgur.com/JXKzikz.gif)
 ![Rat King](https://imgur.com/ZS5rOJR.gif)
