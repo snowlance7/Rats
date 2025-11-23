@@ -67,16 +67,8 @@ namespace Rats
                 NetworkObject.Despawn(true);
                 return;
             }
-            logger.LogDebug("Setting RatKingAI.Instance to this");
             Instance = this;
             logger.LogDebug("Finished spawning Rat King");
-
-
-            if (!IsServerOrHost) { return; }
-            logger.LogDebug("Spawning KingNest");
-            KingNest = GameObject.Instantiate(NestPrefab, NestTransform).GetComponent<RatNest>();
-            KingNest.NetworkObject.Spawn(true);
-            KingNest.SetAsRatKingNestClientRpc();
         }
 
         public override void OnNetworkDespawn()
@@ -85,11 +77,6 @@ namespace Rats
             if (Instance == this)
             {
                 Instance = null;
-            }
-
-            if (KingNest != null && KingNest.NetworkObject.IsSpawned && IsServerOrHost)
-            {
-                KingNest.NetworkObject.Despawn(true);
             }
         }
 

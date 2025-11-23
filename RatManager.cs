@@ -20,10 +20,13 @@ namespace Rats
         public Dictionary<PlayerControllerB, int> playerThreatCounter = [];
         public Dictionary<EnemyAI, int> enemyThreatCounter = [];
 
+        public Dictionary<EnemyAI, int> enemyFoodPointsLeft = [];
+
         int batchIndex = 0;
 
         // Configs
         const float updateInterval = 0.2f;
+        const int enemyFoodPerHPPoint = 10;
 
         public static void Init()
         {
@@ -48,7 +51,8 @@ namespace Rats
 
         void RunBatch()
         {
-            int total = RatAI.Instances.Count;
+            List<RatAI> instances = RatAI.Instances.Where(x => !x.isEnemyDead).ToList();
+            int total = instances.Count;
             if (total == 0) return;
 
             // How many to process per batch (spread evenly)
@@ -56,7 +60,7 @@ namespace Rats
 
             for (int i = 0; i < batchSize; i++)
             {
-                RatAI instance = RatAI.Instances[batchIndex];
+                RatAI instance = instances[batchIndex];
                 if (instance != null)
                 {
                     instance.DoAIInterval();
@@ -66,6 +70,13 @@ namespace Rats
                 if (batchIndex >= total)
                     batchIndex = 0; // wrap around
             }
+        }
+
+        public void AddEnemyFoodAmount(EnemyAI enemy) // TODO: add enemy blacklist/whitelist
+        {
+            int maxHP = enemy.enemyType.enemyPrefab.GetComponent<EnemyAI>().enemyHP;
+            int foodAmount = maxHP * enemyFoodPerHPPoint;
+            enemyFoodPointsLeft.Add(enemy, foodAmount);
         }
     }
 }

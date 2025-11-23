@@ -1,6 +1,7 @@
 ﻿using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
+using static Rats.Plugin;
 
 namespace Rats
 {
@@ -13,8 +14,10 @@ namespace Rats
         [HarmonyPatch(nameof(Landmine.SpawnExplosion))]
         public static void SpawnExplosionPostfix(Vector3 explosionPosition, bool spawnExplosionEffect = false, float killRange = 1f, float damageRange = 1f, int nonLethalDamage = 50, float physicsForce = 0f, GameObject overridePrefab = null, bool goThroughCar = false)
         {
-            foreach(var rat in RatManager.SpawnedRats)
+            if (!IsServerOrHost) { return; }
+            foreach(RatAI rat in RatAI.Instances)
             {
+                if (rat == null || rat.isEnemyDead) { continue; }
                 float distance = Vector3.Distance(rat.transform.position, explosionPosition);
                 if (distance < damageRange)
                 {

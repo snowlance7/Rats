@@ -38,8 +38,6 @@ namespace Rats
         public static HashSet<RatNest> nests = [];
         public static List<RatNest> nestsOpen => nests.Where(x => x.IsOpen).ToList();
 
-        public static Dictionary<EnemyAI, int> enemyFoodAmount = [];
-
         public List<RatAI> DefenseRats = [];
 
         public bool IsOpen = true;
@@ -54,7 +52,6 @@ namespace Rats
         const float minRatSpawnTime = 10f;
         const float maxRatSpawnTime = 30f;
         const int foodToSpawnRat = 5;
-        const int enemyFoodPerHPPoint = 10;
         const int maxRats = 50;
         const float poisonToCloseNest = 1f;
         const float ratKingSummonChancePoison = 0.5f;
@@ -82,7 +79,7 @@ namespace Rats
         {
             if (nests.Count <= 1)
             {
-                enemyFoodAmount.Clear();
+                enemyFoodPointsLeft.Clear();
 
                 if (IsServer)
                 {
@@ -119,10 +116,7 @@ namespace Rats
                 if (poisonInNest >= poisonToCloseNest)
                 {
                     IsOpen = false;
-                    GasParticleSystem.Play();
-                    animator.SetTrigger("destroy");
-                    scanNode.gameObject.SetActive(false);
-                    audioSource.Play();
+                    CloseNestClientRpc();
 
                     SpawnRatKing(ratKingSummonChancePoison);
 
@@ -152,13 +146,6 @@ namespace Rats
             {
                 RatKingAI.Instance.StartRampage();
             }
-        }
-
-        public void AddEnemyFoodAmount(EnemyAI enemy) // TODO: add enemy blacklist/whitelist
-        {
-            int maxHP = enemy.enemyType.enemyPrefab.GetComponent<EnemyAI>().enemyHP;
-            int foodAmount = maxHP * enemyFoodPerHPPoint;
-            enemyFoodAmount.Add(enemy, foodAmount);
         }
 
         public void AddFood(int amount = 1)
@@ -240,7 +227,17 @@ namespace Rats
             float t = Mathf.Clamp01(poisonInNest / poisonToCloseNest);
 
             PoisonLiquidPlaneObj.transform.position = Vector3.Lerp(poisonPlaneStart, poisonPlaneEnd, t);
-            logger.LogDebug("PoisonInNest: " + poisonInNest);
+            //logger.LogDebug("PoisonInNest: " + poisonInNest);
+        }
+
+        [ClientRpc]
+        public void CloseNestClientRpc()
+        {
+            IsOpen = false;
+            GasParticleSystem.Play();
+            animator.SetTrigger("destroy");
+            scanNode.gameObject.SetActive(false);
+            audioSource.Play();
         }
     }
 }
