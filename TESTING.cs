@@ -25,7 +25,6 @@ namespace Rats
         public static void PingScan_performedPostFix()
         {
             if (!Utils.testing) { return; }
-
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.SubmitChat_performed))]
