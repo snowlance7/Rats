@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -182362118, guid: 530e1361083deea4c8f550fe39526039, type: 3}
+  m_Name: Level1ArchetypeMaze
+  m_EditorClassIdentifier:
+  StraightenChance: 0
+  TileSets:
+  - {fileID: 11400000, guid: cc203dcc24d98a743b57fc2433e9a422, type: 2}
+  BranchStartTileSets: []
+  BranchStartType: 0
+  BranchCapTileSets:
+  - {fileID: 11400000, guid: abed446fc1a8e6b48be2d1ebfa3971af, type: 2}
+  BranchCapType: 0
+  BranchingDepth:
+    Min: 2
+    Max: 4
+  BranchCount:
+    Min: 11
+    Max: 15
+  StraighteningSettings:
+    OverrideStraightenChance: 0
+    StraightenChance: 0
+    OverrideCanStraightenMainPath: 0
+    CanStraightenMainPath: 1
+    OverrideCanStraightenBranchPaths: 0
+    CanStraightenBranchPaths: 0
+  Unique: 0
+  fileVersion: 1

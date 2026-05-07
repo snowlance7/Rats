@@ -6,17 +6,16 @@ using System.Text;
 using Unity.Netcode;
 using UnityEngine;
 using static Rats.Plugin;
+using static Rats.Configs;
 
 namespace Rats.Items.GlueTraps
 {
     internal class GlueBoardBehavior : PhysicsProp
     {
-        private static ManualLogSource logger = LoggerInstance;
-
-        public BoxCollider GlueCollider;
-        public GameObject RatProp;
-        public GameObject RatPropJerma;
-        public ScanNodeProperties ScanNode;
+        public BoxCollider GlueCollider = null!;
+        public GameObject RatProp = null!;
+        public GameObject RatPropJerma = null!;
+        public ScanNodeProperties ScanNode = null!;
 
         List<GameObject> ratsOnBoard = [];
 
@@ -35,8 +34,8 @@ namespace Rats.Items.GlueTraps
         {
             base.ActivatePhysicsTrigger(other);
 
-            Plugin.LoggerInstance.LogDebug("In ActivatePhysicsTrigger()");
-            if (ratsOnBoard.Count >= configMaxRatsOnGlueTrap.Value)
+            Plugin.logger.LogDebug("In ActivatePhysicsTrigger()");
+            if (ratsOnBoard.Count >= cfgMaxRatsOnGlueTrap)
             {
                 return;
             }

@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c30496d6ae6d6f907456e10a94e01ec6, type: 3}
+  m_Name: MoldPan
+  m_EditorClassIdentifier:
+  itemId: 0
+  itemName: Cookie pan
+  spawnPositionTypes: []
+  twoHanded: 0
+  twoHandedAnimation: 0
+  disableHandsOnWall: 0
+  canBeGrabbedBeforeGameStart: 1
+  disallowUtilitySlot: 0
+  weight: 1.15
+  itemIsTrigger: 0
+  holdButtonUse: 0
+  itemSpawnsOnGround: 1
+  isConductiveMetal: 1
+  isScrap: 1
+  creditsWorth: 0
+  lockedInDemo: 0
+  highestSalePercentage: 80
+  maxValue: 100
+  minValue: 30
+  spawnPrefab: {fileID: 1928162016981453, guid: a52f1b1e7962b8c4ebbd06db6d184bce, type: 2}
+  requiresBattery: 0
+  batteryUsage: 5
+  automaticallySetUsingPower: 1
+  itemIcon: {fileID: 21300000, guid: 332838a27a7e53448b9c38bc21337d47, type: 2}
+  grabAnim:
+  useAnim:
+  pocketAnim:
+  throwAnim:
+  grabAnimationTime: 0
+  grabSFX: {fileID: 8300000, guid: 30e14186376fff5439b13bd61922148a, type: 3}
+  dropSFX: {fileID: 8300000, guid: 3fff8f61f361ca44dbd85d119077f717, type: 3}
+  pocketSFX: {fileID: 0}
+  throwSFX: {fileID: 0}
+  syncGrabFunction: 0
+  syncUseFunction: 0
+  syncDiscardFunction: 0
+  syncInteractLRFunction: 0
+  saveItemVariable: 0
+  isDefensiveWeapon: 0
+  toolTips: []
+  verticalOffset: 0.03
+  floorYOffset: 0
+  allowDroppingAheadOfPlayer: 1
+  restingRotation: {x: -90, y: 0, z: 90}
+  rotationOffset: {x: 5.1, y: -252.9, z: -155.01}
+  positionOffset: {x: -0.02, y: 0.17, z: -0.26}
+  meshOffset: 0
+  meshVariants: []
+  materialVariants: []
+  clinkAudios:
+  - {fileID: 8300000, guid: 2b750fc459539f445967a0f6e84bbceb, type: 3}
+  - {fileID: 8300000, guid: 9b8ea797c560f454dbb3de5eeb9b9414, type: 3}
+  - {fileID: 8300000, guid: 3be67f408eece0844a2585c356664f96, type: 3}
+  - {fileID: 8300000, guid: d41b01cd951fc0d46b906d64e6780054, type: 3}
+  - {fileID: 8300000, guid: a44b5c5ce09b55846883cc6a3be72900, type: 3}
+  - {fileID: 8300000, guid: 69ec4f78fdaf38a47a5f397a7f77490b, type: 3}
+  usableInSpecialAnimations: 0
+  canBeInspected: 0

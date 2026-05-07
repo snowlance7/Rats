@@ -17,7 +17,7 @@ namespace Rats.Items
 {
     internal class RatCrownBehavior : PhysicsProp
     {
-        private static ManualLogSource logger = LoggerInstance;
+        private static ManualLogSource logger = Plugin.logger;
 
         readonly Vector3 posOffsetWearing = new Vector3(0.3f, -0.1f, -0.4f);
         readonly Vector3 rotOffsetWearing = new Vector3(90f, 115f, 0f);
@@ -152,7 +152,7 @@ namespace Rats.Items
             EnemyAI? enemy = GetClosestEnemyTargettingPlayer();
             if (enemy == null) { return; }
 
-            foreach (var rat in RatManager.SpawnedRats)
+            foreach (var rat in RatManager.Instance.SpawnedRats)
             {
                 if (rat.targetPlayer != previousPlayerHeldBy) { continue; }
                 rat.rallyRat = true;

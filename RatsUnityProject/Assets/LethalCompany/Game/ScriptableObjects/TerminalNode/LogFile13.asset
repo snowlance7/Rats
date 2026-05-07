@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e80ae96b3eb9177eea5c8f9dadbcda1, type: 3}
+  m_Name: LogFile13
+  m_EditorClassIdentifier:
+  displayText: "Desmond. October 7, 1968. Using the log entry system I designed for Sigurd, but I'm making this one private to keep it safe from discovery, as it would damage the team morale. We might not meet our quota tonight.\n\nI believe it's all a guise. We're supposed to think it's all just a transaction, but our real job is feeding ourselves into the machine. How long until its fullness ends and its hunger is insatiable? God knows, maybe it has to do with all these desolate moons. Whoever reads this, I am sorry to burden you with this. Please have a good night, and work hard. As what else is there for us to do? \n\n"
+  terminalEvent:
+  clearPreviousText: 1
+  maxCharactersToType: 35
+  buyItemIndex: -1
+  buyVehicleIndex: -1
+  isConfirmationNode: 0
+  buyRerouteToMoon: -1
+  displayPlanetInfo: -1
+  shipUnlockableID: -1
+  buyUnlockable: 0
+  returnFromStorage: 0
+  itemCost: 0
+  creatureFileID: -1
+  creatureName: Desmond - Oct 7
+  storyLogFileID: 12
+  overrideOptions: 0
+  acceptAnything: 0
+  terminalOptions: []
+  playClip: {fileID: 0}
+  playSyncedClip: -1
+  displayTexture: {fileID: 0}
+  displayVideo: {fileID: 0}
+  loadImageSlowly: 0
+  persistentImage: 0

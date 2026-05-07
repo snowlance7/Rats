@@ -10,7 +10,7 @@ namespace Rats.Items.GlueTraps
 {
     internal class GlueTrapBehavior : PhysicsProp
     {
-        private static ManualLogSource logger = LoggerInstance;
+        private static ManualLogSource logger = Plugin.logger;
 
         public GameObject GlueBoardPrefab;
         public ScanNodeProperties ScanNode;

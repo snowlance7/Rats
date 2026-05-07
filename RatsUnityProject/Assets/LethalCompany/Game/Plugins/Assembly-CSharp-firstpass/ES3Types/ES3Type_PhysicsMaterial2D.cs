@@ -1,0 +1,55 @@
+using UnityEngine;
+using UnityEngine.Scripting;
+
+namespace ES3Types
+{
+	[Preserve]
+	[ES3Properties(new string[] { "bounciness", "friction" })]
+	public class ES3Type_PhysicsMaterial2D : ES3ObjectType
+	{
+		public static ES3Type Instance;
+
+		public ES3Type_PhysicsMaterial2D()
+			: base(typeof(PhysicsMaterial2D))
+		{
+			Instance = this;
+		}
+
+		protected override void WriteObject(object obj, ES3Writer writer)
+		{
+			PhysicsMaterial2D physicsMaterial2D = (PhysicsMaterial2D)obj;
+			writer.WriteProperty("bounciness", physicsMaterial2D.bounciness, ES3Type_float.Instance);
+			writer.WriteProperty("friction", physicsMaterial2D.friction, ES3Type_float.Instance);
+		}
+
+		protected override void ReadObject<T>(ES3Reader reader, object obj)
+		{
+			PhysicsMaterial2D physicsMaterial2D = (PhysicsMaterial2D)obj;
+			foreach (string property in reader.Properties)
+			{
+				if (!(property == "bounciness"))
+				{
+					if (property == "friction")
+					{
+						physicsMaterial2D.friction = reader.Read<float>(ES3Type_float.Instance);
+					}
+					else
+					{
+						reader.Skip();
+					}
+				}
+				else
+				{
+					physicsMaterial2D.bounciness = reader.Read<float>(ES3Type_float.Instance);
+				}
+			}
+		}
+
+		protected override object ReadObject<T>(ES3Reader reader)
+		{
+			PhysicsMaterial2D physicsMaterial2D = new PhysicsMaterial2D();
+			ReadObject<T>(reader, physicsMaterial2D);
+			return physicsMaterial2D;
+		}
+	}
+}

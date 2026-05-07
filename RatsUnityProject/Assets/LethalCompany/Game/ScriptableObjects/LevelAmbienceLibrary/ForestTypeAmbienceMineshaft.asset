@@ -1,0 +1,122 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4128def65e82d58b0be476ddc923330a, type: 3}
+  m_Name: ForestTypeAmbienceMineshaft
+  m_EditorClassIdentifier:
+  insanityMusicAudios:
+  - {fileID: 8300000, guid: d1d2d70685819544e96dd66bfa38f6e9, type: 3}
+  - {fileID: 8300000, guid: 71002b2b7b997c44baea9e06f5f8457b, type: 3}
+  - {fileID: 8300000, guid: 5bf71c1394f0e8445a4611b80ed0b69a, type: 3}
+  - {fileID: 8300000, guid: 81e59efd6cc8a4840bd4de2434f7301f, type: 3}
+  - {fileID: 8300000, guid: ffe05a0de0cbfa94ebf78fc9c62c21e2, type: 3}
+  - {fileID: 8300000, guid: 776cc03cde1e79949b404ec861771152, type: 3}
+  - {fileID: 8300000, guid: 5e31befd37b64884c865987e35bddf5f, type: 3}
+  - {fileID: 8300000, guid: 5f02422b3b1bbe24aac94d35a7870e40, type: 3}
+  - {fileID: 8300000, guid: 8b407033e5a00b24fbb54da1dc762dbd, type: 3}
+  - {fileID: 8300000, guid: 7840c7a3dfec2d845a00411ac952d400, type: 3}
+  - {fileID: 8300000, guid: 4706389a45f7a0b4e9c3e66f6e1937dd, type: 3}
+  - {fileID: 8300000, guid: dbb8daebf8dec1c4db22a55d38e089d2, type: 3}
+  - {fileID: 8300000, guid: 9715e555049807d4eb220d2f5eb9b566, type: 3}
+  insideAmbience:
+  - {fileID: 8300000, guid: 1219fcb3e7fef604b99880e99c389ba9, type: 3}
+  - {fileID: 8300000, guid: 48705bf4629e95f4d9f51fde8a68ad74, type: 3}
+  - {fileID: 8300000, guid: 38015d5e4e2aa8f439cf16b1a65a70cb, type: 3}
+  - {fileID: 8300000, guid: 4aa6b509628baa64181abc57735efb3a, type: 3}
+  - {fileID: 8300000, guid: bb6000509a14ad344b84713257ec90e0, type: 3}
+  - {fileID: 8300000, guid: 44fbfaa04578624479180d08508cc28d, type: 3}
+  - {fileID: 8300000, guid: b3b22b899bf165c43a60fb1481585c06, type: 3}
+  - {fileID: 8300000, guid: 0374f4d6a17927648a2e734cd73f2a27, type: 3}
+  - {fileID: 8300000, guid: bc5305d20cd604945946ceaed8c9288b, type: 3}
+  - {fileID: 8300000, guid: f6c9c8343d5ea3b439aa12ca0bc9dd17, type: 3}
+  - {fileID: 8300000, guid: ba72296899a8a2742adaf69e0fd36512, type: 3}
+  - {fileID: 8300000, guid: cebb24c75b3cc6046ae0af53354764e2, type: 3}
+  - {fileID: 8300000, guid: 77fb180bb00e3bf469e90d4d844cbade, type: 3}
+  - {fileID: 8300000, guid: ccfaa39f6b5b60f478dc544423758bba, type: 3}
+  - {fileID: 8300000, guid: 289ef717aceaa554188544819e8795f8, type: 3}
+  - {fileID: 8300000, guid: 7e776c560defc234bb08d73d19d64056, type: 3}
+  - {fileID: 8300000, guid: 76f62c35141948047b874e963e651739, type: 3}
+  insideAmbienceInsanity:
+  - audioClip: {fileID: 8300000, guid: b3b22b899bf165c43a60fb1481585c06, type: 3}
+    chance: 20
+  - audioClip: {fileID: 8300000, guid: 18510edd1d737da4f91c1c82ec22f2f1, type: 3}
+    chance: 67
+  - audioClip: {fileID: 8300000, guid: 88faf6b2790c80842ab359dde00ceb1a, type: 3}
+    chance: 9
+  - audioClip: {fileID: 8300000, guid: bab9f6b8f11a65f469686d67bf0c0c59, type: 3}
+    chance: 3
+  - audioClip: {fileID: 8300000, guid: 17254db6136fb9248b1e420c8f9241bc, type: 3}
+    chance: 10
+  - audioClip: {fileID: 8300000, guid: a35d698a9870f3643b5893e706c7f097, type: 3}
+    chance: 13
+  - audioClip: {fileID: 8300000, guid: bb66e292393535a4a99fd5bb9a0603aa, type: 3}
+    chance: 26
+  - audioClip: {fileID: 8300000, guid: f2297406ed5c18341a768271aabd4330, type: 3}
+    chance: 1
+  - audioClip: {fileID: 8300000, guid: 353023961593d7d408e90f194faf49a6, type: 3}
+    chance: 17
+  - audioClip: {fileID: 8300000, guid: 408557c07e858aa49af21a2a1fa6d5a4, type: 3}
+    chance: 12
+  - audioClip: {fileID: 8300000, guid: c157ab0f3c7c13741af1afe013bb97f6, type: 3}
+    chance: 3
+  - audioClip: {fileID: 8300000, guid: 71002b2b7b997c44baea9e06f5f8457b, type: 3}
+    chance: 30
+  - audioClip: {fileID: 8300000, guid: d1d2d70685819544e96dd66bfa38f6e9, type: 3}
+    chance: 30
+  shipAmbience:
+  - {fileID: 8300000, guid: bc7513002f903484b85dccacfe01f631, type: 3}
+  - {fileID: 8300000, guid: d340917ed6293e541ac57255515eafa3, type: 3}
+  - {fileID: 8300000, guid: d59c6bd0fccdcf645aa7f10867c54a3e, type: 3}
+  - {fileID: 8300000, guid: 68c9d8c8a0b2e0b4692af4a1b8bd082d, type: 3}
+  - {fileID: 8300000, guid: 1274cd7cabf06ba47b09036d73a24fe6, type: 3}
+  - {fileID: 8300000, guid: 1392e812f6d85ed4cb98917f9c442889, type: 3}
+  - {fileID: 8300000, guid: 9428f18b7a723f04b907f3824c4c7d0a, type: 3}
+  - {fileID: 8300000, guid: da691507f490c9c479a4aa7ab530d835, type: 3}
+  - {fileID: 8300000, guid: 01c419ead8715024d9438d991c31411d, type: 3}
+  - {fileID: 8300000, guid: 5f7c4495c2c90fb408647e6167449a3b, type: 3}
+  - {fileID: 8300000, guid: bfd36eae3bb87244bb2459afd78d7a54, type: 3}
+  - {fileID: 8300000, guid: 97d050c281099d74d924891e918eeb70, type: 3}
+  shipAmbienceInsanity:
+  - audioClip: {fileID: 8300000, guid: 3344ac2b05c44c34caeaefc7dc03969f, type: 3}
+    chance: 42
+  - audioClip: {fileID: 8300000, guid: ccb9406fa2a3ffb40bf2ebc8a805f1c6, type: 3}
+    chance: 46
+  - audioClip: {fileID: 8300000, guid: d04be43cac996da4caba706d6741a8d3, type: 3}
+    chance: 69
+  - audioClip: {fileID: 8300000, guid: bfd36eae3bb87244bb2459afd78d7a54, type: 3}
+    chance: 100
+  - audioClip: {fileID: 8300000, guid: 367d34562ca16764e85ae122c5345c29, type: 3}
+    chance: 86
+  - audioClip: {fileID: 8300000, guid: 4902e27f4fc0dc64fbefb767a46ba282, type: 3}
+    chance: 83
+  - audioClip: {fileID: 8300000, guid: 17254db6136fb9248b1e420c8f9241bc, type: 3}
+    chance: 65
+  - audioClip: {fileID: 8300000, guid: 6749feccdad637546a63c03cedcb104b, type: 3}
+    chance: 44
+  outsideAmbience:
+  - {fileID: 8300000, guid: 1ba928681c5db0740be9706541b6d6e4, type: 3}
+  - {fileID: 8300000, guid: c7b1ed7e3679abe498feaec18a4f8b0b, type: 3}
+  - {fileID: 8300000, guid: 109abd50e4d609648961321b74277536, type: 3}
+  - {fileID: 8300000, guid: 1f57777c4618f85499ded73e9ab61b63, type: 3}
+  - {fileID: 8300000, guid: d2bcf00130e38334983932767698f7e9, type: 3}
+  - {fileID: 8300000, guid: 1518f7dfec755b84e8f68633f80cf030, type: 3}
+  - {fileID: 8300000, guid: c90dab0ce9f47fc4796dd1b176b6c240, type: 3}
+  - {fileID: 8300000, guid: 71002b2b7b997c44baea9e06f5f8457b, type: 3}
+  - {fileID: 8300000, guid: d1d2d70685819544e96dd66bfa38f6e9, type: 3}
+  - {fileID: 8300000, guid: 6a36c2fb750dc1943b06c40221b8e26a, type: 3}
+  - {fileID: 8300000, guid: 7bd3d86b15d973641a3b30eceaa9484f, type: 3}
+  outsideAmbienceInsanity:
+  - audioClip: {fileID: 8300000, guid: 3344ac2b05c44c34caeaefc7dc03969f, type: 3}
+    chance: 25
+  - audioClip: {fileID: 8300000, guid: 9e052402d4bb8414aa3c77a04b362545, type: 3}
+    chance: 100
+  - audioClip: {fileID: 8300000, guid: a74dbd86c450b5a45b34132e37da5445, type: 3}
+    chance: 100

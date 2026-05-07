@@ -11,8 +11,6 @@ namespace Rats
 {
     public class RatNest : NetworkBehaviour
     {
-        private static ManualLogSource logger = LoggerInstance;
-
 #pragma warning disable CS8618
         public GameObject RatPrefab;
         public GameObject JermaRatPrefab;
@@ -137,7 +135,7 @@ namespace Rats
                 if (UnityEngine.Random.Range(0f, 1f) < spawnChance) { return; }
 
                 GameObject? node = Utils.GetRandomNode(outside: false);
-                if (node == null) { LoggerInstance.LogError("node was null cant spawn rat king"); return; }
+                if (node == null) { Plugin.logger.LogError("node was null cant spawn rat king"); return; }
                 RatKingAI ratKing = GameObject.Instantiate(RatKingPrefab, node.transform.position, Quaternion.identity).GetComponent<RatKingAI>();
                 ratKing.NetworkObject.Spawn(true);
             }

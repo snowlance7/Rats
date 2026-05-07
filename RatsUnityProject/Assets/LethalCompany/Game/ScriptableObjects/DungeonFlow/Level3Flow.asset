@@ -1,0 +1,155 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1869055635, guid: 530e1361083deea4c8f550fe39526039, type: 3}
+  m_Name: Level3Flow
+  m_EditorClassIdentifier:
+  globalPropGroupID_obsolete:
+  globalPropRanges_obsolete: []
+  Length:
+    Min: 18
+    Max: 22
+  BranchMode: 0
+  BranchCount:
+    Min: 22
+    Max: 25
+  GlobalProps:
+  - ID: 67
+    Count:
+      Min: 3
+      Max: 5
+  - ID: 1231
+    Count:
+      Min: 1
+      Max: 1
+  - ID: 3
+    Count:
+      Min: 12
+      Max: 20
+  - ID: 0
+    Count:
+      Min: 1
+      Max: 1
+  - ID: 5
+    Count:
+      Min: 5
+      Max: 7
+  - ID: 1
+    Count:
+      Min: 0
+      Max: 2
+  - ID: 2
+    Count:
+      Min: 0
+      Max: 3
+  - ID: 7
+    Count:
+      Min: 3
+      Max: 9
+  - ID: 11
+    Count:
+      Min: 2
+      Max: 4
+  - ID: 5
+    Count:
+      Min: 2
+      Max: 7
+  - ID: 25
+    Count:
+      Min: 1
+      Max: 1
+  - ID: 40
+    Count:
+      Min: 4
+      Max: 6
+  - ID: 18
+    Count:
+      Min: 0
+      Max: 3
+  - ID: 9681
+    Count:
+      Min: 1
+      Max: 3
+  KeyManager: {fileID: 0}
+  DoorwayConnectionChance: 1
+  RestrictConnectionToSameSection: 0
+  TileInjectionRules: []
+  TileTagConnectionMode: 1
+  TileConnectionTags:
+  - TagA:
+      id: 0
+    TagB:
+      id: 1
+  BranchTagPruneMode: 0
+  BranchPruneTags: []
+  GlobalStraighteningSettings:
+    OverrideStraightenChance: 0
+    StraightenChance: 0
+    OverrideCanStraightenMainPath: 0
+    CanStraightenMainPath: 1
+    OverrideCanStraightenBranchPaths: 0
+    CanStraightenBranchPaths: 1
+  Nodes:
+  - Graph: {fileID: 11400000}
+    TileSets:
+    - {fileID: 11400000, guid: 5eb756df7f980974abefa9548fc4a0d3, type: 2}
+    NodeType: 1
+    Position: 0
+    Label: Start
+    Keys: []
+    Locks: []
+    LockPlacement: 0
+    StraighteningSettings:
+      OverrideStraightenChance: 0
+      StraightenChance: 0
+      OverrideCanStraightenMainPath: 0
+      CanStraightenMainPath: 1
+      OverrideCanStraightenBranchPaths: 0
+      CanStraightenBranchPaths: 0
+  - Graph: {fileID: 11400000}
+    TileSets:
+    - {fileID: 11400000, guid: f3d65fdd4394ff3438e84ee7b2f16a09, type: 2}
+    NodeType: 2
+    Position: 1
+    Label: Goal
+    Keys: []
+    Locks: []
+    LockPlacement: 0
+    StraighteningSettings:
+      OverrideStraightenChance: 0
+      StraightenChance: 0
+      OverrideCanStraightenMainPath: 0
+      CanStraightenMainPath: 1
+      OverrideCanStraightenBranchPaths: 0
+      CanStraightenBranchPaths: 0
+  Lines:
+  - Graph: {fileID: 11400000}
+    DungeonArchetypes:
+    - {fileID: 11400000, guid: b802b86d3f4d4024d8455b5bd34f30f7, type: 2}
+    Position: 0
+    Length: 0.40191388
+    Keys: []
+    Locks: []
+  - Graph: {fileID: 11400000}
+    DungeonArchetypes:
+    - {fileID: 11400000, guid: 4c781da389216e04191c8072fbebe0e7, type: 2}
+    Position: 0.40191388
+    Length: 0.44680405
+    Keys: []
+    Locks: []
+  - Graph: {fileID: 11400000}
+    DungeonArchetypes:
+    - {fileID: 11400000, guid: 4de527aa3cdeb8a46a5b49e65c034205, type: 2}
+    Position: 0.8487179
+    Length: 0.15128207
+    Keys: []
+    Locks: []
+  currentFileVersion: 1

@@ -9,11 +9,7 @@ namespace Rats
 {
     public class RatManager : MonoBehaviour
     {
-        private static ManualLogSource logger = LoggerInstance;
-
-        public static RatManager? Instance;
-
-        public static List<EnemyVent> vents => RoundManager.Instance.allEnemyVents.ToList();
+        public static RatManager? Instance { get; private set; } = null!;
 
         public Dictionary<EnemyAI, int> enemyHitCount = [];
 
@@ -51,7 +47,7 @@ namespace Rats
 
         void RunBatch()
         {
-            List<RatAI> instances = RatAI.Instances.Where(x => !x.isEnemyDead).ToList();
+            List<RatAI> instances = RatAI.Instances.Where(x => !x.isDead).ToList();
             int total = instances.Count;
             if (total == 0) return;
 

@@ -1,19 +1,12 @@
-﻿using BepInEx.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Unity.Netcode;
-using UnityEngine;
+﻿using UnityEngine;
 using static Rats.Plugin;
 
 namespace Rats.Items
 {
     internal class BoxOfSnapTrapsBehavior : PhysicsProp
     {
-        private static ManualLogSource logger = LoggerInstance;
-
-        public GameObject SnapTrapPrefab;
-        public ScanNodeProperties ScanNode;
+        public GameObject SnapTrapPrefab = null!;
+        public ScanNodeProperties ScanNode = null!;
 
         // Configs
         int snapTrapAmount;
@@ -60,6 +53,72 @@ namespace Rats.Items
         public override void LoadItemSaveData(int saveData)
         {
             snapTrapAmount = saveData;
+        }
+    }
+
+    internal class SnapTrapBehavior : MonoBehaviour
+    {
+        public AudioSource ItemAudio = null!;
+        public AudioClip[] SetSFX = null!;
+        public AudioClip[] SnapSFX = null!;
+        public Animator ItemAnimator = null!;
+        public GameObject TriggerMesh = null!;
+        public GameObject RatMesh = null!;
+        public GameObject JermaRatMesh = null!;
+        public Rigidbody rb = null!;
+        public Transform LaunchDirection = null!;
+        public BoxCollider collider = null!;
+
+        bool triggered;
+        Quaternion ratRotationOffset;
+        Vector3 ratPositionOffset;
+
+        // Configs
+        float minLaunchForce = 10f;
+        float maxLaunchForce = 15f;
+
+        public void Start()
+        {
+            RoundManager.PlayRandomClip(ItemAudio, SetSFX);
+        }
+
+        public void OnTriggerEnter(Collider other) // TODO: Test this
+        {
+            if (triggered) { return; }
+            Plugin.logger.LogDebug("In OnTriggerEnter()");
+            if (!other.gameObject.TryGetComponent(out RatAICollisionDetect ratCollision)) { return; }
+            Plugin.logger.LogDebug("Got rat collision");
+            ratCollision.mainScript.KillEnemy();
+            if (IsServerOrHost)
+            {
+                ratCollision.mainScript.NetworkObject.Despawn(false);
+            }
+            Destroy(ratCollision.mainScript.gameObject);
+            ItemAnimator.SetTrigger("trigger");
+            RoundManager.PlayRandomClip(ItemAudio, SnapSFX);
+            TriggerMesh.SetActive(false);
+
+            if (configUseJermaRats.Value)
+            {
+                JermaRatMesh.SetActive(true);
+            }
+            else
+            {
+                RatMesh.SetActive(true);
+            }
+
+            collider.isTrigger = false;
+            collider.providesContacts = true;
+            rb.isKinematic = false;
+
+            Vector3 torque = new Vector3(UnityEngine.Random.Range(0f, 5f), 0f, UnityEngine.Random.Range(-3f, -10f));
+
+            rb.AddForce(LaunchDirection.forward * UnityEngine.Random.Range(minLaunchForce, maxLaunchForce), ForceMode.Impulse);
+            rb.AddTorque(torque, ForceMode.Impulse);
+            rb.useGravity = true;
+            triggered = true;
+
+            GameObject.Destroy(this.gameObject, configSnapTrapsDespawnTime.Value);
         }
     }
 }

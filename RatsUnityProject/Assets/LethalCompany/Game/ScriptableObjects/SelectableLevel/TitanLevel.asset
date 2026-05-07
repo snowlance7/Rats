@@ -1,0 +1,828 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89cc72f2cd6e5da392d2eb839dbf2eba, type: 3}
+  m_Name: TitanLevel
+  m_EditorClassIdentifier:
+  planetPrefab: {fileID: 1941209694757260, guid: b109ab75e2b35d547bf3eabac1ad6244, type: 2}
+  sceneName: Level8Titan
+  levelID: 9
+  lockedForDemo: 1
+  spawnEnemiesAndScrap: 1
+  PlanetName: 8 Titan
+  LevelDescription: "POPULATION: None\nCONDITIONS: Frozen, rocky. This moon was mined for resources. It's easy to get lost here.\nFAUNA: Dangerous entities have been rumored to take residence in the vast network of tunnels."
+  videoReel: {fileID: 0}
+  riskLevel: S+
+  timeToArrive: 1.5
+  OffsetFromGlobalTime: 0
+  DaySpeedMultiplier: 1
+  planetHasTime: 1
+  randomWeathers:
+  - weatherType: 2
+    weatherVariable: 1
+    weatherVariable2: 0
+    weatherVariableColor: {r: 0, g: 0, b: 0, a: 1}
+  - weatherType: 3
+    weatherVariable: 4
+    weatherVariable2: 12
+    weatherVariableColor: {r: 0, g: 0, b: 0, a: 1}
+  - weatherType: 5
+    weatherVariable: 3
+    weatherVariable2: 0
+    weatherVariableColor: {r: 0, g: 0, b: 0, a: 1}
+  overrideWeather: 0
+  overrideWeatherType: 0
+  currentWeather: 3
+  factorySizeMultiplier: 2.2
+  dungeonFlowTypes:
+  - id: 0
+    rarity: 300
+    overrideLevelAmbience: {fileID: 0}
+  - id: 1
+    rarity: 57
+    overrideLevelAmbience: {fileID: 0}
+  - id: 4
+    rarity: 115
+    overrideLevelAmbience: {fileID: 11400000, guid: 8060977aa61f4134cb0f55088b650266, type: 2}
+  spawnableMapObjects:
+  - prefabToSpawn: {fileID: 1571550127160343, guid: 129c8c399cb465846b768e0f62261b78, type: 2}
+    spawnFacingAwayFromWall: 1
+    spawnFacingWall: 0
+    spawnWithBackToWall: 0
+    spawnWithBackFlushAgainstWall: 0
+    requireDistanceBetweenSpawns: 0
+    disallowSpawningNearEntrances: 0
+    numberToSpawn:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1.6912956
+        outSlope: 1.6912956
+        tangentMode: 0
+        weightedMode: 2
+        inWeight: 0
+        outWeight: 0.27726084
+      - serializedVersion: 3
+        time: 0.75952417
+        value: 5.598252
+        inSlope: 42.08351
+        outSlope: 42.08351
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.1556589
+        outWeight: 0.73548234
+      - serializedVersion: 3
+        time: 0.88479793
+        value: 15.818184
+        inSlope: 122.97418
+        outSlope: 161.94714
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.1640102
+        outWeight: 1
+      - serializedVersion: 3
+        time: 1.0017693
+        value: 34.761364
+        inSlope: 161.94714
+        outSlope: 14.878238
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.6488085
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - prefabToSpawn: {fileID: 1937975800163309, guid: a1721c69d7ab49e4c8c5e89481710184, type: 2}
+    spawnFacingAwayFromWall: 0
+    spawnFacingWall: 0
+    spawnWithBackToWall: 0
+    spawnWithBackFlushAgainstWall: 0
+    requireDistanceBetweenSpawns: 0
+    disallowSpawningNearEntrances: 0
+    numberToSpawn:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1.6912956
+        outSlope: 1.6912956
+        tangentMode: 0
+        weightedMode: 2
+        inWeight: 0
+        outWeight: 0.27726084
+      - serializedVersion: 3
+        time: 0.77028894
+        value: 3.7627766
+        inSlope: 23.341127
+        outSlope: 23.341127
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.16567203
+        outWeight: 0.4704904
+      - serializedVersion: 3
+        time: 0.91099787
+        value: 12.159094
+        inSlope: 55.343945
+        outSlope: 121.49355
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.26296878
+        outWeight: 1
+      - serializedVersion: 3
+        time: 1.0002282
+        value: 23
+        inSlope: 121.49355
+        outSlope: 14.878238
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.6488085
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - prefabToSpawn: {fileID: 1568916391554248, guid: 117897924e0601543a05de5c330358f9, type: 2}
+    spawnFacingAwayFromWall: 0
+    spawnFacingWall: 1
+    spawnWithBackToWall: 1
+    spawnWithBackFlushAgainstWall: 1
+    requireDistanceBetweenSpawns: 1
+    disallowSpawningNearEntrances: 0
+    numberToSpawn:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1.6912956
+        outSlope: 1.6912956
+        tangentMode: 0
+        weightedMode: 2
+        inWeight: 0
+        outWeight: 0.34763202
+      - serializedVersion: 3
+        time: 0.5610818
+        value: 0
+        inSlope: Infinity
+        outSlope: Infinity
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.32372206
+        outWeight: 0.33457875
+      - serializedVersion: 3
+        time: 0.73680806
+        value: 2
+        inSlope: 11.38134
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.33281815
+        outWeight: 0.32117817
+      - serializedVersion: 3
+        time: 1.0002282
+        value: 2
+        inSlope: -0
+        outSlope: 14.878238
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.3568122
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  indoorMapHazards:
+  - hazardType: {fileID: 11400000, guid: 6187ecf1be2e26c4d9dc65e71e12830d, type: 2}
+    numberToSpawn:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1.6912956
+        outSlope: 1.6912956
+        tangentMode: 0
+        weightedMode: 2
+        inWeight: 0
+        outWeight: 0.27726084
+      - serializedVersion: 3
+        time: 0.75952417
+        value: 5.598252
+        inSlope: 42.08351
+        outSlope: 42.08351
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.1556589
+        outWeight: 0.73548234
+      - serializedVersion: 3
+        time: 0.88479793
+        value: 15.818184
+        inSlope: 122.97418
+        outSlope: 161.94714
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.1640102
+        outWeight: 1
+      - serializedVersion: 3
+        time: 1.0017693
+        value: 34.761364
+        inSlope: 161.94714
+        outSlope: 14.878238
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.6488085
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - hazardType: {fileID: 11400000, guid: 65b64e018df1f7943860a5dae512e148, type: 2}
+    numberToSpawn:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1.6912956
+        outSlope: 1.6912956
+        tangentMode: 0
+        weightedMode: 2
+        inWeight: 0
+        outWeight: 0.27726084
+      - serializedVersion: 3
+        time: 0.77028894
+        value: 3.7627766
+        inSlope: 23.341127
+        outSlope: 23.341127
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.16567203
+        outWeight: 0.4704904
+      - serializedVersion: 3
+        time: 0.91099787
+        value: 12.159094
+        inSlope: 55.343945
+        outSlope: 121.49355
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.26296878
+        outWeight: 1
+      - serializedVersion: 3
+        time: 1.0002282
+        value: 23
+        inSlope: 121.49355
+        outSlope: 14.878238
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.6488085
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - hazardType: {fileID: 11400000, guid: e5119a60e567a2146b358fae8d062185, type: 2}
+    numberToSpawn:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1.6912956
+        outSlope: 1.6912956
+        tangentMode: 0
+        weightedMode: 2
+        inWeight: 0
+        outWeight: 0.34763202
+      - serializedVersion: 3
+        time: 0.5610818
+        value: 0
+        inSlope: Infinity
+        outSlope: Infinity
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.32372206
+        outWeight: 0.33457875
+      - serializedVersion: 3
+        time: 0.73680806
+        value: 2
+        inSlope: 11.38134
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.33281815
+        outWeight: 0.32117817
+      - serializedVersion: 3
+        time: 1.0002282
+        value: 2
+        inSlope: 0
+        outSlope: 14.878238
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.3568122
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  spawnableOutsideObjects:
+  - spawnableObject: {fileID: 11400000, guid: 935a9ee37f653c1449f2d2ababb16e7a, type: 2}
+    randomAmount:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.67232805
+        value: 1.3364911
+        inSlope: 3.1381323
+        outSlope: 3.1381323
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.09977834
+        outWeight: 0.20025739
+      - serializedVersion: 3
+        time: 0.99953943
+        value: 3.2408102
+        inSlope: 11.739434
+        outSlope: 11.739434
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.10882898
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - spawnableObject: {fileID: 11400000, guid: eb0d6ddd6a3c15443bec64bc4f2e8a63, type: 2}
+    randomAmount:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.67232805
+        value: 1.3364911
+        inSlope: 3.1381323
+        outSlope: 3.1381323
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.09977834
+        outWeight: 0.20025739
+      - serializedVersion: 3
+        time: 0.99953943
+        value: 3.2408102
+        inSlope: 11.739434
+        outSlope: 11.739434
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.10882898
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - spawnableObject: {fileID: 11400000, guid: 5ca182c4df1e40d42a74f7ef96d7bba8, type: 2}
+    randomAmount:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.67232805
+        value: 1.3364911
+        inSlope: 3.1381323
+        outSlope: 3.1381323
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.09977834
+        outWeight: 0.20025739
+      - serializedVersion: 3
+        time: 0.99953943
+        value: 3.2408102
+        inSlope: 11.739434
+        outSlope: 11.739434
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.10882898
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - spawnableObject: {fileID: 11400000, guid: ce7b414cb15532d469255d626dad30e1, type: 2}
+    randomAmount:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.67232805
+        value: 1.3364911
+        inSlope: 3.1381323
+        outSlope: 3.1381323
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.09977834
+        outWeight: 0.20025739
+      - serializedVersion: 3
+        time: 0.99953943
+        value: 3.2408102
+        inSlope: 11.739434
+        outSlope: 11.739434
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.10882898
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - spawnableObject: {fileID: 11400000, guid: a6d08199670357c43abc432ee0e6060e, type: 2}
+    randomAmount:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1.6912956
+        outSlope: 1.6912956
+        tangentMode: 0
+        weightedMode: 2
+        inWeight: 0
+        outWeight: 0.27726084
+      - serializedVersion: 3
+        time: 0.9200602
+        value: 2.1658955
+        inSlope: 23.838375
+        outSlope: 23.838375
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.11420691
+        outWeight: 0.35336575
+      - serializedVersion: 3
+        time: 1.0017445
+        value: 12.252171
+        inSlope: 814.1128
+        outSlope: 814.1128
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.08401288
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - spawnableObject: {fileID: 11400000, guid: 8458c223b9439ef4f9ab54988d553fc0, type: 2}
+    randomAmount:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 2
+        inSlope: 1.6912956
+        outSlope: 1.6912956
+        tangentMode: 0
+        weightedMode: 2
+        inWeight: 0
+        outWeight: 0.27726084
+      - serializedVersion: 3
+        time: 0.6962776
+        value: 5.4675903
+        inSlope: 30.075167
+        outSlope: 30.075167
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.15920748
+        outWeight: 0.5323987
+      - serializedVersion: 3
+        time: 1.0002282
+        value: 28.093853
+        inSlope: 230.00574
+        outSlope: 230.00574
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.16783261
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - spawnableObject: {fileID: 11400000, guid: bed26e2012a44b94d9491874ba4d1af6, type: 2}
+    randomAmount:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 2
+        inSlope: 1.6912956
+        outSlope: 1.6912956
+        tangentMode: 0
+        weightedMode: 2
+        inWeight: 0
+        outWeight: 0.27726084
+      - serializedVersion: 3
+        time: 0.6962776
+        value: 5.4675903
+        inSlope: 30.075167
+        outSlope: 30.075167
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.15920748
+        outWeight: 0.5323987
+      - serializedVersion: 3
+        time: 1.0002282
+        value: 28.093853
+        inSlope: 230.00574
+        outSlope: 230.00574
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.16783261
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - spawnableObject: {fileID: 11400000, guid: 0553f2704d1ef594898fb854ffbb5b84, type: 2}
+    randomAmount:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1.6912956
+        outSlope: 1.6912956
+        tangentMode: 0
+        weightedMode: 2
+        inWeight: 0
+        outWeight: 0.27726084
+      - serializedVersion: 3
+        time: 0.887432
+        value: 2.9786797
+        inSlope: 4.582536
+        outSlope: 4.582536
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.15920748
+        outWeight: 0.4704904
+      - serializedVersion: 3
+        time: 0.92637944
+        value: 6.655987
+        inSlope: 3.296209
+        outSlope: 40.884808
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.19772816
+        outWeight: 1
+      - serializedVersion: 3
+        time: 1.0002282
+        value: 9.675278
+        inSlope: 40.884808
+        outSlope: 14.878238
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.6488085
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  canSpawnMold: 1
+  moldSpreadIterations: 0
+  moldStartPosition: -1
+  moldType: 1
+  spawnableScrap:
+  - spawnableItem: {fileID: 11400000, guid: aa8d12cd869137542970bb7cec4aae7c, type: 2}
+    rarity: 37
+  - spawnableItem: {fileID: 11400000, guid: 30c5e726e296d37409f53fea109826be, type: 2}
+    rarity: 40
+  - spawnableItem: {fileID: 11400000, guid: 2ad60299833fef947b92780c62e62c17, type: 2}
+    rarity: 16
+  - spawnableItem: {fileID: 11400000, guid: 872412d3f693e174c9b17ad926153899, type: 2}
+    rarity: 47
+  - spawnableItem: {fileID: 11400000, guid: ccfaaf2036b232b4cb5a0a70a21d9ae9, type: 2}
+    rarity: 27
+  - spawnableItem: {fileID: 11400000, guid: 44c987a920b0d4a478865a050247725c, type: 2}
+    rarity: 20
+  - spawnableItem: {fileID: 11400000, guid: 3b2b00ab50afa964b94247091a33046b, type: 2}
+    rarity: 8
+  - spawnableItem: {fileID: 11400000, guid: 024dfb61d92eb97408be376106b2c95d, type: 2}
+    rarity: 10
+  - spawnableItem: {fileID: 11400000, guid: c5f67e54945fd2640948c5245fff8522, type: 2}
+    rarity: 27
+  - spawnableItem: {fileID: 11400000, guid: a6aac718bf5126d47b7616510b702262, type: 2}
+    rarity: 34
+  - spawnableItem: {fileID: 11400000, guid: cd5362825cee0ce42ae30d40d271db03, type: 2}
+    rarity: 37
+  - spawnableItem: {fileID: 11400000, guid: 46761045010529f4db3a8ab0f354045e, type: 2}
+    rarity: 27
+  - spawnableItem: {fileID: 11400000, guid: e79332f667c6c184188dde0dbe5a28bd, type: 2}
+    rarity: 35
+  - spawnableItem: {fileID: 11400000, guid: 3145765c983ea664ca4cf393b0e8cffd, type: 2}
+    rarity: 36
+  - spawnableItem: {fileID: 11400000, guid: d2ab83302b81bef4d977e65ab20a5ba4, type: 2}
+    rarity: 31
+  - spawnableItem: {fileID: 11400000, guid: eec815c007a94ec44a8ae0636a9e1024, type: 2}
+    rarity: 15
+  - spawnableItem: {fileID: 11400000, guid: 0140b25dad960394d874fb878b268ec9, type: 2}
+    rarity: 14
+  - spawnableItem: {fileID: 11400000, guid: fb44c35e853ccd3488fa4c2ed6e5de6a, type: 2}
+    rarity: 21
+  - spawnableItem: {fileID: 11400000, guid: 3944d2c31c4e70541b7182cdd0710e31, type: 2}
+    rarity: 33
+  - spawnableItem: {fileID: 11400000, guid: c0a8ad759e8910b42b2602fb8c01453f, type: 2}
+    rarity: 25
+  - spawnableItem: {fileID: 11400000, guid: ebfcc31bd25e4464e8c132d0a2c4afd8, type: 2}
+    rarity: 30
+  - spawnableItem: {fileID: 11400000, guid: 71185921d6dea254689d109e49c04c44, type: 2}
+    rarity: 22
+  - spawnableItem: {fileID: 11400000, guid: b2d921b5cdc3fc54496e982c37dd81af, type: 2}
+    rarity: 38
+  - spawnableItem: {fileID: 11400000, guid: 27259419f30525648ae49b7407fd0271, type: 2}
+    rarity: 21
+  - spawnableItem: {fileID: 11400000, guid: 0ced274e043515d499298be522c5bba4, type: 2}
+    rarity: 16
+  - spawnableItem: {fileID: 11400000, guid: 74e4e1e237e68be41bf710091c21a4de, type: 2}
+    rarity: 24
+  - spawnableItem: {fileID: 11400000, guid: c757108aa6e5cfa41beac75a2ede5dd2, type: 2}
+    rarity: 30
+  - spawnableItem: {fileID: 11400000, guid: 5e478df7bd6e855479531daa5c6f242e, type: 2}
+    rarity: 24
+  - spawnableItem: {fileID: 11400000, guid: 00682ee7777743d428bd5363d1e8cf5e, type: 2}
+    rarity: 16
+  - spawnableItem: {fileID: 11400000, guid: 794114bcac2f9cb45837df926871b9a6, type: 2}
+    rarity: 9
+  - spawnableItem: {fileID: 11400000, guid: 68e9c9445dec91147bb573fdf0771b7e, type: 2}
+    rarity: 17
+  - spawnableItem: {fileID: 11400000, guid: 64aefa08adc8a8b45ba2a1259a890e06, type: 2}
+    rarity: 46
+  - spawnableItem: {fileID: 11400000, guid: a51b217039321904d884c20957c9bcae, type: 2}
+    rarity: 43
+  - spawnableItem: {fileID: 11400000, guid: 49aa6e2bc70765040a56887fbad6de01, type: 2}
+    rarity: 26
+  - spawnableItem: {fileID: 11400000, guid: 9a4ee7e70d17a3246b853b8be4a2d4fe, type: 2}
+    rarity: 19
+  - spawnableItem: {fileID: 11400000, guid: 0270d8d19afb54340bf9bc0e5d6dc1cc, type: 2}
+    rarity: 8
+  minScrap: 28
+  maxScrap: 32
+  minTotalScrapValue: 300
+  maxTotalScrapValue: 700
+  levelAmbienceClips: {fileID: 11400000, guid: 4cd7dfff118a1124e9f40a617705de84, type: 2}
+  maxEnemyPowerCount: 18
+  maxOutsideEnemyPowerCount: 7
+  maxDaytimeEnemyPowerCount: 20
+  maxInsideDiversityPowerCount: 100
+  maxOutsideDiversityPowerCount: 100
+  Enemies:
+  - enemyType: {fileID: 11400000, guid: ea127fa3c8c5afb4db5e01164190eefd, type: 2}
+    rarity: 17
+  - enemyType: {fileID: 11400000, guid: 3715424e544f60040895f1a80027bb9c, type: 2}
+    rarity: 0
+  - enemyType: {fileID: 11400000, guid: 5faa473dfe658fd4c9ddcfbb7d670a98, type: 2}
+    rarity: 59
+  - enemyType: {fileID: 11400000, guid: c5da66e79f10742489c2e909dbdbb752, type: 2}
+    rarity: 54
+  - enemyType: {fileID: 11400000, guid: 31ad2cc98c4bf3244b3f0fdfa56334b8, type: 2}
+    rarity: 20
+  - enemyType: {fileID: 11400000, guid: 8cd179e2b70fed84c97fc5ad0d1f940b, type: 2}
+    rarity: 62
+  - enemyType: {fileID: 11400000, guid: 2ebe2a4807d280048bbf16768fb26415, type: 2}
+    rarity: 59
+  - enemyType: {fileID: 11400000, guid: 9ee4d4705ff89544a94e86bdaa242843, type: 2}
+    rarity: 54
+  - enemyType: {fileID: 11400000, guid: cfab0b2fbc467ac439ef0566d1d06f6f, type: 2}
+    rarity: 38
+  - enemyType: {fileID: 11400000, guid: 32838322f8493b84abf1bbfd6c7c247c, type: 2}
+    rarity: 71
+  - enemyType: {fileID: 11400000, guid: ccb36efa5af070a4686a35be5e64c93b, type: 2}
+    rarity: 16
+  - enemyType: {fileID: 11400000, guid: 3b7dec60607ff5b4693d4f07852d4b66, type: 2}
+    rarity: 71
+  - enemyType: {fileID: 11400000, guid: e7daec98b7aff164c8cb9940b3c1ed4f, type: 2}
+    rarity: 32
+  - enemyType: {fileID: 11400000, guid: 351f006ee05944840abe855df70aed04, type: 2}
+    rarity: 57
+  specialEnemyRarity:
+    overrideEnemy: {fileID: 0}
+    percentageChance: 0
+  OutsideEnemies:
+  - enemyType: {fileID: 11400000, guid: 6303db468e4e6e84f9c1ed9304c6716a, type: 2}
+    rarity: 32
+  - enemyType: {fileID: 11400000, guid: 53c55f723f9873f47b59e29263674e4e, type: 2}
+    rarity: 80
+  - enemyType: {fileID: 11400000, guid: 24334ce421c161347873eea335a842f7, type: 2}
+    rarity: 4
+  - enemyType: {fileID: 11400000, guid: 9765c87e3e31fca43ada184c2cd5cb11, type: 2}
+    rarity: 7
+  DaytimeEnemies: []
+  enemySpawnChanceThroughoutDay:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: -3
+      inSlope: 59.199333
+      outSlope: 59.199333
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 0.18829483
+    - serializedVersion: 3
+      time: 0.16717777
+      value: 2.1031938
+      inSlope: 11.647723
+      outSlope: 11.647723
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0.65918964
+      outWeight: 0.40484196
+    - serializedVersion: 3
+      time: 0.7631003
+      value: 11.275558
+      inSlope: 25.289257
+      outSlope: 25.289257
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0.41667995
+      outWeight: 0.5360636
+    - serializedVersion: 3
+      time: 1
+      value: 15
+      inSlope: 35.604027
+      outSlope: 35.604027
+      tangentMode: 0
+      weightedMode: 1
+      inWeight: 0.04912584
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  outsideEnemySpawnChanceThroughDay:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -7.7369623E-07
+      value: -2.8875
+      inSlope: Infinity
+      outSlope: -1.0600616
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 0.14093608
+    - serializedVersion: 3
+      time: 0.5448442
+      value: -0.02099245
+      inSlope: 9.172262
+      outSlope: 9.172262
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0.33333334
+      outWeight: 0.71965504
+    - serializedVersion: 3
+      time: 1.0052626
+      value: 5.3594007
+      inSlope: 16.256857
+      outSlope: 11.374388
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0.25347674
+      outWeight: 0.48315445
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  daytimeEnemySpawnChanceThroughDay:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spawnProbabilityRange: 2
+  daytimeEnemiesProbabilityRange: 10
+  levelIncludesSnowFootprints: 1
+  levelIconString: maptitan

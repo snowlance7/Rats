@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3feb48a78b71d86c00b5bb2d4f508469, type: 3}
+  m_Name: Agitated
+  m_EditorClassIdentifier:
+  timeToWaitBeforeGrabbingItem: 10
+  irritability: 0.8
+  judgementSpeed: 2
+  startingPatience: 2
+  desiresSilence: 1
+  mustBeWokenUp: 1
+  maximumItemsToAnger: -1
+  sensitivity: 0.6
+  noiseBehindWallSFX: {fileID: 0}
+  grabItemsSFX:
+  - {fileID: 8300000, guid: 6d95ccc77baf8c9468d50ba27ad507d9, type: 3}
+  - {fileID: 8300000, guid: d7d53ce3187ca0749ad244925133b09f, type: 3}
+  - {fileID: 8300000, guid: f5e6cccaebb00d242b200192f05397ce, type: 3}
+  angerSFX:
+  - {fileID: 8300000, guid: 1c1cf9884ead61649ba4670d45c8a666, type: 3}
+  - {fileID: 8300000, guid: 8361d069fbc369d499c337fe147bcc53, type: 3}
+  attackSFX:
+  - {fileID: 8300000, guid: 213e94f67796a064c855c602c554dbf4, type: 3}
+  wallAttackSFX: {fileID: 8300000, guid: 6fe8f11cbf66b7548968a2bb186eae5f, type: 3}
+  insideWindowSFX: {fileID: 8300000, guid: e7e2a4fade231d2459d4e060297a5156, type: 3}
+  behindWallSFX: {fileID: 8300000, guid: fbfb033da7ce77a479c0b77bcc68b7bf, type: 3}
+  stopWallSFXWhenOpening: 0
+  manifestation: 1
+  maxPlayersToKillBeforeSatisfied: 2
+  enableMonsterAnimationIndex: 0000000001000000
+  grabPlayerAnimationTime: 2
