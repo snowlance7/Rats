@@ -76,12 +76,11 @@
 
     <ItemGroup>
       <Folder Include="Assets\" />
-      <Folder Include="ThunderStore\Rats\" />
     </ItemGroup>
 
     <ItemGroup>
       <Reference Include="Snowlance.SnowyLib">
-        <HintPath>..\..\..\AppData\Roaming\com.kesomannen.gale\lethal-company\profiles\Testing\BepInEx\plugins\Snowlance-SnowyLib\Snowlance.SnowyLib.dll</HintPath>
+        <HintPath>..\..\..\..\AppData\Roaming\com.kesomannen.gale\lethal-company\profiles\Testing\BepInEx\plugins\Snowlance-SnowyLib\Snowlance.SnowyLib.dll</HintPath>
       </Reference>
     </ItemGroup>
 

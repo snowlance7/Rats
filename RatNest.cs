@@ -6,6 +6,8 @@ using Unity.Netcode;
 using UnityEngine;
 using static Rats.Plugin;
 using static Rats.RatManager;
+using static Rats.Configs;
+using SnowyLib;
 
 namespace Rats
 {
@@ -14,7 +16,6 @@ namespace Rats
 #pragma warning disable CS8618
         public GameObject RatPrefab;
         public GameObject JermaRatPrefab;
-        public GameObject RatKingPrefab;
 
         public GameObject RatNestMeshObj;
         public ScanNodeProperties scanNode;
@@ -77,7 +78,7 @@ namespace Rats
         {
             if (nests.Count <= 1)
             {
-                enemyFoodPointsLeft.Clear();
+                //enemyFoodPointsLeft.Clear();
 
                 if (IsServer)
                 {
@@ -116,33 +117,13 @@ namespace Rats
                     IsOpen = false;
                     CloseNestClientRpc();
 
-                    SpawnRatKing(ratKingSummonChancePoison);
+                    //SpawnRatKing(ratKingSummonChancePoison);
 
                     if (nestsOpen.Count <= 1)
                     {
-                        SpawnRatKing(ratKingSummonChanceNests, true);
+                        //SpawnRatKing(ratKingSummonChanceNests, true);
                     }
                 }
-            }
-        }
-
-        public void SpawnRatKing(float spawnChance = 1f, bool rampage = false)
-        {
-            if (!IsServer) { logger.LogError("Only server can call functions in RatNest"); return; }
-
-            if (RatKingAI.Instance == null && configRatKingEnable.Value)
-            {
-                if (UnityEngine.Random.Range(0f, 1f) < spawnChance) { return; }
-
-                GameObject? node = Utils.GetRandomNode(outside: false);
-                if (node == null) { Plugin.logger.LogError("node was null cant spawn rat king"); return; }
-                RatKingAI ratKing = GameObject.Instantiate(RatKingPrefab, node.transform.position, Quaternion.identity).GetComponent<RatKingAI>();
-                ratKing.NetworkObject.Spawn(true);
-            }
-
-            if (rampage && RatKingAI.Instance != null)
-            {
-                RatKingAI.Instance.StartRampage();
             }
         }
 
@@ -164,7 +145,7 @@ namespace Rats
 
             if (RatAI.Instances.Count < maxRats)
             {
-                GameObject prefab = configUseJermaRats.Value ? JermaRatPrefab : RatPrefab;
+                GameObject prefab = cfgUseJermaRats ? JermaRatPrefab : RatPrefab;
 
                 Vector3 position = RoundManager.Instance.GetNavMeshPosition(transform.position);
 
@@ -202,7 +183,7 @@ namespace Rats
                 if (nest == null || !nest.IsOpen) { continue; }
                 float distance = Vector3.Distance(position, nest.transform.position);
                 if (distance >= closestDistance) { continue; }
-                if (checkForPath && !Utils.CalculatePath(position, nest.transform.position)) { continue; }
+                if (checkForPath && !Utils.CanPathToPoint(position, nest.transform.position)) { continue; }
                 closestDistance = distance;
                 closestNest = nest;
             }

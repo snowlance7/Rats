@@ -10,6 +10,7 @@ using static Rats.RatNest;
 using static Rats.Configs;
 using SnowyLib;
 using Dawn.Utils;
+using System;
 
 namespace Rats
 {
@@ -87,6 +88,7 @@ namespace Rats
         const float AIIntervalTime = 0.2f;
         private Vector3 lastPosition;
         private float currentSpeed;
+        private NavMeshPath path1;
         const float defenseRadius = 5f;
         const float timeToIncreaseThreat = 3f;
         const int threatToAttackPlayer = 100;
@@ -143,15 +145,10 @@ namespace Rats
 
             if (!IsServer) { return; }
 
-            if (moveTowardsDestination)
-            {
-                agent.SetDestination(destination);
-            }
-
             switch (currentBehaviorState)
             {
                 case State.ReturnToNest:
-                    agent.speed = 5f;
+                    nav.agent.speed = 5f;
 
                     closestNest ??= GetClosestNestToPosition(transform.position);
 
@@ -159,7 +156,7 @@ namespace Rats
                     {
                         EnemyVent closestVent = RoundManager.Instance.allEnemyVents.GetClosestToPosition(transform.position, (x) => x.transform.position)!;
 
-                        SetDestinationToPosition(closestVent.floorNode.position);
+                        nav.DoPathingToDestination(closestVent.floorNode.position);
 
                         if (timeIdle > maxIdleTime)
                         {
@@ -169,7 +166,7 @@ namespace Rats
                         return;
                     }
 
-                    SetDestinationToPosition(closestNest.transform.position);
+                    nav.DoPathingToDestination(closestNest.transform.position);
 
                     if (timeIdle > maxIdleTime && ReachedDestination())
                     {
@@ -198,12 +195,12 @@ namespace Rats
 
                     break;
                 case State.Scouting:
-                    agent.speed = 5f;
+                    nav.agent.speed = 5f;
 
                     if (grabbingBody && targetPlayer != null)
                     {
                         GrabbableObject deadBody = targetPlayer.deadBody.grabBodyObject;
-                        if (SetDestinationToPosition(deadBody.transform.position, true))
+                        if (nav.TryDoPathingToDestination(deadBody.transform.position, out SmartAgentNavigator.GoToDestinationResult result) && result != SmartAgentNavigator.GoToDestinationResult.Failure)
                         {
                             if (ReachedDestination())
                             {
@@ -222,11 +219,11 @@ namespace Rats
                         targetNode = Utils.insideAINodes.GetRandom();
 
                     if (targetNode != null)
-                        SetDestinationToPosition(targetNode.transform.position);
+                        nav.DoPathingToDestination(targetNode.transform.position);
 
                     break;
                 case State.Swarming:
-                    agent.speed = 10f;
+                    nav.agent.speed = 10f;
 
                     if (swarmTarget == null)
                     {
@@ -261,7 +258,7 @@ namespace Rats
                     if (timeIdle > maxIdleTime)
                         swarmTargetPos = RoundManager.Instance.GetRandomNavMeshPositionInRadius(swarmTarget.transform.position, swarmRadius, RoundManager.Instance.navHit);
 
-                    SetDestinationToPosition(swarmTargetPos);
+                    nav.DoPathingToDestination(swarmTargetPos);
 
                     break;
                 default:
@@ -273,11 +270,11 @@ namespace Rats
         bool ReachedDestination()
         {
             // Check if we've reached the destination
-            if (!agent.pathPending)
+            if (!nav.agent.pathPending)
             {
-                if (agent.remainingDistance <= agent.stoppingDistance)
+                if (nav.agent.remainingDistance <= nav.agent.stoppingDistance)
                 {
-                    if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
+                    if (!nav.agent.hasPath || nav.agent.velocity.sqrMagnitude == 0f)
                     {
                         return true;
                     }
@@ -287,26 +284,6 @@ namespace Rats
             return false;
         }
 
-        public bool SetDestinationToPosition(Vector3 position, bool checkForPath = false)
-        {
-            if (checkForPath)
-            {
-                position = RoundManager.Instance.GetNavMeshPosition(position, RoundManager.Instance.navHit, 1.75f);
-                path1 = new NavMeshPath();
-                if (!agent.CalculatePath(position, path1))
-                {
-                    return false;
-                }
-                if (Vector3.Distance(path1.corners[path1.corners.Length - 1], RoundManager.Instance.GetNavMeshPosition(position, RoundManager.Instance.navHit, 2.7f)) > 1.55f)
-                {
-                    return false;
-                }
-            }
-            moveTowardsDestination = true;
-            destination = RoundManager.Instance.GetNavMeshPosition(position, RoundManager.Instance.navHit, -1f);
-            return true;
-        }
-
         bool CheckLineOfSightForDeadBody()
         {
             foreach (var player in StartOfRound.Instance.allPlayerScripts)
@@ -314,7 +291,7 @@ namespace Rats
                 DeadBodyInfo deadBody = player.deadBody;
                 if (deadBody == null || deadBody.deactivated) { continue; }
                 path1 = new NavMeshPath();
-                if (CheckLineOfSightForPosition(deadBody.grabBodyObject.transform.position, 60, 60, 5) && agent.CalculatePath(RoundManager.Instance.GetNavMeshPosition(deadBody.grabBodyObject.transform.position, RoundManager.Instance.navHit, 1.75f), path1))
+                if (CheckLineOfSightForPosition(deadBody.grabBodyObject.transform.position, 60, 60, 5) && nav.CanPathToPoint(deadBody.grabBodyObject.transform.position))
                 {
                     targetPlayer = deadBody.playerScript;
                     return true;

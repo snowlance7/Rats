@@ -13,15 +13,6 @@ namespace Rats
         public static int cfgBatchGroupCount => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<int>("Batch Group Count").Value;
         public static float cfgBatchUpdateInterval => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<float>("Batch Update Interval").Value;
 
-        // Rat King
-        public static float cfgRatKingSummonChanceRatDeath => ContentHandler<RatsContentHandler>.Instance.RatKing!.GetConfig<float>("Rat Death Summon Chance").Value;
-        public static float cfgRatKingSummonChancePoison => ContentHandler<RatsContentHandler>.Instance.RatKing!.GetConfig<float>("Poison Summon Chance").Value;
-        public static float cfgRatKingSummonChanceNests => ContentHandler<RatsContentHandler>.Instance.RatKing!.GetConfig<float>("All Nests Disabled Summon Chance").Value;
-        public static int cfgRatKingDamage => ContentHandler<RatsContentHandler>.Instance.RatKing!.GetConfig<int>("Damage").Value;
-        public static float cfgRatKingRallyCooldown => ContentHandler<RatsContentHandler>.Instance.RatKing!.GetConfig<float>("Rally Cooldown").Value;
-        public static float cfgRatKingLoseDistance => ContentHandler<RatsContentHandler>.Instance.RatKing!.GetConfig<float>("Distance to Lose Rat King").Value;
-        public static float cfgRatKingIdleTime => ContentHandler<RatsContentHandler>.Instance.RatKing!.GetConfig<float>("Idle Time").Value;
-
         // Nest
         public static string cfgSewerGrateSpawnWeightCurve => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<string>("Spawn Weight Curve").Value;
         public static int cfgMinRatSpawnTime => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<int>("Minimum Rat Spawn Time").Value;
@@ -68,15 +59,6 @@ configMaxRats = Config.Bind("Performance", "Maximum Rats", 50, "The maximum numb
 configAIIntervalTime = Config.Bind("Performance", "AI Interval Time", 0.3f, "The interval in which rats will update their AI (Changing position, doing complex calculations, etc). Setting this higher can improve performance but can also make the rats freeze in place more often while lower values makes them constantly moving but can decrease performance. Funnily enough the rats move more rat like when this is set higher.");
 configBatchGroupCount = Config.Bind("Performance", "Batch Group Count", 5, "The amount of groups the rats will be split into to update. (if you dont know what this means, just leave this config alone)");
 configBatchUpdateInterval = Config.Bind("Performance", "Batch Update Interval", 0.2f, "The amount of time between each group update. (if you dont know what this means, just leave this config alone)");
-
-// RatKing
-configRatKingSummonChanceRatDeath = Config.Bind("Rat King", "Rat Death Summon Chance", 0.01f, "The chance the rat king will spawn when killing a rat at high threat.");
-configRatKingSummonChancePoison = Config.Bind("Rat King", "Poison Summon Chance", 0.5f, "The chance the rat king will spawn when disabling a nest with rat poison.");
-configRatKingSummonChanceNests = Config.Bind("Rat King", "All Nests Disabled Summon Chance", 0.85f, "The chance the rat king will spawn when all the nests are disabled.");
-configRatKingDamage = Config.Bind("Rat King", "Damage", 25, "The amount of damage the rat king does.");
-configRatKingRallyCooldown = Config.Bind("Rat King", "Rally Cooldown", 30f, "The cooldown for the rat kings rally ability.");
-configRatKingLoseDistance = Config.Bind("Rat King", "Distance to Lose Rat King", 20f, "The distance from the rat king you need to be to lose him. Does not apply when rampaged or hunting.");
-configRatKingIdleTime = Config.Bind("Rat King", "Idle Time", 5f, "The amount of time the rat king will spend idling when reaching a destination during his roam routine.");
 
 // Nest
 configSewerGrateSpawnWeightCurve = Config.Bind("Nest", "Spawn Weight Curve", "Vanilla - 0,0 ; 1,2 | Custom - 0,0 ; 1,2", "The MoonName - CurveSpawnWeight for the SewerGrate(Rat nest).");

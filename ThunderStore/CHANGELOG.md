@@ -1,5 +1,7 @@
 ## 1.3.0
-
+- v80 Compat Fix
+- Removed Rat King (Temporarily)
+- Switched to DawnLib
 
 ## 1.2.3
 - v73 Compatibility

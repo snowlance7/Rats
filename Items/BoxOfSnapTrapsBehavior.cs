@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 using static Rats.Plugin;
+using static Rats.Configs;
 
 namespace Rats.Items
 {
     internal class BoxOfSnapTrapsBehavior : PhysicsProp
     {
-        public GameObject SnapTrapPrefab = null!;
-        public ScanNodeProperties ScanNode = null!;
+        public GameObject snapTrapPrefab = null!;
+        public ScanNodeProperties scanNode = null!;
 
         // Configs
         int snapTrapAmount;
@@ -14,8 +15,8 @@ namespace Rats.Items
         public override void Start()
         {
             base.Start();
-            ScanNode.subText = "";
-            snapTrapAmount = configSnapTrapAmount.Value;
+            scanNode.subText = "";
+            snapTrapAmount = cfgSnapTrapAmount;
         }
 
         public override void SetControlTipsForItem()
@@ -33,7 +34,7 @@ namespace Rats.Items
             if (buttonDown && snapTrapAmount > 0)
             {
                 if (!Physics.Raycast(transform.position, -Vector3.up, out var hitInfo, 80f, 268437761, QueryTriggerInteraction.Ignore)) { return; }
-                GameObject.Instantiate(SnapTrapPrefab, hitInfo.point, playerHeldBy.transform.rotation);
+                GameObject.Instantiate(snapTrapPrefab, hitInfo.point, playerHeldBy.transform.rotation);
                 snapTrapAmount--;
                 SetControlTipsForItem();
             }
@@ -98,7 +99,7 @@ namespace Rats.Items
             RoundManager.PlayRandomClip(ItemAudio, SnapSFX);
             TriggerMesh.SetActive(false);
 
-            if (configUseJermaRats.Value)
+            if (cfgUseJermaRats)
             {
                 JermaRatMesh.SetActive(true);
             }
@@ -118,7 +119,7 @@ namespace Rats.Items
             rb.useGravity = true;
             triggered = true;
 
-            GameObject.Destroy(this.gameObject, configSnapTrapsDespawnTime.Value);
+            GameObject.Destroy(this.gameObject, cfgSnapTrapsDespawnTime);
         }
     }
 }

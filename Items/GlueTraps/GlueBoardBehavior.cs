@@ -55,7 +55,7 @@ namespace Rats.Items.GlueTraps
 
             while (elapsedTime < delay)
             {
-                rat.agent.speed = Mathf.Lerp(startSpeed, 0f, elapsedTime / delay);
+                rat.nav.agent.speed = Mathf.Lerp(startSpeed, 0f, elapsedTime / delay);
                 elapsedTime += Time.deltaTime;
                 logger.LogDebug("Elapsed Time: " + elapsedTime);
                 yield return null;
@@ -63,7 +63,7 @@ namespace Rats.Items.GlueTraps
 
             logger.LogDebug("Finished slowing, calling rpc now");
 
-            rat.KillEnemyOnOwnerClient();
+            rat.KillEnemyServerRpc();
             yield return new WaitForSeconds(1f);
             logger.LogDebug("Calling AddRatToBoardClientRpc");
             AddRatToBoardClientRpc(rat.transform.position, rat.transform.rotation);
@@ -104,12 +104,12 @@ namespace Rats.Items.GlueTraps
         {
             logger.LogDebug("In ParentRatToBoardClientRpc()");
 
-            GameObject prefab = configUseJermaRats.Value ? RatPropJerma : RatProp;
+            GameObject prefab = cfgUseJermaRats ? RatPropJerma : RatProp;
             GameObject rat = Instantiate(prefab, pos, rot);
             logger.LogDebug("Parenting rat to board");
             rat.transform.SetParent(transform);
             ratsOnBoard.Add(rat);
-            SetScrapValue(ratsOnBoard.Count * configScrapValuePerRat.Value);
+            SetScrapValue(ratsOnBoard.Count * cfgScrapValuePerRat);
         }
     }
 }

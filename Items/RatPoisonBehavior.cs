@@ -5,6 +5,7 @@ using System.Collections;
 using System.Text;
 using UnityEngine;
 using static Rats.Plugin;
+using static Rats.Configs;
 
 namespace Rats.Items
 {
@@ -32,8 +33,8 @@ namespace Rats.Items
         {
             base.Start();
             ScanNode.subText = "";
-            currentFluid = configRatPoisonMaxFluid.Value;
-            pourRate = configRatPoisonPourRate.Value;
+            currentFluid = cfgRatPoisonMaxFluid;
+            pourRate = cfgRatPoisonPourRate;
         }
 
         public override void Update()
@@ -68,7 +69,7 @@ namespace Rats.Items
                 // Run on client
                 if (Physics.Raycast(PourDirection.position, -Vector3.up, out var hitInfo, 80f))
                 {
-                    if (hitInfo.collider.gameObject.TryGetComponent(out RatNest nest) && !nest.IsRatKing && nest.poisonInNest < RatManager.poisonToCloseNest)
+                    if (hitInfo.collider.gameObject.TryGetComponent(out RatNest nest) && nest.poisonInNest < cfgPoisonToCloseNest)
                     {
                         nest.AddPoisonServerRpc(pourRate * Time.deltaTime);
                     }

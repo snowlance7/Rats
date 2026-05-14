@@ -5,23 +5,22 @@ using System.Text;
 using Unity.Netcode;
 using UnityEngine;
 using static Rats.Plugin;
+using static Rats.Configs;
 
 namespace Rats.Items.GlueTraps
 {
     internal class GlueTrapBehavior : PhysicsProp
     {
-        private static ManualLogSource logger = Plugin.logger;
-
-        public GameObject GlueBoardPrefab;
-        public ScanNodeProperties ScanNode;
+        public GameObject glueBoardPrefab = null!;
+        public ScanNodeProperties scanNode = null!;
 
         int glueTrapAmount;
 
         public override void Start()
         {
             base.Start();
-            ScanNode.subText = "";
-            glueTrapAmount = configGlueBoardAmount.Value;
+            scanNode.subText = "";
+            glueTrapAmount = cfgGlueBoardAmount;
         }
 
         public override void SetControlTipsForItem()
@@ -41,7 +40,7 @@ namespace Rats.Items.GlueTraps
                 if (!Physics.Raycast(transform.position, -Vector3.up, out var hitInfo, 80f, 268437761, QueryTriggerInteraction.Ignore)) { return; }
                 if (IsServerOrHost)
                 {
-                    GameObject glueBoardObj = Instantiate(GlueBoardPrefab, hitInfo.point, playerHeldBy.transform.rotation);
+                    GameObject glueBoardObj = Instantiate(glueBoardPrefab, hitInfo.point, playerHeldBy.transform.rotation);
                     glueBoardObj.GetComponent<NetworkObject>().Spawn(true);
                 }
                 glueTrapAmount--;
