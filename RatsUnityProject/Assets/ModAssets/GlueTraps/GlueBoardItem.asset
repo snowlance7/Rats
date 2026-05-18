@@ -19,10 +19,11 @@ MonoBehaviour:
   twoHandedAnimation: 1
   disableHandsOnWall: 1
   canBeGrabbedBeforeGameStart: 1
+  disallowUtilitySlot: 1
   weight: 1
   itemIsTrigger: 0
   holdButtonUse: 0
-  itemSpawnsOnGround: 1
+  itemSpawnsOnGround: 0
   isConductiveMetal: 0
   isScrap: 1
   creditsWorth: 0
@@ -41,7 +42,7 @@ MonoBehaviour:
   pocketAnim: 
   throwAnim: 
   grabAnimationTime: 0
-  grabSFX: {fileID: 0}
+  grabSFX: {fileID: 8300000, guid: d5541a937d211754c8dd7b16a9160c1f, type: 3}
   dropSFX: {fileID: 0}
   pocketSFX: {fileID: 0}
   throwSFX: {fileID: 0}
@@ -61,5 +62,6 @@ MonoBehaviour:
   meshOffset: 0
   meshVariants: []
   materialVariants: []
+  clinkAudios: []
   usableInSpecialAnimations: 0
   canBeInspected: 0

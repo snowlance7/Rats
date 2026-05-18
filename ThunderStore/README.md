@@ -1,10 +1,9 @@
 # Rats Mod
 
-## Warning: These arent your normal rats, they have evolved in order to survive the harsh moons they live on
+## Warning: These arent your normal rats, they have evolved in order to survive the harsh moons of Lethal Company
 
 ![Gathering Food](https://imgur.com/aBnca3P.gif)
 ![Rat Chase](https://imgur.com/JXKzikz.gif)
-![Rat King](https://imgur.com/ZS5rOJR.gif)
 ![Snap Traps](https://imgur.com/exwFknd.gif)
 
 ## Behavior
@@ -24,8 +23,7 @@
 
 - Box Of Snap Traps: Buyable equipment. Allows you to place snap traps to kill rats. Killing rats this way does not increase the threat counter.
 - Glue Traps: Buyable equipment. Allows you to place Glue Boards to slow and kill rats. Each stuck rat increases the scrap value of the glue board and it can be picked up and sold for profit. Killing rats this way does not increase the threat counter.
-- Rat Poison: Buyable equipment. You can pour this into a rat nest to prevent them from spawning. Be careful as this can have consequences...
-- Rat Crown: ???
+- Rat Poison: Buyable equipment. You can pour this into a rat nest to prevent them from spawning.
 
 ![Item Showcase](https://imgur.com/Xb7Wl1m.png)
 

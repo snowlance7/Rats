@@ -24,21 +24,36 @@ namespace Rats
         [HarmonyPostfix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.PingScan_performed))]
         public static void PingScan_performedPostFix()
         {
-            if (!Utils.testing) { return; }
+            try
+            {
+                if (!Utils.testing) { return; }
+
+            }
+            catch
+            {
+                return;
+            }
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.SubmitChat_performed))]
         public static void SubmitChat_performedPrefix(HUDManager __instance)
         {
-            if (!Utils.testing) { return; }
-            string msg = __instance.chatTextField.text;
-            string[] args = msg.Split(" ");
-
-            switch (args[0])
+            try
             {
-                default:
-                    Utils.ChatCommand(args);
-                    break;
+                if (!Utils.testing) { return; }
+                string msg = __instance.chatTextField.text;
+                string[] args = msg.Split(" ");
+
+                switch (args[0])
+                {
+                    default:
+                        Utils.ChatCommand(args);
+                        break;
+                }
+            }
+            catch
+            {
+                return;
             }
         }
     }
