@@ -168,9 +168,9 @@ GameObject:
   - component: {fileID: 5582058415804553102}
   - component: {fileID: 246146624906901411}
   - component: {fileID: 7645277860360273823}
-  - component: {fileID: 8339590062417386625}
   - component: {fileID: 5033940921285507212}
   - component: {fileID: 3651664022539150003}
+  - component: {fileID: 6908666718475836366}
   m_Layer: 6
   m_Name: GlueTrap
   m_TagString: PhysicsProp
@@ -237,57 +237,6 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 1
   AutoObjectParentSync: 0
---- !u!114 &8339590062417386625
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3570764565569835984}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -869513902, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  grabbable: 1
-  isHeld: 0
-  isHeldByEnemy: 0
-  deactivated: 0
-  parentObject: {fileID: 0}
-  targetFloorPosition: {x: 0, y: 0, z: 0}
-  startFallingPosition: {x: 0, y: 0, z: 0}
-  floorYRot: 0
-  fallTime: 0
-  hasHitGround: 0
-  scrapValue: 0
-  itemUsedUp: 0
-  playerHeldBy: {fileID: 0}
-  isPocketed: 0
-  isBeingUsed: 0
-  isInElevator: 0
-  isInShipRoom: 0
-  isInFactory: 0
-  useCooldown: 0
-  currentUseCooldown: 0
-  itemProperties: {fileID: 11400000, guid: f2990638e0c452542a7b267b335c4ef6, type: 2}
-  insertedBattery:
-    empty: 0
-    charge: 0
-  customGrabTooltip: 
-  propBody: {fileID: 0}
-  propColliders: []
-  originalScale: {x: 0, y: 0, z: 0}
-  wasOwnerLastFrame: 0
-  mainObjectRenderer: {fileID: 8580441595119072745}
-  scrapPersistedThroughRounds: 0
-  heldByPlayerOnServer: 0
-  radarIcon: {fileID: 0}
-  reachedFloorTarget: 0
-  grabbableToEnemies: 1
-  hasBeenHeld: 0
-  GlueBoardPrefab: {fileID: 1535911432680096998, guid: 2b1cda44d7e96d847bd6dfc29fe99739,
-    type: 3}
-  ScanNode: {fileID: 4406274286716307312}
 --- !u!82 &5033940921285507212
 AudioSource:
   m_ObjectHideFlags: 0
@@ -297,7 +246,7 @@ AudioSource:
   m_GameObject: {fileID: 3570764565569835984}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300008, guid: cb9fb87df5ca10840a2a5b2dc5a4284c,
+  OutputAudioMixerGroup: {fileID: 24300008, guid: 64b08a5192e203847bb952b79319ef18,
     type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
@@ -401,3 +350,55 @@ MonoBehaviour:
   overridingLowPass: 0
   lowPassOverride: 20000
   debugLog: 0
+--- !u!114 &6908666718475836366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3570764565569835984}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 364194853, guid: e20c07124ca5124418fc75f04e11df23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  grabbable: 1
+  isHeld: 0
+  isHeldByEnemy: 0
+  deactivated: 0
+  parentObject: {fileID: 0}
+  targetFloorPosition: {x: 0, y: 0, z: 0}
+  startFallingPosition: {x: 0, y: 0, z: 0}
+  floorYRot: 0
+  fallTime: 0
+  hasHitGround: 0
+  scrapValue: 0
+  itemUsedUp: 0
+  playerHeldBy: {fileID: 0}
+  isPocketed: 0
+  isBeingUsed: 0
+  isInElevator: 0
+  isInShipRoom: 0
+  isInFactory: 0
+  useCooldown: 0
+  currentUseCooldown: 0
+  itemProperties: {fileID: 11400000, guid: f2990638e0c452542a7b267b335c4ef6, type: 2}
+  insertedBattery:
+    empty: 0
+    charge: 0
+  customGrabTooltip: 
+  propBody: {fileID: 0}
+  propColliders: []
+  originalScale: {x: 0, y: 0, z: 0}
+  wasOwnerLastFrame: 0
+  mainObjectRenderer: {fileID: 0}
+  scrapPersistedThroughRounds: 0
+  heldByPlayerOnServer: 0
+  radarIcon: {fileID: 0}
+  reachedFloorTarget: 0
+  grabbableToEnemies: 1
+  hasBeenHeld: 0
+  rotateObject: 0
+  glueBoardPrefab: {fileID: 1535911432680096998, guid: 2b1cda44d7e96d847bd6dfc29fe99739,
+    type: 3}
+  scanNode: {fileID: 4406274286716307312}

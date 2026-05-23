@@ -401,7 +401,7 @@ AudioSource:
   m_GameObject: {fileID: 2224361524075873126}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300008, guid: cb9fb87df5ca10840a2a5b2dc5a4284c,
+  OutputAudioMixerGroup: {fileID: 24300008, guid: 64b08a5192e203847bb952b79319ef18,
     type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
@@ -613,10 +613,11 @@ GameObject:
   - component: {fileID: 734057920991045285}
   - component: {fileID: 835767262270216843}
   - component: {fileID: 5137645381882760009}
-  - component: {fileID: 8858198601221520142}
   - component: {fileID: 4993871470383950864}
   - component: {fileID: 3264556760181182119}
   - component: {fileID: 6221543130595581161}
+  - component: {fileID: 7761012223187460265}
+  - component: {fileID: 2843975760095451466}
   m_Layer: 19
   m_Name: Rat
   m_TagString: Enemy
@@ -690,71 +691,6 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 1
   AutoObjectParentSync: 1
---- !u!114 &8858198601221520142
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2896751805717247731}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -41463191, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SqueakSFX:
-  - {fileID: 8300000, guid: c63541de79b8c2f48b8c146cb01f9a8f, type: 3}
-  - {fileID: 8300000, guid: 875332d79e31e7d47befa82583dd855f, type: 3}
-  - {fileID: 8300000, guid: 843fde1ead71eb64999240c14fd28602, type: 3}
-  - {fileID: 8300000, guid: b7965dd2d4e7a81439f9d1487381cef7, type: 3}
-  - {fileID: 8300000, guid: 56043c665bd11a84499fcf34bd770971, type: 3}
-  - {fileID: 8300000, guid: 38ee3eeca00d441449a238bab0b6693a, type: 3}
-  AttackSFX:
-  - {fileID: 8300000, guid: 877f6bf2fc848c54eb912beebe0e4c48, type: 3}
-  - {fileID: 8300000, guid: 29618175c7e1b9c4c8406e74901ab78f, type: 3}
-  HitSFX:
-  - {fileID: 8300000, guid: a00310f2a6f3f5d4ebcd2d4977976b43, type: 3}
-  - {fileID: 8300000, guid: f999f3de65339e14fa78616b699558bc, type: 3}
-  - {fileID: 8300000, guid: 52cc7955de6a58748afd9b798519c7dc, type: 3}
-  - {fileID: 8300000, guid: 2d3b6350a1d9f6948b5915eb356d219f, type: 3}
-  - {fileID: 8300000, guid: c8b65d4d1bd305649b214ff969cb9f0d, type: 3}
-  - {fileID: 8300000, guid: c5dff0445da470f4d8b025322f4fd742, type: 3}
-  - {fileID: 8300000, guid: 1c5599741871ab940a4d80ccb610a9be, type: 3}
-  - {fileID: 8300000, guid: 701f8f990e03df14aaf7f52796038cdf, type: 3}
-  - {fileID: 8300000, guid: 161dce1d596e3d84cb047db0aef99a33, type: 3}
-  - {fileID: 8300000, guid: cb84fa8a7f9ef084981636678f8c8ef8, type: 3}
-  - {fileID: 8300000, guid: 1093aeebe1c380e448133349275a5bdb, type: 3}
-  - {fileID: 8300000, guid: 7fec221c60724fe46856310333b711ce, type: 3}
-  - {fileID: 8300000, guid: d6c027c127262ab4490da37862265541, type: 3}
-  - {fileID: 8300000, guid: 4235773887fa73f4abe1082c9fa74cdf, type: 3}
-  - {fileID: 8300000, guid: f74ffedd06a82e941ae0a52da69ec6b4, type: 3}
-  - {fileID: 8300000, guid: 0bdaf29f9235d9144b0e7bdcb6ac2a41, type: 3}
-  - {fileID: 8300000, guid: 643f8effd189a37458b35e8365b5d774, type: 3}
-  - {fileID: 8300000, guid: de5409cc82701a44782f41a36c939e80, type: 3}
-  NibbleSFX:
-  - {fileID: 8300000, guid: bb700b36b04afbd4a9feca9a80099fc7, type: 3}
-  - {fileID: 8300000, guid: eaeb2ed8509a9d3438a2d8a4d3769e25, type: 3}
-  - {fileID: 8300000, guid: cecae45df886e014a8479d2b9104270f, type: 3}
-  - {fileID: 8300000, guid: c3259ca13ec2e8943b45b3017b4187d6, type: 3}
-  - {fileID: 8300000, guid: 3b7ba3088fb0d6444b971db9833b28a1, type: 3}
-  ScreamSFX: {fileID: 8300000, guid: 7281819988ebcb1419a6f031f4fa1b88, type: 3}
-  HappyBirthdayRatSFX: []
-  RatMouth: {fileID: 7141508304028364253}
-  ChristmasHat: {fileID: 8916332277764663740}
-  agent: {fileID: 835767262270216843}
-  creatureAnimator: {fileID: 4993871470383950864}
-  AIIntervalTime: 1
-  eye: {fileID: 8257306636695816652}
-  enemyHP: 1
-  creatureSFX: {fileID: 7974736408781690819}
-  creatureVoice: {fileID: 1789703757890052960}
-  IsJermaRat: 0
-  isEnemyDead: 0
-  targetPlayer: {fileID: 0}
-  targetEnemy: {fileID: 0}
-  Nest: {fileID: 0}
-  rallyRat: 0
-  defenseRat: 0
 --- !u!95 &4993871470383950864
 Animator:
   serializedVersion: 5
@@ -821,6 +757,86 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TransitionStateInfoList: []
   m_Animator: {fileID: 4993871470383950864}
+--- !u!114 &7761012223187460265
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2896751805717247731}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -41463191, guid: e20c07124ca5124418fc75f04e11df23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  squeakSFX:
+  - {fileID: 8300000, guid: c63541de79b8c2f48b8c146cb01f9a8f, type: 3}
+  - {fileID: 8300000, guid: 875332d79e31e7d47befa82583dd855f, type: 3}
+  - {fileID: 8300000, guid: 843fde1ead71eb64999240c14fd28602, type: 3}
+  - {fileID: 8300000, guid: b7965dd2d4e7a81439f9d1487381cef7, type: 3}
+  - {fileID: 8300000, guid: 56043c665bd11a84499fcf34bd770971, type: 3}
+  - {fileID: 8300000, guid: 38ee3eeca00d441449a238bab0b6693a, type: 3}
+  attackSFX:
+  - {fileID: 8300000, guid: 877f6bf2fc848c54eb912beebe0e4c48, type: 3}
+  - {fileID: 8300000, guid: 29618175c7e1b9c4c8406e74901ab78f, type: 3}
+  hitSFX:
+  - {fileID: 8300000, guid: a00310f2a6f3f5d4ebcd2d4977976b43, type: 3}
+  - {fileID: 8300000, guid: f999f3de65339e14fa78616b699558bc, type: 3}
+  - {fileID: 8300000, guid: 52cc7955de6a58748afd9b798519c7dc, type: 3}
+  - {fileID: 8300000, guid: 2d3b6350a1d9f6948b5915eb356d219f, type: 3}
+  - {fileID: 8300000, guid: c8b65d4d1bd305649b214ff969cb9f0d, type: 3}
+  - {fileID: 8300000, guid: c5dff0445da470f4d8b025322f4fd742, type: 3}
+  - {fileID: 8300000, guid: 1c5599741871ab940a4d80ccb610a9be, type: 3}
+  - {fileID: 8300000, guid: 701f8f990e03df14aaf7f52796038cdf, type: 3}
+  - {fileID: 8300000, guid: 161dce1d596e3d84cb047db0aef99a33, type: 3}
+  - {fileID: 8300000, guid: cb84fa8a7f9ef084981636678f8c8ef8, type: 3}
+  - {fileID: 8300000, guid: 1093aeebe1c380e448133349275a5bdb, type: 3}
+  - {fileID: 8300000, guid: 7fec221c60724fe46856310333b711ce, type: 3}
+  - {fileID: 8300000, guid: d6c027c127262ab4490da37862265541, type: 3}
+  - {fileID: 8300000, guid: 4235773887fa73f4abe1082c9fa74cdf, type: 3}
+  - {fileID: 8300000, guid: f74ffedd06a82e941ae0a52da69ec6b4, type: 3}
+  - {fileID: 8300000, guid: 0bdaf29f9235d9144b0e7bdcb6ac2a41, type: 3}
+  - {fileID: 8300000, guid: 643f8effd189a37458b35e8365b5d774, type: 3}
+  - {fileID: 8300000, guid: de5409cc82701a44782f41a36c939e80, type: 3}
+  nibbleSFX:
+  - {fileID: 8300000, guid: bb700b36b04afbd4a9feca9a80099fc7, type: 3}
+  - {fileID: 8300000, guid: eaeb2ed8509a9d3438a2d8a4d3769e25, type: 3}
+  - {fileID: 8300000, guid: cecae45df886e014a8479d2b9104270f, type: 3}
+  - {fileID: 8300000, guid: c3259ca13ec2e8943b45b3017b4187d6, type: 3}
+  - {fileID: 8300000, guid: 3b7ba3088fb0d6444b971db9833b28a1, type: 3}
+  screamSFX: {fileID: 8300000, guid: 7281819988ebcb1419a6f031f4fa1b88, type: 3}
+  ratMouthTransform: {fileID: 7141508304028364253}
+  christmasHat: {fileID: 8916332277764663740}
+  animator: {fileID: 4993871470383950864}
+  eye: {fileID: 8257306636695816652}
+  audioSource: {fileID: 1789703757890052960}
+  nav: {fileID: 2843975760095451466}
+  isJermaRat: 0
+  isDead: 0
+  targetPlayer: {fileID: 0}
+--- !u!114 &2843975760095451466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2896751805717247731}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1066262130, guid: 5bc1f3681f40ba9498f3e6f536510199, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnUseEntranceTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  OnEnableOrDisableAgent:
+    m_PersistentCalls:
+      m_Calls: []
+  CanTryToFlyToDestination: 0
+  lastUsedEntranceTeleport: {fileID: 0}
+  agent: {fileID: 0}
+  _nodeRemovalPrecision: 5
+  _allowedLinks: 1
 --- !u!1 &3399548701976123500
 GameObject:
   m_ObjectHideFlags: 0
@@ -1055,7 +1071,7 @@ GameObject:
   - component: {fileID: 6947988526352428978}
   - component: {fileID: 44013637276788213}
   - component: {fileID: 4664923662712959394}
-  - component: {fileID: 7510816954977307391}
+  - component: {fileID: 904749788954566899}
   m_Layer: 19
   m_Name: Collision
   m_TagString: Enemy
@@ -1126,7 +1142,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &7510816954977307391
+--- !u!114 &904749788954566899
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1135,12 +1151,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 5627499659381206636}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -819815532, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
+  m_Script: {fileID: -819815532, guid: e20c07124ca5124418fc75f04e11df23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainScript: {fileID: 8858198601221520142}
-  canCollideWithEnemies: 1
-  onlyCollideWhenGrounded: 0
+  mainScript: {fileID: 7761012223187460265}
 --- !u!1 &5734498912229969198
 GameObject:
   m_ObjectHideFlags: 0
@@ -1739,7 +1753,7 @@ AudioSource:
   m_GameObject: {fileID: 8584567157748486478}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300008, guid: cb9fb87df5ca10840a2a5b2dc5a4284c,
+  OutputAudioMixerGroup: {fileID: 24300008, guid: 64b08a5192e203847bb952b79319ef18,
     type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0

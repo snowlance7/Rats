@@ -1,0 +1,301 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 466683445, guid: 1f73291e6cf64124796e048d841e7d1f, type: 3}
+  m_Name: RatPoisonDef
+  m_EditorClassIdentifier: 
+  _configEntries:
+  - settingName: Max Fluid
+    DynamicConfigType: 2
+    defaultString: 
+    defaultInt: 0
+    defaultFloat: 5
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 0
+      <Max>k__BackingField: 0
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: The amount of rat poison in a jug of rat poison
+  - settingName: Pour Rate
+    DynamicConfigType: 2
+    defaultString: 
+    defaultInt: 0
+    defaultFloat: 0.1
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 0
+      <Max>k__BackingField: 0
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: How fast the rat poison pours out of the container
+  - settingName: Poison To Close Nest
+    DynamicConfigType: 2
+    defaultString: 
+    defaultInt: 0
+    defaultFloat: 1
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 0
+      <Max>k__BackingField: 0
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: The amount of poison you need to pour in a rat nest to disable it
+  _tags: []
+  <Key>k__BackingField:
+    _namespace: rats
+    _key: rat_poison
+  <Item>k__BackingField: {fileID: 11400000, guid: 0a0777b3ff04a5547befe303c1d8b6f6,
+    type: 2}
+  <ShopItemPreset>k__BackingField:
+    <OrderRequestNode>k__BackingField: {fileID: 0}
+    <OrderReceiptNode>k__BackingField: {fileID: 0}
+    <ItemInfoNode>k__BackingField: {fileID: 0}
+  <TerminalPredicate>k__BackingField: {fileID: 0}
+  <PricingStrategy>k__BackingField: {fileID: 0}
+  <MoonSpawnWeightsConfig>k__BackingField:
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: vanilla
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: custom
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: experimentation
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: vow
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: march
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: assurance
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: offense
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: adamance
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: embrion
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: rend
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: dine
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: titan
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: artifice
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_none
+    MathOperation: 2
+    Weight: 0
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_low
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_medium
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_high
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_ultra_high
+    MathOperation: 0
+    Weight: 0
+  <InteriorSpawnWeightsConfig>k__BackingField:
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: vanilla
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: custom
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: facility
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: mansion
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: mineshaft
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_none
+    MathOperation: 2
+    Weight: 0
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_low
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_medium
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_high
+    MathOperation: 0
+    Weight: 0
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_ultra_high
+    MathOperation: 0
+    Weight: 0
+  <WeatherSpawnWeightsConfig>k__BackingField:
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: vanilla
+    MathOperation: 2
+    Weight: 1
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: custom
+    MathOperation: 2
+    Weight: 1
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: none
+    MathOperation: 2
+    Weight: 1
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: rainy
+    MathOperation: 2
+    Weight: 1
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: stormy
+    MathOperation: 2
+    Weight: 1
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: foggy
+    MathOperation: 2
+    Weight: 1
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: flooded
+    MathOperation: 2
+    Weight: 1
+  - NamespacedKey:
+      _namespace: lethal_company
+      _key: eclipsed
+    MathOperation: 2
+    Weight: 1
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_none
+    MathOperation: 2
+    Weight: 0
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_low
+    MathOperation: 2
+    Weight: 1
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_medium
+    MathOperation: 2
+    Weight: 1
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_high
+    MathOperation: 2
+    Weight: 1
+  - NamespacedKey:
+      _namespace: rats
+      _key: rat_poison_ultra_high
+    MathOperation: 2
+    Weight: 1
+  <RouteSpawnWeightsConfig>k__BackingField: []
+  <GenerateSpawnWeightsConfig>k__BackingField: 0
+  <IsScrap>k__BackingField: 0
+  <GenerateScrapConfig>k__BackingField: 0
+  <IsShopItem>k__BackingField: 1
+  <GenerateShopItemConfig>k__BackingField: 1
+  <Cost>k__BackingField: 15
+  <GenerateDisableUnlockConfig>k__BackingField: 1
+  <GenerateDisablePricingStrategyConfig>k__BackingField: 1
+  <MoonSpawnWeights>k__BackingField: 
+  <InteriorSpawnWeights>k__BackingField: 
+  <WeatherSpawnWeights>k__BackingField: 

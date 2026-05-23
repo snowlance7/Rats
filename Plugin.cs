@@ -2,8 +2,10 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using Dawn;
+using Dusk;
 using GameNetcodeStuff;
 using HarmonyLib;
+using System.IO;
 using System.Reflection;
 using Unity.Netcode;
 using UnityEngine;
@@ -16,6 +18,7 @@ namespace Rats
     {
         public static Plugin Instance { get; private set; } = null!;
         public static ManualLogSource logger { get; private set; } = null!;
+        public static DuskMod Mod { get; private set; } = null!;
 
         readonly Harmony harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
         public static PlayerControllerB localPlayer { get { return GameNetworkManager.Instance.localPlayerController; } }
@@ -32,6 +35,10 @@ namespace Rats
             logger = Instance.Logger;
 
             harmony.PatchAll();
+
+            AssetBundle? mainBundle = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Info.Location), "rats_mainassets"));
+            Mod = DuskMod.RegisterMod(this, mainBundle);
+            Mod.RegisterContentHandlers();
 
             InitializeNetworkBehaviours();
 

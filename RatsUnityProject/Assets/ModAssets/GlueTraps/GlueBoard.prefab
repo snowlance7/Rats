@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 8539612012275522851}
   - component: {fileID: 9218037439599226748}
   - component: {fileID: 5449964954387172438}
-  - component: {fileID: 6409683193796346020}
+  - component: {fileID: 6543072877926769643}
   m_Layer: 6
   m_Name: GlueBoard
   m_TagString: PhysicsProp
@@ -113,8 +113,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 0.00000031292436, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.94178367, y: 0.94178367, z: 1.0753287}
-  m_ConstrainProportionsScale: 1
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1110628243303930254}
   - {fileID: 6396733420329099573}
@@ -151,7 +151,7 @@ AudioSource:
   m_GameObject: {fileID: 1535911432680096998}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300008, guid: cb9fb87df5ca10840a2a5b2dc5a4284c,
+  OutputAudioMixerGroup: {fileID: 24300008, guid: 64b08a5192e203847bb952b79319ef18,
     type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
@@ -260,7 +260,7 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 1
   AutoObjectParentSync: 0
---- !u!114 &6409683193796346020
+--- !u!114 &6543072877926769643
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -269,7 +269,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1535911432680096998}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -741224381, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
+  m_Script: {fileID: -441300744, guid: e20c07124ca5124418fc75f04e11df23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   grabbable: 1
@@ -301,13 +301,14 @@ MonoBehaviour:
   propColliders: []
   originalScale: {x: 0, y: 0, z: 0}
   wasOwnerLastFrame: 0
-  mainObjectRenderer: {fileID: 7361413210527853270}
+  mainObjectRenderer: {fileID: 0}
   scrapPersistedThroughRounds: 0
   heldByPlayerOnServer: 0
   radarIcon: {fileID: 0}
   reachedFloorTarget: 0
-  grabbableToEnemies: 0
+  grabbableToEnemies: 1
   hasBeenHeld: 0
+  rotateObject: 0
   GlueCollider: {fileID: 7820034468129389063}
   RatProp: {fileID: 8798174050813656465, guid: a96537a26edd3384faa8909f8b0389c8, type: 3}
   RatPropJerma: {fileID: 1675854891591097596, guid: 693bede0990b01043a7cb27ed721349b,

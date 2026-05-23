@@ -4999,8 +4999,8 @@ GameObject:
   - component: {fileID: 4082878498297763115}
   - component: {fileID: 2429690724112240935}
   - component: {fileID: 8061298476035953568}
-  - component: {fileID: 7082691587174610740}
   - component: {fileID: 4059404602660131355}
+  - component: {fileID: 4338043815410571230}
   m_Layer: 6
   m_Name: RatPoison
   m_TagString: PhysicsProp
@@ -5055,7 +5055,7 @@ AudioSource:
   m_GameObject: {fileID: 7548659131972677963}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300008, guid: cb9fb87df5ca10840a2a5b2dc5a4284c,
+  OutputAudioMixerGroup: {fileID: 24300008, guid: 64b08a5192e203847bb952b79319ef18,
     type: 2}
   m_audioClip: {fileID: 8300000, guid: 95435491f98abcf439b44a7eb59f0ae4, type: 3}
   m_PlayOnAwake: 0
@@ -5164,7 +5164,28 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 1
   AutoObjectParentSync: 0
---- !u!114 &7082691587174610740
+--- !u!95 &4059404602660131355
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7548659131972677963}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: a20a87d991e56f64081d011cc90be712, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4338043815410571230
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5173,7 +5194,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7548659131972677963}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1151888701, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
+  m_Script: {fileID: 1151888701, guid: e20c07124ca5124418fc75f04e11df23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   grabbable: 1
@@ -5205,39 +5226,20 @@ MonoBehaviour:
   propColliders: []
   originalScale: {x: 0, y: 0, z: 0}
   wasOwnerLastFrame: 0
-  mainObjectRenderer: {fileID: 7820333927782428966}
+  mainObjectRenderer: {fileID: 0}
   scrapPersistedThroughRounds: 0
   heldByPlayerOnServer: 0
   radarIcon: {fileID: 0}
   reachedFloorTarget: 0
   grabbableToEnemies: 1
   hasBeenHeld: 0
+  rotateObject: 0
   ItemAudio: {fileID: 2429690724112240935}
   particleSystem: {fileID: 4213189863407211916}
   ItemAnimator: {fileID: 4059404602660131355}
   PourDirection: {fileID: 7233857064835898484}
   ScanNode: {fileID: 6186879607787624003}
---- !u!95 &4059404602660131355
-Animator:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7548659131972677963}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: a20a87d991e56f64081d011cc90be712, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  lastPlayerHeldBy: {fileID: 0}
 --- !u!1 &9128391430725569531
 GameObject:
   m_ObjectHideFlags: 0

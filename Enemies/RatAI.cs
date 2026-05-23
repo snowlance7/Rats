@@ -32,9 +32,10 @@ namespace Rats
         public AudioSource audioSource = null!;
         public SmartAgentNavigator nav = null!;
         [SerializeField] bool isJermaRat;
-        
+
         //public NetworkVariable<int> Health = new NetworkVariable<int>(value: 100, writePerm: NetworkVariableWritePermission.Owner, readPerm: NetworkVariableReadPermission.Everyone);
 
+        [HideInInspector]
         public bool isDead;
 
         GameObject? targetNode;
@@ -47,6 +48,7 @@ namespace Rats
         State previousBehaviorState;
         State currentBehaviorState = State.ReturnToNest;
 
+        [HideInInspector]
         public PlayerControllerB? targetPlayer;
         //public EnemyAI? targetEnemy;
 
@@ -68,8 +70,6 @@ namespace Rats
 
         GameObject? swarmTarget;
         Vector3 swarmTargetPos;
-
-        NavMeshPath path = new NavMeshPath();
 
         bool rallyRat;
 

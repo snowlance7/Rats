@@ -5198,11 +5198,11 @@ GameObject:
   m_Component:
   - component: {fileID: 3210382306801285447}
   - component: {fileID: 1876417250954944023}
-  - component: {fileID: 996867915449928234}
   - component: {fileID: 3197079738398677423}
   - component: {fileID: 2926140894269960458}
   - component: {fileID: 5240784647910806909}
   - component: {fileID: 3057298029341164107}
+  - component: {fileID: 2203300213292858038}
   m_Layer: 21
   m_Name: RatNest
   m_TagString: Untagged
@@ -5219,7 +5219,7 @@ Transform:
   m_GameObject: {fileID: 8680554055499160128}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.02761796, y: -0, z: -0.04007699}
+  m_LocalPosition: {x: 0, y: -0, z: 0}
   m_LocalScale: {x: 15, y: 15, z: 15}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -5248,36 +5248,6 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
---- !u!114 &996867915449928234
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8680554055499160128}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -142638541, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  RatPrefab: {fileID: 2896751805717247731, guid: a5d8e2cc3b8c6e54d883d739d3701b93,
-    type: 3}
-  RatKingPrefab: {fileID: 8097870923337303632, guid: 0c129c093d5c558489d120aa24b3ee56,
-    type: 3}
-  JermaRatPrefab: {fileID: 6222321793913088547, guid: 090ba523c1ce7b44fabba965598c43f1,
-    type: 3}
-  RatNestMesh: {fileID: 1793159301049963090}
-  ScanNode: {fileID: 5280199281927543280}
-  voidPlaneRenderer: {fileID: 1076040447062857100}
-  PoisonLiquidPlane: {fileID: 7178296072266955082}
-  YellowMat: {fileID: 2100000, guid: 06b6dd1b7949db746b7bf2a866cd28d5, type: 2}
-  GasParticleSystem: {fileID: 8123415221784060668}
-  NestAnimator: {fileID: 2926140894269960458}
-  NestAudio: {fileID: 5240784647910806909}
-  IsOpen: 1
-  IsRatKing: 0
-  DefenseRats: []
-  PoisonInNest: 0
 --- !u!65 &3197079738398677423
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5329,7 +5299,7 @@ AudioSource:
   m_GameObject: {fileID: 8680554055499160128}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300008, guid: cb9fb87df5ca10840a2a5b2dc5a4284c,
+  OutputAudioMixerGroup: {fileID: 24300008, guid: 64b08a5192e203847bb952b79319ef18,
     type: 2}
   m_audioClip: {fileID: 8300000, guid: 50c0858504253dd4399d6015bbfdb211, type: 3}
   m_PlayOnAwake: 0
@@ -5433,3 +5403,30 @@ MonoBehaviour:
   overridingLowPass: 0
   lowPassOverride: 20000
   debugLog: 0
+--- !u!114 &2203300213292858038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8680554055499160128}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -142638541, guid: e20c07124ca5124418fc75f04e11df23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  RatPrefab: {fileID: 2896751805717247731, guid: a5d8e2cc3b8c6e54d883d739d3701b93,
+    type: 3}
+  JermaRatPrefab: {fileID: 6222321793913088547, guid: 090ba523c1ce7b44fabba965598c43f1,
+    type: 3}
+  RatNestMeshObj: {fileID: 1793159301049963090}
+  scanNode: {fileID: 5280199281927543280}
+  voidPlaneRenderer: {fileID: 1076040447062857100}
+  PoisonLiquidPlaneObj: {fileID: 7178296072266955082}
+  YellowMat: {fileID: 2100000, guid: 06b6dd1b7949db746b7bf2a866cd28d5, type: 2}
+  GasParticleSystem: {fileID: 8123415221784060668}
+  animator: {fileID: 2926140894269960458}
+  audioSource: {fileID: 5240784647910806909}
+  DefenseRats: []
+  IsOpen: 1
+  poisonInNest: 0

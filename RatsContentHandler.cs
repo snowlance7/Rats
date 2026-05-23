@@ -4,12 +4,6 @@ namespace Rats
 {
     public class RatsContentHandler : ContentHandler<RatsContentHandler>
     {
-        public class RatAssets(DuskMod mod, string filePath) : AssetBundleLoader<RatAssets>(mod, filePath) { }
-        public RatAssets? Rat;
-
-        public class RatKingAssets(DuskMod mod, string filePath) : AssetBundleLoader<RatKingAssets>(mod, filePath) { }
-        public RatKingAssets? RatKing;
-
         public class RatNestAssets(DuskMod mod, string filePath) : AssetBundleLoader<RatNestAssets>(mod, filePath) { }
         public RatNestAssets? RatNest;
 

@@ -11,15 +11,11 @@ namespace Rats.Items
 {
     internal class RatPoisonBehavior : PhysicsProp
     {
-        private static ManualLogSource logger = Plugin.logger;
-
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        public AudioSource ItemAudio;
-        public ParticleSystem particleSystem;
-        public Animator ItemAnimator;
-        public Transform PourDirection;
-        public ScanNodeProperties ScanNode;
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        public AudioSource audioSource = null!;
+        public ParticleSystem particleSystem = null!;
+        public Animator animator = null!;
+        public Transform pourDirection = null!;
+        public ScanNodeProperties scanNode = null!;
 
         public PlayerControllerB? lastPlayerHeldBy;
 
@@ -32,7 +28,7 @@ namespace Rats.Items
         public override void Start()
         {
             base.Start();
-            ScanNode.subText = "";
+            scanNode.subText = "";
             currentFluid = cfgRatPoisonMaxFluid;
             pourRate = cfgRatPoisonPourRate;
         }
@@ -67,7 +63,7 @@ namespace Rats.Items
                 if (playerHeldBy == null || localPlayer != playerHeldBy) { return; }
 
                 // Run on client
-                if (Physics.Raycast(PourDirection.position, -Vector3.up, out var hitInfo, 80f))
+                if (Physics.Raycast(pourDirection.position, -Vector3.up, out var hitInfo, 80f))
                 {
                     if (hitInfo.collider.gameObject.TryGetComponent(out RatNest nest) && nest.poisonInNest < cfgPoisonToCloseNest)
                     {
@@ -86,7 +82,7 @@ namespace Rats.Items
             HUDManager.Instance.ChangeControlTipMultiple(toolTips, holdingItem: true, itemProperties);
         }
 
-        public override void ItemActivate(bool used, bool buttonDown = true)
+        public override void ItemActivate(bool used, bool buttonDown = true) // Synced TODO: create rpcs
         {
             base.ItemActivate(used, buttonDown);
 
@@ -103,17 +99,17 @@ namespace Rats.Items
             if (lastPlayerHeldBy == null) { return; }
             pouring = _pouring;
             lastPlayerHeldBy.activatingItem = pouring;
-            ItemAnimator.SetBool("pour", pouring);
+            animator.SetBool("pour", pouring);
 
             if (pouring)
             {
                 particleSystem.Play();
-                ItemAudio.Play();
+                audioSource.Play();
             }
             else
             {
                 particleSystem.Stop();
-                ItemAudio.Stop();
+                audioSource.Stop();
             }
         }
 

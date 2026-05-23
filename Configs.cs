@@ -1,4 +1,5 @@
-﻿using Dusk;
+﻿using Dawn.Utils;
+using Dusk;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,13 +16,12 @@ namespace Rats
 
         // Nest
         public static string cfgSewerGrateSpawnWeightCurve => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<string>("Spawn Weight Curve").Value;
-        public static int cfgMinRatSpawnTime => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<int>("Minimum Rat Spawn Time").Value;
-        public static int cfgMaxRatSpawnTime => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<int>("Maximum Rat Spawn Time").Value;
+        public static BoundedRange cfgRatSpawnTime => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<BoundedRange>("Rat Spawn Time").Value;
         public static int cfgFoodToSpawnRat => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<int>("Food Required to Spawn Rat").Value;
         public static int cfgEnemyFoodPerHPPoint => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<int>("Food Per HP Point").Value;
 
         // Rats
-        public static bool cfgHolidayRats => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<bool>("Holiday Rats").Value;
+        public static bool cfgHolidayRats => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<bool>("Holiday Rats").Value;
         public static bool cfgUseJermaRats => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<bool>("Use Jerma Rats").Value;
         public static float cfgDefenseRadius => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<float>("Defense Radius").Value;
         public static float cfgTimeToIncreaseThreat => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<float>("Time to Increase Threat").Value;
@@ -46,7 +46,7 @@ namespace Rats
         // GlueTrap
         public static int cfgGlueBoardAmount => ContentHandler<RatsContentHandler>.Instance.GlueTrap!.GetConfig<int>("Glue Board Amount").Value;
         public static int cfgScrapValuePerRat => ContentHandler<RatsContentHandler>.Instance.GlueTrap!.GetConfig<int>("Scrap Value Per Rat").Value;
-        public static int cfgMaxRatsOnGlueTrap => ContentHandler<RatsContentHandler>.Instance.GlueTrap!.GetConfig<int>("Maximum Rats on Glue Trap").Value;
+        public static int cfgMaxRatsOnGlueTrap => ContentHandler<RatsContentHandler>.Instance.GlueTrap!.GetConfig<int>("Maximum Rats On Glue Board").Value;
 
         // BoxOfSnapTraps
         public static int cfgSnapTrapAmount => ContentHandler<RatsContentHandler>.Instance.BoxOfSnapTraps!.GetConfig<int>("Snap Trap Amount").Value;
@@ -65,7 +65,7 @@ configSewerGrateSpawnWeightCurve = Config.Bind("Nest", "Spawn Weight Curve", "Va
 configMinRatSpawnTime = Config.Bind("Nest", "Minimum Rat Spawn Time", 5, "The minimum time in seconds before a rat can spawn from the nest.");
 configMaxRatSpawnTime = Config.Bind("Nest", "Maximum Rat Spawn Time", 20, "The maximum time in seconds before a rat can spawn from the nest.");
 configFoodToSpawnRat = Config.Bind("Nest", "Food Required to Spawn Rat", 5, "The amount of food needed in the nest to spawn a new rat.");
-configEnemyFoodPerHPPoint = Config.Bind("Nest", "Food Per HP Point", 10, "How much food points one HP will equal for enemies. ex: if 10 thumper will give 40 food points.");
+configEnemyFoodPerHPPoint = Config.Bind("Nest", "Food Per HP Point", 10, "How much food points one HP will equal for enemies. ex: if 10, thumper will give 40 food points.");
 
 // Rats
 configHolidayRats = Config.Bind("General", "Holiday Rats", false, "Rats spawn with a santa hat");
@@ -93,7 +93,7 @@ configPoisonToCloseNest = Config.Bind("Rat Poison", "Poison To Close Nest", 1f, 
 // GlueTrap
 configGlueBoardAmount = Config.Bind("Glue Trap", "Glue Board Amount", 4, "The amount of glue boards you get in the glue trap item.");
 configScrapValuePerRat = Config.Bind("Glue Trap", "Scrap Value Per Rat", 2, "The scrap value added to the glue board per rat stuck.");
-configMaxRatsOnGlueTrap = Config.Bind("Glue Trap", "Maximum Rats on Glue Trap", 5, "The maximum number of rats that can be caught on a single glue trap before it becomes full.");
+configMaxRatsOnGlueTrap = Config.Bind("Glue Trap", "Maximum Rats On Glue Board", 5, "The maximum number of rats that can be caught on a single glue trap before it becomes full.");
 
 // BoxOfSnapTraps
 configSnapTrapAmount = Config.Bind("Snap Traps", "Snap Trap Amount", 100, "The amount of snap traps that come with a Box Of Snap Traps.");

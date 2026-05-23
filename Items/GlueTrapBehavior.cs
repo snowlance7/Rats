@@ -5,11 +5,75 @@ using System.Collections.Generic;
 using System.Text;
 using Unity.Netcode;
 using UnityEngine;
-using static Rats.Plugin;
 using static Rats.Configs;
+using static Rats.Plugin;
+using static UnityEngine.SendMouseEvents;
 
-namespace Rats.Items.GlueTraps
+namespace Rats.Items
 {
+    internal class GlueTrapBehavior : PhysicsProp
+    {
+        public GameObject glueBoardPrefab = null!;
+        public ScanNodeProperties scanNode = null!;
+
+        int glueTrapAmount;
+
+        public override void Start()
+        {
+            base.Start();
+            scanNode.subText = "";
+            glueTrapAmount = cfgGlueBoardAmount;
+        }
+
+        public override void SetControlTipsForItem()
+        {
+            if (playerHeldBy != localPlayer) { return; }
+            string[] toolTips = itemProperties.toolTips;
+            toolTips[0] = $"Drop Glue Trap [LMB] ({glueTrapAmount} left)";
+            HUDManager.Instance.ChangeControlTipMultiple(toolTips, holdingItem: true, itemProperties);
+        }
+
+        public override void ItemActivate(bool used, bool buttonDown = true)
+        {
+            base.ItemActivate(used, buttonDown);
+            if (!buttonDown || glueTrapAmount <= 0) { return; }
+            if (!Physics.Raycast(transform.position, -Vector3.up, out var hitInfo, 80f, 268437761, QueryTriggerInteraction.Ignore)) { return; }
+            SpawnGlueBoardServerRpc(hitInfo.point, playerHeldBy.transform.rotation);
+        }
+
+        public override void GrabItem()
+        {
+            base.GrabItem();
+            SetControlTipsForItem();
+        }
+
+        public override int GetItemDataToSave()
+        {
+            return glueTrapAmount;
+        }
+
+        public override void LoadItemSaveData(int saveData)
+        {
+            glueTrapAmount = saveData;
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void SpawnGlueBoardServerRpc(Vector3 position, Quaternion rotation)
+        {
+            if (!IsServer) { return; }
+            GameObject glueBoardObj = Instantiate(glueBoardPrefab, position, rotation);
+            glueBoardObj.GetComponent<NetworkObject>().Spawn(true);
+            SpawnGlueBoardClientRpc();
+        }
+
+        [ClientRpc]
+        public void SpawnGlueBoardClientRpc()
+        {
+            glueTrapAmount--;
+            SetControlTipsForItem();
+        }
+    }
+
     internal class GlueBoardBehavior : PhysicsProp
     {
         public BoxCollider GlueCollider = null!;
@@ -34,7 +98,7 @@ namespace Rats.Items.GlueTraps
         {
             base.ActivatePhysicsTrigger(other);
 
-            Plugin.logger.LogDebug("In ActivatePhysicsTrigger()");
+            logger.LogDebug("In ActivatePhysicsTrigger()");
             if (ratsOnBoard.Count >= cfgMaxRatsOnGlueTrap)
             {
                 return;
