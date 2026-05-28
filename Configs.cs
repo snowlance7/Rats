@@ -9,10 +9,10 @@ namespace Rats
     internal static class Configs
     {
         // Performance
-        public static int cfgMaxRats => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<int>("Maximum Rats").Value;
-        public static float cfgAIIntervalTime => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<float>("AI Interval Time").Value;
-        public static int cfgBatchGroupCount => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<int>("Batch Group Count").Value;
-        public static float cfgBatchUpdateInterval => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<float>("Batch Update Interval").Value;
+        public static int cfgMaxRats => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<int>("Maximum Rats").Value;
+        public static float cfgAIIntervalTime => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<float>("AI Interval Time").Value;
+        public static int cfgBatchGroupCount => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<int>("Batch Group Count").Value;
+        public static float cfgBatchUpdateInterval => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<float>("Batch Update Interval").Value;
 
         // Nest
         public static string cfgSewerGrateSpawnWeightCurve => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<string>("Spawn Weight Curve").Value;
@@ -22,21 +22,17 @@ namespace Rats
 
         // Rats
         public static bool cfgHolidayRats => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<bool>("Holiday Rats").Value;
-        public static bool cfgUseJermaRats => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<bool>("Use Jerma Rats").Value;
-        public static float cfgDefenseRadius => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<float>("Defense Radius").Value;
-        public static float cfgTimeToIncreaseThreat => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<float>("Time to Increase Threat").Value;
-        public static int cfgThreatToAttackPlayer => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<int>("Threat to Attack Player").Value;
-        public static int cfgHighPlayerThreat => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<int>("High Player Threat").Value;
-        public static int cfgThreatToAttackEnemy => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<int>("Threat to Attack Enemy").Value;
-        public static float cfgSwarmRadius => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<float>("Swarm Radius").Value;
-        public static int cfgMaxDefenseRats => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<int>("Maximum Defense Rats").Value;
-        public static float cfgDistanceNeededToLoseRats => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<float>("Distance Needed to Lose Rats").Value;
-        public static int cfgEnemyHitsToDoDamage => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<int>("Enemy Hits to Do Damage").Value;
-        public static int cfgPlayerFoodAmount => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<int>("Player Food Amount").Value;
-        public static int cfgRatDamage => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<int>("Rat Damage").Value;
-        public static float cfgSqueakChance => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<float>("Squeak Chance").Value;
-        public static string cfgEnemyWhitelist => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<string>("Enemy Whitelist").Value;
-        public static bool cfgRatsTakePlayerCorpses => ContentHandler<RatsContentHandler>.Instance.Rat!.GetConfig<bool>("Rats Take Player Corpes").Value;
+        public static bool cfgUseJermaRats => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<bool>("Use Jerma Rats").Value;
+        public static int cfgThreatToAttackPlayer => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<int>("Threat to Attack Player").Value;
+        public static int cfgHighPlayerThreat => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<int>("High Player Threat").Value;
+        public static int cfgThreatToAttackEnemy => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<int>("Threat to Attack Enemy").Value;
+        public static float cfgSwarmRadius => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<float>("Swarm Radius").Value;
+        public static int cfgMaxDefenseRats => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<int>("Maximum Defense Rats").Value;
+        public static int cfgEnemyHitsToDoDamage => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<int>("Enemy Hits to Do Damage").Value;
+        public static int cfgPlayerFoodAmount => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<int>("Player Food Amount").Value;
+        public static float cfgSqueakChance => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<float>("Squeak Chance").Value;
+        public static string cfgEnemyWhitelist => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<string>("Enemy Whitelist").Value;
+        public static bool cfgRatsTakePlayerCorpses => ContentHandler<RatsContentHandler>.Instance.RatNest!.GetConfig<bool>("Rats Take Player Corpes").Value;
 
         // RatPoison
         public static float cfgRatPoisonMaxFluid => ContentHandler<RatsContentHandler>.Instance.RatPoison!.GetConfig<float>("Max Fluid").Value;
@@ -54,23 +50,14 @@ namespace Rats
     }
 }
 /*
-// Performance
 configMaxRats = Config.Bind("Performance", "Maximum Rats", 50, "The maximum number of rats that can be on the map. Lowering this can improve performance.");
 configAIIntervalTime = Config.Bind("Performance", "AI Interval Time", 0.3f, "The interval in which rats will update their AI (Changing position, doing complex calculations, etc). Setting this higher can improve performance but can also make the rats freeze in place more often while lower values makes them constantly moving but can decrease performance. Funnily enough the rats move more rat like when this is set higher.");
 configBatchGroupCount = Config.Bind("Performance", "Batch Group Count", 5, "The amount of groups the rats will be split into to update. (if you dont know what this means, just leave this config alone)");
 configBatchUpdateInterval = Config.Bind("Performance", "Batch Update Interval", 0.2f, "The amount of time between each group update. (if you dont know what this means, just leave this config alone)");
-
-// Nest
-configSewerGrateSpawnWeightCurve = Config.Bind("Nest", "Spawn Weight Curve", "Vanilla - 0,0 ; 1,2 | Custom - 0,0 ; 1,2", "The MoonName - CurveSpawnWeight for the SewerGrate(Rat nest).");
-configMinRatSpawnTime = Config.Bind("Nest", "Minimum Rat Spawn Time", 5, "The minimum time in seconds before a rat can spawn from the nest.");
-configMaxRatSpawnTime = Config.Bind("Nest", "Maximum Rat Spawn Time", 20, "The maximum time in seconds before a rat can spawn from the nest.");
 configFoodToSpawnRat = Config.Bind("Nest", "Food Required to Spawn Rat", 5, "The amount of food needed in the nest to spawn a new rat.");
 configEnemyFoodPerHPPoint = Config.Bind("Nest", "Food Per HP Point", 10, "How much food points one HP will equal for enemies. ex: if 10, thumper will give 40 food points.");
-
-// Rats
 configHolidayRats = Config.Bind("General", "Holiday Rats", false, "Rats spawn with a santa hat");
 configUseJermaRats = Config.Bind("Rats", "Use Jerma Rats", false, "Uses a lower quality model for the rats with no animations. Can help with performance if enabled.");
-configDefenseRadius = Config.Bind("Rats", "Defense Radius", 5f, "The radius in which defense rats protect the nest.");
 configTimeToIncreaseThreat = Config.Bind("Rats", "Time to Increase Threat", 2.5f, "The time needed to add a threat point for a player when they are in line of sight of the rat.");
 configThreatToAttackPlayer = Config.Bind("Rats", "Threat to Attack Player", 100, "The threat level at which rats begin attacking the player.");
 configHighPlayerThreat = Config.Bind("Rats", "High Player Threat", 250, "The threat level at which rats will call for the rat king and the rat king will attack players.");

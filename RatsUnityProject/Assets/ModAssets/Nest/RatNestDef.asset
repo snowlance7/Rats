@@ -13,6 +13,83 @@ MonoBehaviour:
   m_Name: RatNestDef
   m_EditorClassIdentifier: 
   _configEntries:
+  - settingName: Max Rats
+    DynamicConfigType: 1
+    defaultString: 
+    defaultInt: 50
+    defaultFloat: 0
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: The maximum number of rats that can be on the map. Lowering this
+      can improve performance.
+  - settingName: AI Interval Time
+    DynamicConfigType: 2
+    defaultString: 
+    defaultInt: 10
+    defaultFloat: 0.3
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: The interval in which rats will update their AI (Changing position,
+      doing complex calculations, etc). Setting this higher can improve performance
+      but can also make the rats freeze in place more often while lower values makes
+      them constantly moving but can decrease performance. Funnily enough the rats
+      move more rat like when this is set higher.
+  - settingName: 
+    DynamicConfigType: 3
+    defaultString: 
+    defaultInt: 10
+    defaultFloat: 0
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: 
+  - settingName: 
+    DynamicConfigType: 3
+    defaultString: 
+    defaultInt: 10
+    defaultFloat: 0
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: 
   - settingName: Rat Spawn Time
     DynamicConfigType: 4
     defaultString: 

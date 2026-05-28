@@ -24,14 +24,12 @@ namespace Rats
 
         public RatsContentHandler(DuskMod mod) : base(mod)
         {
-            RegisterContent("rat", out Rat);
-            RegisterContent("rat_king", out Rat);
-            RegisterContent("rat_nest", out Rat);
-            RegisterContent("glue_board", out Rat);
-            RegisterContent("glue_trap", out Rat);
-            RegisterContent("box_of_snap_traps", out Rat);
-            RegisterContent("rat_crown", out Rat);
-            RegisterContent("rat_poison", out Rat);
+            RegisterContent("rat_nest", out RatNest);
+            RegisterContent("glue_board", out GlueBoard);
+            RegisterContent("glue_trap", out GlueTrap);
+            RegisterContent("box_of_snap_traps", out BoxOfSnapTraps);
+            RegisterContent("rat_crown", out RatCrown);
+            RegisterContent("rat_poison", out RatPoison);
         }
     }
 

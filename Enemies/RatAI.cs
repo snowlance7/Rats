@@ -1,16 +1,12 @@
-﻿using BepInEx.Logging;
+﻿using Dawn.Utils;
 using GameNetcodeStuff;
+using SnowyLib;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.AI;
+using static Rats.Configs;
 using static Rats.Plugin;
 using static Rats.RatNest;
-using static Rats.Configs;
-using SnowyLib;
-using Dawn.Utils;
-using System;
 
 namespace Rats
 {
@@ -33,16 +29,9 @@ namespace Rats
         public SmartAgentNavigator nav = null!;
         [SerializeField] bool isJermaRat;
 
-        //public NetworkVariable<int> Health = new NetworkVariable<int>(value: 100, writePerm: NetworkVariableWritePermission.Owner, readPerm: NetworkVariableReadPermission.Everyone);
-
-        [HideInInspector]
-        public bool isDead;
+        [HideInInspector] public bool isDead;
 
         GameObject? targetNode;
-        bool moveTowardsDestination;
-        Vector3 destination;
-
-        bool isOutside;
 
         bool inSpecialAnimation;
         State previousBehaviorState;
@@ -71,7 +60,7 @@ namespace Rats
         GameObject? swarmTarget;
         Vector3 swarmTargetPos;
 
-        bool rallyRat;
+        //bool rallyRat;
 
         int health = 1;
 
@@ -83,28 +72,36 @@ namespace Rats
         }
 
         // Config Values // TODO: Set up configs
-        const float swarmRadiusAttacking = 3f;
 
-        const float AIIntervalTime = 0.2f;
         private Vector3 lastPosition;
         private float currentSpeed;
-        private NavMeshPath path1;
-        const float defenseRadius = 5f;
+
         const float timeToIncreaseThreat = 3f;
-        const int threatToAttackPlayer = 100;
-        const int threatToAttackEnemy = 50;
-        const int highPlayerThreat = 250;
-        const int enemyHitsToDoDamage = 10;
-        const int playerFoodAmount = 30;
-        const float squeakChance = 0.1f;
         const float maxIdleTime = 1f;
-        const float swarmRadiusDefault = 6f;
+        const float distanceNeededToLoseRats = 20f;
+
+        float swarmRadiusAttacking = 3f;
+        int threatToAttackPlayer = 100;
+        int threatToAttackEnemy = 50;
+        int highPlayerThreat = 250;
+        int enemyHitsToDoDamage = 10;
+        int playerFoodAmount = 30;
+        float squeakChance = 0.1f;
+        float swarmRadiusDefault = 6f;
 
         public void Start()
         {
             hashDie = Animator.StringToHash("die");
             hashSpeed = Animator.StringToHash("speed");
             christmasHat.SetActive(cfgHolidayRats);
+            swarmRadiusAttacking = cfgSwarmRadius;
+            threatToAttackPlayer = cfgThreatToAttackPlayer;
+            threatToAttackEnemy = cfgThreatToAttackEnemy;
+            highPlayerThreat = cfgHighPlayerThreat;
+            enemyHitsToDoDamage = cfgEnemyHitsToDoDamage;
+            playerFoodAmount = cfgPlayerFoodAmount;
+            squeakChance = cfgSqueakChance;
+
             logger.LogDebug($"Rat spawned");
         }
 
@@ -235,7 +232,7 @@ namespace Rats
 
                     if (swarmTarget.TryGetComponentInChildren(out PlayerControllerB player))
                     {
-                        if (!player.isPlayerControlled || (timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 2f && Vector3.Distance(transform.position, player.transform.position) > cfgDistanceNeededToLoseRats))
+                        if (!player.isPlayerControlled || (timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 2f && Vector3.Distance(transform.position, player.transform.position) > distanceNeededToLoseRats))
                         {
                             SwitchToBehaviorClientRpc((int)State.ReturnToNest);
                             return;
@@ -244,7 +241,7 @@ namespace Rats
                     else if (swarmTarget.TryGetComponentInChildren(out EnemyAICollisionDetect enemyAICollision))
                     {
                         EnemyAI enemy = enemyAICollision.mainScript;
-                        if (enemy.isEnemyDead || (timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 1f && Vector3.Distance(transform.position, enemy.transform.position) > cfgDistanceNeededToLoseRats))
+                        if (enemy.isEnemyDead || (timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 1f && Vector3.Distance(transform.position, enemy.transform.position) > distanceNeededToLoseRats))
                         {
                             SwitchToBehaviorClientRpc((int)State.ReturnToNest);
                             return;
@@ -290,7 +287,6 @@ namespace Rats
             {
                 DeadBodyInfo deadBody = player.deadBody;
                 if (deadBody == null || deadBody.deactivated) { continue; }
-                path1 = new NavMeshPath();
                 if (CheckLineOfSightForPosition(deadBody.grabBodyObject.transform.position, 60, 60, 5) && nav.CanPathToPoint(deadBody.grabBodyObject.transform.position))
                 {
                     targetPlayer = deadBody.playerScript;
@@ -407,14 +403,14 @@ namespace Rats
             PlayerControllerB? player = other.gameObject.GetComponent<PlayerControllerB>();
             if (!PlayerIsTargetable(player)) { return; }
             if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.name == "RatCrownItem" && !player.currentlyHeldObjectServer.isPocketed) { return; }
-            rallyRat = false;
+            //rallyRat = false;
             if (currentBehaviorState == State.Swarming) // TODO: Test this
             {
                 RoundManager.PlayRandomClip(audioSource, attackSFX);
 
                 if (player != localPlayer) { return; }
                 int deathAnim = UnityEngine.Random.Range(0, 2) == 1 ? 7 : 0;
-                player.DamagePlayer(cfgRatDamage, true, true, CauseOfDeath.Mauling, deathAnim);
+                player.DamagePlayer(1, true, true, CauseOfDeath.Mauling, deathAnim);
             }
         }
 
@@ -682,18 +678,31 @@ namespace Rats
         }
     }
 
-    public static class ComponentExtensions
+    public class RatAICollisionDetect : MonoBehaviour, IHittable
     {
-        public static bool TryGetComponentInChildren<T>(this GameObject go, out T component) where T : Component
+        public RatAI mainScript = null!;
+
+        private void OnTriggerStay(Collider other)
         {
-            component = go.GetComponentInChildren<T>();
-            return component != null;
+            if (other.CompareTag("Player"))
+            {
+                mainScript.OnCollideWithPlayer(other);
+            }
+            else if (other.CompareTag("Enemy"))
+            {
+                EnemyAICollisionDetect? enemyCollision = other.gameObject.GetComponent<EnemyAICollisionDetect>();
+                if (enemyCollision != null)
+                {
+                    mainScript.OnCollideWithEnemy(other, enemyCollision.mainScript);
+                }
+            }
         }
 
-        public static bool TryGetComponentInChildren<T>(this Component comp, out T component) where T : Component
+        bool IHittable.Hit(int force, Vector3 hitDirection, PlayerControllerB? playerWhoHit, bool playHitSFX, int hitID)
         {
-            component = comp.GetComponentInChildren<T>();
-            return component != null;
+            int id = playerWhoHit != null ? (int)playerWhoHit.actualClientId : -1;
+            mainScript.HitEnemyServerRpc(force, id);
+            return true;
         }
     }
 }

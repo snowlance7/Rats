@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static Rats.Plugin;
+using static Rats.Configs;
 
 namespace Rats
 {
@@ -21,13 +22,19 @@ namespace Rats
         int batchIndex = 0;
 
         // Configs
-        const float updateInterval = 0.2f;
-        const int enemyFoodPerHPPoint = 10;
+        float updateInterval;
+        int enemyFoodPerHPPoint;
 
         public static void Init()
         {
             if (Instance != null) { return; }
             Instance = GameObject.Instantiate(new GameObject("RatManager"), Vector3.zero, Quaternion.identity, RoundManager.Instance.mapPropsContainer.transform).AddComponent<RatManager>();
+        }
+
+        public void Start()
+        {
+            updateInterval = cfgBatchUpdateInterval;
+            enemyFoodPerHPPoint = cfgEnemyFoodPerHPPoint;
         }
 
         public void OnDestroy()
