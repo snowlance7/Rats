@@ -32,11 +32,30 @@ MonoBehaviour:
     defaultColor: {r: 0, g: 0, b: 0, a: 0}
     Description: The maximum number of rats that can be on the map. Lowering this
       can improve performance.
-  - settingName: AI Interval Time
+  - settingName: Batch Group Count
+    DynamicConfigType: 1
+    defaultString: 
+    defaultInt: 5
+    defaultFloat: 0
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: The amount of groups the rats will be split into to update. (if
+      you dont know what this means, just leave this config alone)
+  - settingName: Batch Update Interval
     DynamicConfigType: 2
     defaultString: 
     defaultInt: 10
-    defaultFloat: 0.3
+    defaultFloat: 0.2
     defaultBool: 0
     defaultBoundedRange:
       <Min>k__BackingField: 5
@@ -49,47 +68,8 @@ MonoBehaviour:
       m_RotationOrder: 0
     defaultVector3: {x: 0, y: 0, z: 0}
     defaultColor: {r: 0, g: 0, b: 0, a: 0}
-    Description: The interval in which rats will update their AI (Changing position,
-      doing complex calculations, etc). Setting this higher can improve performance
-      but can also make the rats freeze in place more often while lower values makes
-      them constantly moving but can decrease performance. Funnily enough the rats
-      move more rat like when this is set higher.
-  - settingName: 
-    DynamicConfigType: 3
-    defaultString: 
-    defaultInt: 10
-    defaultFloat: 0
-    defaultBool: 0
-    defaultBoundedRange:
-      <Min>k__BackingField: 5
-      <Max>k__BackingField: 20
-    defaultAnimationCurve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 0
-      m_PostInfinity: 0
-      m_RotationOrder: 0
-    defaultVector3: {x: 0, y: 0, z: 0}
-    defaultColor: {r: 0, g: 0, b: 0, a: 0}
-    Description: 
-  - settingName: 
-    DynamicConfigType: 3
-    defaultString: 
-    defaultInt: 10
-    defaultFloat: 0
-    defaultBool: 0
-    defaultBoundedRange:
-      <Min>k__BackingField: 5
-      <Max>k__BackingField: 20
-    defaultAnimationCurve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 0
-      m_PostInfinity: 0
-      m_RotationOrder: 0
-    defaultVector3: {x: 0, y: 0, z: 0}
-    defaultColor: {r: 0, g: 0, b: 0, a: 0}
-    Description: 
+    Description: The amount of time between each group update. (if you dont know
+      what this means, just leave this config alone)
   - settingName: Rat Spawn Time
     DynamicConfigType: 4
     defaultString: 
@@ -109,7 +89,7 @@ MonoBehaviour:
     defaultColor: {r: 0, g: 0, b: 0, a: 0}
     Description: The min/max time in seconds before a rat can spawn from a nest after
       the last rat was spawned
-  - settingName: Food Required To Spawn Rat
+  - settingName: Food Required to Spawn Rat
     DynamicConfigType: 1
     defaultString: 
     defaultInt: 5
@@ -164,6 +144,207 @@ MonoBehaviour:
     defaultVector3: {x: 0, y: 0, z: 0}
     defaultColor: {r: 0, g: 0, b: 0, a: 0}
     Description: Rats spawn with a santa hat
+  - settingName: Use Jerma Rats
+    DynamicConfigType: 3
+    defaultString: 
+    defaultInt: 10
+    defaultFloat: 0
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: Uses a lower quality model for the rats with no animations. Can
+      help with performance if enabled.
+  - settingName: Threat to Attack Player
+    DynamicConfigType: 1
+    defaultString: 
+    defaultInt: 100
+    defaultFloat: 0
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: The threat level at which rats begin attacking the player
+  - settingName: High Player Threat
+    DynamicConfigType: 1
+    defaultString: 
+    defaultInt: 200
+    defaultFloat: 0
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: The threat level at which rats will form kill squads to attack players
+  - settingName: Threat to Attack Enemy
+    DynamicConfigType: 1
+    defaultString: 
+    defaultInt: 50
+    defaultFloat: 0
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: The threat level at which rats begin attacking other enemies
+  - settingName: Swarm Radius
+    DynamicConfigType: 2
+    defaultString: 
+    defaultInt: 10
+    defaultFloat: 3
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: The radius in which rats swarm around their target
+  - settingName: Maximum Defense Rats
+    DynamicConfigType: 1
+    defaultString: 
+    defaultInt: 10
+    defaultFloat: 0
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: The maximum number of defense rats assigned to protect the nest
+  - settingName: Enemy Hits to Do Damage
+    DynamicConfigType: 1
+    defaultString: 
+    defaultInt: 10
+    defaultFloat: 0
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: The amount of attacks needed to do 1 shovel hit of damage to an
+      enemy. If 10, thumper will need to be attacked 40 times by a rat.
+  - settingName: Player Food Amount
+    DynamicConfigType: 1
+    defaultString: 
+    defaultInt: 30
+    defaultFloat: 0
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: How much food points a player corpse gives when brought to the nest
+  - settingName: Squeak Chance
+    DynamicConfigType: 2
+    defaultString: 
+    defaultInt: 10
+    defaultFloat: 0.01
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: The chance a rat will squeak when completing a run cycle (every
+      second)
+  - settingName: Rats Take Player Corpses
+    DynamicConfigType: 3
+    defaultString: 
+    defaultInt: 10
+    defaultFloat: 0
+    defaultBool: 1
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: If this is true, allows rats to drag players to their nest to eat
+  - settingName: Enable Infestation System
+    DynamicConfigType: 3
+    defaultString: 
+    defaultInt: 10
+    defaultFloat: 0
+    defaultBool: 1
+    defaultBoundedRange:
+      <Min>k__BackingField: 5
+      <Max>k__BackingField: 20
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: Enables the infestation system
   _tags: []
   <Key>k__BackingField:
     _namespace: rats
@@ -177,7 +358,7 @@ MonoBehaviour:
     spawnWithBackToWall: 0
     spawnWithBackFlushAgainstWall: 0
     requireDistanceBetweenSpawns: 1
-    disallowSpawningNearEntrances: 0
+    disallowSpawningNearEntrances: 1
     allowInMineshaft: 1
   <OutsideMapObjectSettings>k__BackingField:
     spawnFacingAwayFromWall: 0
@@ -207,7 +388,7 @@ MonoBehaviour:
         outWeight: 0
       - serializedVersion: 3
         time: 1
-        value: 3
+        value: 4
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -234,7 +415,7 @@ MonoBehaviour:
         outWeight: 0
       - serializedVersion: 3
         time: 1
-        value: 3
+        value: 5
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -950,7 +1131,7 @@ MonoBehaviour:
   <InsidePrioritiseMoonConfig>k__BackingField: 1
   <CreateInsideCurveSpawnWeightsConfig>k__BackingField: 1
   <IsOutsideHazard>k__BackingField: 0
-  <CreateOutsideHazardConfig>k__BackingField: 1
+  <CreateOutsideHazardConfig>k__BackingField: 0
   <OutsideMoonCurveSpawnWeights>k__BackingField: []
   <OutsideInteriorCurveSpawnWeights>k__BackingField: []
   <OutsidePrioritiseMoonConfig>k__BackingField: 0

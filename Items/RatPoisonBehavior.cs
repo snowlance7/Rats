@@ -9,7 +9,7 @@ using static Rats.Configs;
 
 namespace Rats.Items
 {
-    internal class RatPoisonBehavior : PhysicsProp
+    internal class RatPoisonBehavior : PhysicsProp // TODO: Make it act like weed killer and kill cadaver weeds
     {
         public AudioSource audioSource = null!;
         public ParticleSystem particleSystem = null!;
@@ -24,6 +24,50 @@ namespace Rats.Items
         float currentFluid;
 
         float pourRate;
+
+        public void Awake()
+        {
+            var i = itemProperties;
+            i.itemName = "Rat Poison";
+            i.twoHanded = false;
+            i.twoHandedAnimation = false;
+            i.disableHandsOnWall = false;
+            i.canBeGrabbedBeforeGameStart = true;
+            i.disallowUtilitySlot = false;
+            i.weight = 1.2f;
+            i.itemIsTrigger = false;
+            i.holdButtonUse = true;
+            i.isConductiveMetal = false;
+
+            i.requiresBattery = false;
+            i.batteryUsage = 0;
+            i.automaticallySetUsingPower = false;
+
+            i.grabAnim = "";
+            i.useAnim = "";
+            i.pocketAnim = "";
+            i.throwAnim = "";
+            i.grabAnimationTime = 1;
+
+            i.syncGrabFunction = false;
+            i.syncUseFunction = false;
+            i.syncDiscardFunction = false;
+            i.syncInteractLRFunction = false;
+
+            i.saveItemVariable = true;
+
+            i.isDefensiveWeapon = false;
+            i.toolTips = ["Pour [LMB]"];
+            i.verticalOffset = 0;
+            i.floorYOffset = 90;
+            i.allowDroppingAheadOfPlayer = true;
+            i.restingRotation = new Vector3(0, 0, 0);
+            i.rotationOffset = new Vector3(180, 180, 60);
+            i.positionOffset = new Vector3(-0.65f, 0.55f, 0f);
+            i.meshOffset = false;
+            i.usableInSpecialAnimations = false;
+            i.canBeInspected = false;
+        }
 
         public override void Start()
         {

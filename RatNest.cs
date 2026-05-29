@@ -1,71 +1,79 @@
 ﻿using BepInEx.Logging;
+using Dawn;
+using Dawn.Utils;
+using GameNetcodeStuff;
+using SnowyLib;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using static Rats.Plugin;
-using static Rats.RatManager;
 using static Rats.Configs;
-using SnowyLib;
+using static Rats.Plugin;
 
 namespace Rats
 {
     public class RatNest : NetworkBehaviour
     {
-#pragma warning disable CS8618
-        public GameObject RatPrefab;
-        public GameObject JermaRatPrefab;
+        public GameObject ratPrefab = null!;
 
-        public GameObject RatNestMeshObj;
-        public ScanNodeProperties scanNode;
-        public MeshRenderer voidPlaneRenderer;
+        public GameObject jermaRatPrefab = null!;
 
-        public GameObject PoisonLiquidPlaneObj;
-        public Material YellowMat;
-        public ParticleSystem GasParticleSystem;
+        public GameObject meshObj = null!;
 
-        public Animator animator;
-        public AudioSource audioSource;
-#pragma warning restore CS8618
+        public ScanNodeProperties scanNode = null!;
 
-        readonly float poisonUpOffset = 0.0219f;
+        public MeshRenderer voidPlaneRenderer = null!;
 
-        Vector3 poisonPlaneStart;
-        Vector3 poisonPlaneEnd;
+        public GameObject poisonLiquidPlaneObj = null!;
 
-        public static HashSet<RatNest> nests = [];
-        public static List<RatNest> nestsOpen => nests.Where(x => x.IsOpen).ToList();
+        public Material yellowMat = null!;
 
-        public List<RatAI> DefenseRats = [];
+        public ParticleSystem gasParticleSystem = null!;
 
-        public bool IsOpen = true;
+        public Animator animator = null!;
+
+        public AudioSource audioSource = null!;
+
+        public static RatNest? mainInstance => nests.FirstOrDefault();
+
+        public bool isMainInstance => mainInstance != null && mainInstance == this;
+
+        public static HashSet<RatNest> nests { get; private set; } = [];
+
+        public static List<RatNest> nestsOpen => nests.Where(x => x.isOpen).ToList();
+
+        public static Dictionary<EnemyAI, int> enemyHitCount = [];
+        public static Dictionary<PlayerControllerB, int> playerThreatCounter = [];
+        public static Dictionary<EnemyAI, int> enemyThreatCounter = [];
+        public static Dictionary<EnemyAI, int> enemyFoodPointsLeft = [];
+
+        public bool isOpen = true;
 
         float timeSinceSpawnRat;
         float nextRatSpawnTime;
+
         int food;
 
         public float poisonInNest;
 
-        // Configs
-        const float minRatSpawnTime = 10f;
-        const float maxRatSpawnTime = 30f;
-        const int foodToSpawnRat = 5;
-        const int maxRats = 50;
-        const float poisonToCloseNest = 1f;
-        const float ratKingSummonChancePoison = 0.5f;
-        const float ratKingSummonChanceNests = 0.75f;
+        Vector3 poisonPlaneStart;
+
+        Vector3 poisonPlaneEnd;
+
+        const float poisonUpOffset = 0.0219f;
+
+        int batchIndex = 0;
+        public HashSet<RatAI> DefenseRats = [];
 
         public void Start()
         {
             logger.LogDebug("Rat nest spawned at: " + transform.position);
 
-            poisonPlaneStart = PoisonLiquidPlaneObj.transform.position;
+            poisonPlaneStart = poisonLiquidPlaneObj.transform.position;
             poisonPlaneEnd = poisonPlaneStart + (Vector3.up * poisonUpOffset);
 
-            nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
-
-            RatManager.Init();
+            nextRatSpawnTime = cfgRatSpawnTime.GetRandomInRange(Utils.randomLocal);
         }
 
         public override void OnNetworkSpawn()
@@ -78,7 +86,7 @@ namespace Rats
         {
             if (nests.Count <= 1)
             {
-                //enemyFoodPointsLeft.Clear();
+                LevelInfestations.UpdateLevelInfestation();
 
                 if (IsServer)
                 {
@@ -87,6 +95,11 @@ namespace Rats
                         rat?.NetworkObject?.Despawn(destroy: true);
                     }
                 }
+
+                enemyHitCount.Clear();
+                playerThreatCounter.Clear();
+                enemyThreatCounter.Clear();
+                enemyFoodPointsLeft.Clear();
             }
 
             nests.Remove(this);
@@ -99,22 +112,22 @@ namespace Rats
 
             if (!IsServer) { return; }
 
-            if (IsOpen)
+            if (isOpen)
             {
-                if (RatAI.Instances.Count < maxRats)
+                if (RatAI.Instances.Count < cfgMaxRats)
                 {
                     if (timeSinceSpawnRat > nextRatSpawnTime)
                     {
                         timeSinceSpawnRat = 0f;
-                        nextRatSpawnTime = UnityEngine.Random.Range(minRatSpawnTime, maxRatSpawnTime);
+                        nextRatSpawnTime = cfgRatSpawnTime.GetRandomInRange(Utils.randomLocal);
 
                         SpawnRat();
                     }
                 }
 
-                if (poisonInNest >= poisonToCloseNest)
+                if (poisonInNest >= cfgPoisonToCloseNest)
                 {
-                    IsOpen = false;
+                    isOpen = false;
                     CloseNestClientRpc();
 
                     //SpawnRatKing(ratKingSummonChancePoison);
@@ -125,15 +138,50 @@ namespace Rats
                     }
                 }
             }
+
+            if (isMainInstance)
+            {
+
+
+                // Run one batch per interval
+                if (Time.frameCount % Mathf.CeilToInt(cfgBatchUpdateInterval / Time.deltaTime) == 0)
+                {
+                    //logger.LogDebug("Running batch");
+                    RunBatch();
+                }
+            }
+        }
+
+        void RunBatch()
+        {
+            List<RatAI> instances = RatAI.Instances.Where(x => !x.isDead).ToList();
+            int total = instances.Count;
+            if (total == 0) return;
+
+            // How many to process per batch (spread evenly)
+            int batchSize = Mathf.Max(1, total / Mathf.CeilToInt(1f / cfgBatchUpdateInterval));
+
+            for (int i = 0; i < batchSize; i++)
+            {
+                RatAI instance = instances[batchIndex];
+                if (instance != null)
+                {
+                    instance.DoAIInterval();
+                }
+
+                batchIndex++;
+                if (batchIndex >= total)
+                    batchIndex = 0; // wrap around
+            }
         }
 
         public void AddFood(int amount = 1)
         {
-            if (!IsServerOrHost) { logger.LogError("Only server can call functions in RatNest"); return; }
+            if (!IsServer) { logger.LogError("Only server can call functions in RatNest"); return; }
             food += amount;
 
-            int ratsToSpawn = food / foodToSpawnRat;
-            int remainingFood = food % foodToSpawnRat;
+            int ratsToSpawn = food / cfgFoodToSpawnRat;
+            int remainingFood = food % cfgFoodToSpawnRat;
 
             food = remainingFood;
             SpawnRats(ratsToSpawn);
@@ -143,9 +191,9 @@ namespace Rats
         {
             if (!Utils.testing && (StartOfRound.Instance.inShipPhase || StartOfRound.Instance.shipIsLeaving)) { return; }
 
-            if (RatAI.Instances.Count < maxRats)
+            if (RatAI.Instances.Count < cfgMaxRats)
             {
-                GameObject prefab = cfgUseJermaRats ? JermaRatPrefab : RatPrefab;
+                GameObject prefab = cfgUseJermaRats ? jermaRatPrefab : ratPrefab;
 
                 Vector3 position = RoundManager.Instance.GetNavMeshPosition(transform.position);
 
@@ -178,9 +226,9 @@ namespace Rats
             float closestDistance = Mathf.Infinity;
             RatNest? closestNest = null;
 
-            foreach (var nest in RatNest.nests)
+            foreach (var nest in nests)
             {
-                if (nest == null || !nest.IsOpen) { continue; }
+                if (nest == null || !nest.isOpen) { continue; }
                 float distance = Vector3.Distance(position, nest.transform.position);
                 if (distance >= closestDistance) { continue; }
                 if (checkForPath && !Utils.CanPathToPoint(position, nest.transform.position)) { continue; }
@@ -189,6 +237,19 @@ namespace Rats
             }
 
             return closestNest;
+        }
+
+        public static void AddEnemyFoodAmount(EnemyAI enemy) // TODO: add enemy blacklist/whitelist
+        {
+            int maxHP = enemy.enemyType.enemyPrefab.GetComponent<EnemyAI>().enemyHP;
+            int foodAmount = maxHP * cfgEnemyFoodPerHPPoint;
+            enemyFoodPointsLeft.Add(enemy, foodAmount);
+        }
+
+        public void OnNestClosed() // Animation TODO
+        {
+            if (!IsServer) { return; }
+            NetworkObject.Despawn(destroy: true);
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -201,19 +262,19 @@ namespace Rats
         [ClientRpc]
         void AddPoisonClientRpc(float amount)
         {
-            voidPlaneRenderer.material = YellowMat;
-            poisonInNest = Mathf.Min(poisonInNest + amount, poisonToCloseNest);
-            float t = Mathf.Clamp01(poisonInNest / poisonToCloseNest);
+            voidPlaneRenderer.material = yellowMat;
+            poisonInNest = Mathf.Min(poisonInNest + amount, cfgPoisonToCloseNest);
+            float t = Mathf.Clamp01(poisonInNest / cfgPoisonToCloseNest);
 
-            PoisonLiquidPlaneObj.transform.position = Vector3.Lerp(poisonPlaneStart, poisonPlaneEnd, t);
+            poisonLiquidPlaneObj.transform.position = Vector3.Lerp(poisonPlaneStart, poisonPlaneEnd, t);
             //logger.LogDebug("PoisonInNest: " + poisonInNest);
         }
 
         [ClientRpc]
         public void CloseNestClientRpc()
         {
-            IsOpen = false;
-            GasParticleSystem.Play();
+            isOpen = false;
+            gasParticleSystem.Play();
             animator.SetTrigger("destroy");
             scanNode.gameObject.SetActive(false);
             audioSource.Play();

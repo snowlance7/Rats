@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 466683445, guid: 1f73291e6cf64124796e048d841e7d1f, type: 3}
+  m_Name: BoxOfSnapTrapsDef
+  m_EditorClassIdentifier: 
+  _configEntries:
+  - settingName: Snap Trap Amount
+    DynamicConfigType: 1
+    defaultString: 
+    defaultInt: 100
+    defaultFloat: 0
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 0
+      <Max>k__BackingField: 0
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: The amount of snap traps that come with a Box Of Snap Traps
+  - settingName: Despawn Time
+    DynamicConfigType: 2
+    defaultString: 10
+    defaultInt: 10
+    defaultFloat: 10
+    defaultBool: 0
+    defaultBoundedRange:
+      <Min>k__BackingField: 0
+      <Max>k__BackingField: 0
+    defaultAnimationCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    defaultVector3: {x: 0, y: 0, z: 0}
+    defaultColor: {r: 0, g: 0, b: 0, a: 0}
+    Description: The time in seconds for snap traps to despawn after being triggered
+  _tags: []
+  <Key>k__BackingField:
+    _namespace: rats
+    _key: box_of_snap_traps
+  <Item>k__BackingField: {fileID: 11400000, guid: 7a20fda0131466c4c8d980bd8fd3772d,
+    type: 2}
+  <ShopItemPreset>k__BackingField:
+    <OrderRequestNode>k__BackingField: {fileID: 0}
+    <OrderReceiptNode>k__BackingField: {fileID: 0}
+    <ItemInfoNode>k__BackingField: {fileID: 0}
+  <TerminalPredicate>k__BackingField: {fileID: 0}
+  <PricingStrategy>k__BackingField: {fileID: 0}
+  <MoonSpawnWeightsConfig>k__BackingField: []
+  <InteriorSpawnWeightsConfig>k__BackingField: []
+  <WeatherSpawnWeightsConfig>k__BackingField: []
+  <RouteSpawnWeightsConfig>k__BackingField: []
+  <GenerateSpawnWeightsConfig>k__BackingField: 1
+  <IsScrap>k__BackingField: 0
+  <GenerateScrapConfig>k__BackingField: 0
+  <IsShopItem>k__BackingField: 1
+  <GenerateShopItemConfig>k__BackingField: 1
+  <Cost>k__BackingField: 20
+  <GenerateDisableUnlockConfig>k__BackingField: 1
+  <GenerateDisablePricingStrategyConfig>k__BackingField: 1
+  <MoonSpawnWeights>k__BackingField: 
+  <InteriorSpawnWeights>k__BackingField: 
+  <WeatherSpawnWeights>k__BackingField: 

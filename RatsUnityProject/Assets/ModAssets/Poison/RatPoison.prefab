@@ -5234,11 +5234,11 @@ MonoBehaviour:
   grabbableToEnemies: 1
   hasBeenHeld: 0
   rotateObject: 0
-  ItemAudio: {fileID: 2429690724112240935}
+  audioSource: {fileID: 2429690724112240935}
   particleSystem: {fileID: 4213189863407211916}
-  ItemAnimator: {fileID: 4059404602660131355}
-  PourDirection: {fileID: 7233857064835898484}
-  ScanNode: {fileID: 6186879607787624003}
+  animator: {fileID: 4059404602660131355}
+  pourDirection: {fileID: 7233857064835898484}
+  scanNode: {fileID: 6186879607787624003}
   lastPlayerHeldBy: {fileID: 0}
 --- !u!1 &9128391430725569531
 GameObject:

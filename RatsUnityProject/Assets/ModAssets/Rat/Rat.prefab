@@ -615,7 +615,6 @@ GameObject:
   - component: {fileID: 5137645381882760009}
   - component: {fileID: 4993871470383950864}
   - component: {fileID: 3264556760181182119}
-  - component: {fileID: 6221543130595581161}
   - component: {fileID: 7761012223187460265}
   - component: {fileID: 2843975760095451466}
   m_Layer: 19
@@ -743,20 +742,6 @@ MonoBehaviour:
   InLocalSpace: 0
   Interpolate: 1
   SlerpPosition: 0
---- !u!114 &6221543130595581161
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2896751805717247731}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  TransitionStateInfoList: []
-  m_Animator: {fileID: 4993871470383950864}
 --- !u!114 &7761012223187460265
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1071,7 +1056,7 @@ GameObject:
   - component: {fileID: 6947988526352428978}
   - component: {fileID: 44013637276788213}
   - component: {fileID: 4664923662712959394}
-  - component: {fileID: 904749788954566899}
+  - component: {fileID: 7497845131243671748}
   m_Layer: 19
   m_Name: Collision
   m_TagString: Enemy
@@ -1142,7 +1127,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &904749788954566899
+--- !u!114 &7497845131243671748
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1151,7 +1136,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5627499659381206636}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -819815532, guid: e20c07124ca5124418fc75f04e11df23, type: 3}
+  m_Script: {fileID: 1206251218, guid: e20c07124ca5124418fc75f04e11df23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   mainScript: {fileID: 7761012223187460265}
@@ -1766,7 +1751,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 50
+  MaxDistance: 20
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0

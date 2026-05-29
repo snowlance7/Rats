@@ -12,6 +12,14 @@ namespace Rats.Items
         // Configs
         int snapTrapAmount;
 
+        public void Awake()
+        {
+            itemProperties.floorYOffset = 0;
+            itemProperties.rotationOffset = new Vector3(0, 0, 0);
+            itemProperties.positionOffset = new Vector3(0f, 0f, 0f);
+            itemProperties.meshOffset = true;
+        }
+
         public override void Start()
         {
             base.Start();
@@ -27,7 +35,7 @@ namespace Rats.Items
             HUDManager.Instance.ChangeControlTipMultiple(toolTips, holdingItem: true, itemProperties);
         }
 
-        public override void ItemActivate(bool used, bool buttonDown = true)
+        public override void ItemActivate(bool used, bool buttonDown = true) // Synced TODO: Make rpcs
         {
             base.ItemActivate(used, buttonDown);
 

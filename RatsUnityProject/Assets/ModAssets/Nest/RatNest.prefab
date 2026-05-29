@@ -5312,7 +5312,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 10
+  MaxDistance: 20
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -5415,18 +5415,17 @@ MonoBehaviour:
   m_Script: {fileID: -142638541, guid: e20c07124ca5124418fc75f04e11df23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RatPrefab: {fileID: 2896751805717247731, guid: a5d8e2cc3b8c6e54d883d739d3701b93,
+  ratPrefab: {fileID: 2896751805717247731, guid: a5d8e2cc3b8c6e54d883d739d3701b93,
     type: 3}
-  JermaRatPrefab: {fileID: 6222321793913088547, guid: 090ba523c1ce7b44fabba965598c43f1,
+  jermaRatPrefab: {fileID: 6222321793913088547, guid: 090ba523c1ce7b44fabba965598c43f1,
     type: 3}
-  RatNestMeshObj: {fileID: 1793159301049963090}
+  meshObj: {fileID: 1793159301049963090}
   scanNode: {fileID: 5280199281927543280}
   voidPlaneRenderer: {fileID: 1076040447062857100}
-  PoisonLiquidPlaneObj: {fileID: 7178296072266955082}
-  YellowMat: {fileID: 2100000, guid: 06b6dd1b7949db746b7bf2a866cd28d5, type: 2}
-  GasParticleSystem: {fileID: 8123415221784060668}
+  poisonLiquidPlaneObj: {fileID: 7178296072266955082}
+  yellowMat: {fileID: 2100000, guid: 06b6dd1b7949db746b7bf2a866cd28d5, type: 2}
+  gasParticleSystem: {fileID: 8123415221784060668}
   animator: {fileID: 2926140894269960458}
   audioSource: {fileID: 5240784647910806909}
-  DefenseRats: []
-  IsOpen: 1
+  isOpen: 1
   poisonInNest: 0

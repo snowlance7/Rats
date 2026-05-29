@@ -170,7 +170,7 @@ GameObject:
   - component: {fileID: 7591513946995745550}
   - component: {fileID: 725663172260872808}
   - component: {fileID: 4871789998130563807}
-  - component: {fileID: 1783817022108358483}
+  - component: {fileID: 3450911268988462438}
   m_Layer: 6
   m_Name: BoxOfSnapTraps
   m_TagString: PhysicsProp
@@ -225,13 +225,13 @@ AudioSource:
   m_GameObject: {fileID: 7030529463453190758}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300008, guid: cb9fb87df5ca10840a2a5b2dc5a4284c,
+  OutputAudioMixerGroup: {fileID: 24300008, guid: 64b08a5192e203847bb952b79319ef18,
     type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
-  Loop: 1
+  Loop: 0
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -350,7 +350,7 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 1
   AutoObjectParentSync: 0
---- !u!114 &1783817022108358483
+--- !u!114 &3450911268988462438
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -359,7 +359,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7030529463453190758}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -1139795581, guid: 6cbf90cadbe79fe4db4345d706118198, type: 3}
+  m_Script: {fileID: -1139795581, guid: e20c07124ca5124418fc75f04e11df23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   grabbable: 1
@@ -398,6 +398,7 @@ MonoBehaviour:
   reachedFloorTarget: 0
   grabbableToEnemies: 1
   hasBeenHeld: 0
-  SnapTrapPrefab: {fileID: 4662161481250524302, guid: 3d38d10395cadd54c89f8f6297b67137,
+  rotateObject: 0
+  snapTrapPrefab: {fileID: 4662161481250524302, guid: 3d38d10395cadd54c89f8f6297b67137,
     type: 3}
-  ScanNode: {fileID: 4410529030389524436}
+  scanNode: {fileID: 4410529030389524436}

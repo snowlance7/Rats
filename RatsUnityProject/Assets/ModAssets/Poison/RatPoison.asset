@@ -17,10 +17,10 @@ MonoBehaviour:
   spawnPositionTypes: []
   twoHanded: 0
   twoHandedAnimation: 0
-  disableHandsOnWall: 0
+  disableHandsOnWall: 1
   canBeGrabbedBeforeGameStart: 1
   disallowUtilitySlot: 0
-  weight: 1.2
+  weight: 1.5
   itemIsTrigger: 0
   holdButtonUse: 1
   itemSpawnsOnGround: 0
@@ -42,9 +42,9 @@ MonoBehaviour:
   pocketAnim: 
   throwAnim: 
   grabAnimationTime: 0
-  grabSFX: {fileID: 8300000, guid: d5541a937d211754c8dd7b16a9160c1f, type: 3}
+  grabSFX: {fileID: 8300000, guid: dfd31fd0a86079d41b9a68bebafcf111, type: 3}
   dropSFX: {fileID: 8300000, guid: 0591b1ae642d9834ca332b8c72e53655, type: 3}
-  pocketSFX: {fileID: 8300000, guid: d5541a937d211754c8dd7b16a9160c1f, type: 3}
+  pocketSFX: {fileID: 8300000, guid: dfd31fd0a86079d41b9a68bebafcf111, type: 3}
   throwSFX: {fileID: 0}
   syncGrabFunction: 0
   syncUseFunction: 0
@@ -56,11 +56,11 @@ MonoBehaviour:
   - Pour [LMB]
   verticalOffset: 0
   floorYOffset: 0
-  allowDroppingAheadOfPlayer: 0
-  restingRotation: {x: 0, y: 0, z: 0}
-  rotationOffset: {x: 180, y: 180, z: 60}
-  positionOffset: {x: -0.65, y: 0.55, z: 0}
-  meshOffset: 0
+  allowDroppingAheadOfPlayer: 1
+  restingRotation: {x: 0, y: 0, z: 90}
+  rotationOffset: {x: 0, y: 0, z: 0}
+  positionOffset: {x: 0, y: 0, z: 0}
+  meshOffset: 1
   meshVariants: []
   materialVariants: []
   clinkAudios: []

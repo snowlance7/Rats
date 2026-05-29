@@ -7,6 +7,7 @@ using UnityEngine;
 using static Rats.Configs;
 using static Rats.Plugin;
 using static Rats.RatNest;
+using static Dawn.Utils.SmartAgentNavigator;
 
 namespace Rats
 {
@@ -30,6 +31,10 @@ namespace Rats
         [SerializeField] bool isJermaRat;
 
         [HideInInspector] public bool isDead;
+
+        GoToDestinationResult destinationResult = GoToDestinationResult.InProgress;
+
+        public bool isOutside => nav.IsAgentOutside();
 
         GameObject? targetNode;
 
@@ -71,7 +76,7 @@ namespace Rats
             Swarming
         }
 
-        // Config Values // TODO: Set up configs
+        float swarmRadiusDefault = 6f;
 
         private Vector3 lastPosition;
         private float currentSpeed;
@@ -80,27 +85,11 @@ namespace Rats
         const float maxIdleTime = 1f;
         const float distanceNeededToLoseRats = 20f;
 
-        float swarmRadiusAttacking = 3f;
-        int threatToAttackPlayer = 100;
-        int threatToAttackEnemy = 50;
-        int highPlayerThreat = 250;
-        int enemyHitsToDoDamage = 10;
-        int playerFoodAmount = 30;
-        float squeakChance = 0.1f;
-        float swarmRadiusDefault = 6f;
-
         public void Start()
         {
             hashDie = Animator.StringToHash("die");
             hashSpeed = Animator.StringToHash("speed");
             christmasHat.SetActive(cfgHolidayRats);
-            swarmRadiusAttacking = cfgSwarmRadius;
-            threatToAttackPlayer = cfgThreatToAttackPlayer;
-            threatToAttackEnemy = cfgThreatToAttackEnemy;
-            highPlayerThreat = cfgHighPlayerThreat;
-            enemyHitsToDoDamage = cfgEnemyHitsToDoDamage;
-            playerFoodAmount = cfgPlayerFoodAmount;
-            squeakChance = cfgSqueakChance;
 
             logger.LogDebug($"Rat spawned");
         }
@@ -130,7 +119,7 @@ namespace Rats
             animator?.SetFloat(hashSpeed, currentSpeed);
             lastPosition = transform.position;
 
-            timeIdle = currentSpeed > 0.1f ? 0f : maxIdleTime + Time.deltaTime;
+            timeIdle = currentSpeed > 0.1f ? 0f : timeIdle + Time.deltaTime;
         }
 
         public void DoAIInterval()
@@ -163,9 +152,9 @@ namespace Rats
                         return;
                     }
 
-                    nav.DoPathingToDestination(closestNest.transform.position);
+                    nav.TryDoPathingToDestination(closestNest.transform.position, out destinationResult);
 
-                    if (timeIdle > maxIdleTime && ReachedDestination())
+                    if (timeIdle > maxIdleTime && destinationResult == GoToDestinationResult.Success)
                     {
                         // Add food to nest
                         if (holdingFood)
@@ -175,7 +164,7 @@ namespace Rats
                         if (returningBodyToNest)
                         {
                             DropBodyClientRpc(true);
-                            closestNest.AddFood(playerFoodAmount);
+                            closestNest.AddFood(cfgPlayerFoodAmount);
                         }
                         
                         if (closestNest.DefenseRats.Count < cfgMaxDefenseRats)
@@ -197,9 +186,9 @@ namespace Rats
                     if (grabbingBody && targetPlayer != null)
                     {
                         GrabbableObject deadBody = targetPlayer.deadBody.grabBodyObject;
-                        if (nav.TryDoPathingToDestination(deadBody.transform.position, out SmartAgentNavigator.GoToDestinationResult result) && result != SmartAgentNavigator.GoToDestinationResult.Failure)
+                        if (nav.TryDoPathingToDestination(deadBody.transform.position, out destinationResult) && destinationResult != GoToDestinationResult.Failure)
                         {
-                            if (ReachedDestination())
+                            if (destinationResult == GoToDestinationResult.Success)
                             {
                                 int limb = UnityEngine.Random.Range(0, targetPlayer.deadBody.bodyParts.Length);
                                 GrabBodyClientRpc(targetPlayer.actualClientId, limb);
@@ -228,20 +217,20 @@ namespace Rats
                         return;
                     }
 
-                    float swarmRadius = swarmRadiusAttacking;
+                    float swarmRadius = cfgSwarmRadius;
 
-                    if (swarmTarget.TryGetComponentInChildren(out PlayerControllerB player))
+                    if (swarmTarget.TryGetComponentInChildren(out PlayerControllerB? player))
                     {
-                        if (!player.isPlayerControlled || (timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 2f && Vector3.Distance(transform.position, player.transform.position) > distanceNeededToLoseRats))
+                        if (player == null || !player.isPlayerControlled || (timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 2f && Vector3.Distance(transform.position, player.transform.position) > distanceNeededToLoseRats))
                         {
                             SwitchToBehaviorClientRpc((int)State.ReturnToNest);
                             return;
                         }
                     }
-                    else if (swarmTarget.TryGetComponentInChildren(out EnemyAICollisionDetect enemyAICollision))
+                    else if (swarmTarget.TryGetComponentInChildren(out EnemyAICollisionDetect? enemyAICollision))
                     {
-                        EnemyAI enemy = enemyAICollision.mainScript;
-                        if (enemy.isEnemyDead || (timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 1f && Vector3.Distance(transform.position, enemy.transform.position) > distanceNeededToLoseRats))
+                        EnemyAI? enemy = enemyAICollision?.mainScript;
+                        if (enemy == null || enemy.isEnemyDead || (timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 1f && Vector3.Distance(transform.position, enemy.transform.position) > distanceNeededToLoseRats))
                         {
                             SwitchToBehaviorClientRpc((int)State.ReturnToNest);
                             return;
@@ -264,25 +253,10 @@ namespace Rats
             }
         }
 
-        bool ReachedDestination()
-        {
-            // Check if we've reached the destination
-            if (!nav.agent.pathPending)
-            {
-                if (nav.agent.remainingDistance <= nav.agent.stoppingDistance)
-                {
-                    if (!nav.agent.hasPath || nav.agent.velocity.sqrMagnitude == 0f)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
         bool CheckLineOfSightForDeadBody()
         {
+            if (!cfgRatsTakePlayerCorpses) { return false; }
+
             foreach (var player in StartOfRound.Instance.allPlayerScripts)
             {
                 DeadBodyInfo deadBody = player.deadBody;
@@ -426,19 +400,19 @@ namespace Rats
 
             if (collidedEnemy.isEnemyDead)
             {
-                if (!RatManager.Instance!.enemyFoodPointsLeft.ContainsKey(collidedEnemy))
+                if (enemyFoodPointsLeft.ContainsKey(collidedEnemy))
                 {
-                    RatManager.Instance.enemyThreatCounter.Remove(collidedEnemy);
-                    RatManager.Instance.enemyHitCount.Remove(collidedEnemy);
-                    RatManager.Instance.AddEnemyFoodAmount(collidedEnemy);
+                    enemyThreatCounter.Remove(collidedEnemy);
+                    enemyHitCount.Remove(collidedEnemy);
+                    AddEnemyFoodAmount(collidedEnemy);
                 }
 
-                RatManager.Instance.enemyFoodPointsLeft[collidedEnemy] -= 1;
+                enemyFoodPointsLeft[collidedEnemy] -= 1;
                 holdingFood = true;
 
-                if (RatManager.Instance.enemyFoodPointsLeft[collidedEnemy] <= 0)
+                if (enemyFoodPointsLeft[collidedEnemy] <= 0)
                 {
-                    RatManager.Instance.enemyFoodPointsLeft.Remove(collidedEnemy);
+                    enemyFoodPointsLeft.Remove(collidedEnemy);
                     RoundManager.Instance.DespawnEnemyOnServer(collidedEnemy.NetworkObject);
                 }
 
@@ -453,24 +427,24 @@ namespace Rats
             }
             else
             {
-                if (!RatManager.Instance.enemyThreatCounter.ContainsKey(collidedEnemy))
+                if (!enemyThreatCounter.ContainsKey(collidedEnemy))
                 {
-                    RatManager.Instance.enemyThreatCounter.Add(collidedEnemy, 0);
+                    enemyThreatCounter.Add(collidedEnemy, 0);
                 }
 
-                if (RatManager.Instance.enemyThreatCounter[collidedEnemy] > threatToAttackEnemy)
+                if (enemyThreatCounter[collidedEnemy] > cfgThreatToAttackEnemy)
                 {
-                    if (!RatManager.Instance.enemyHitCount.ContainsKey(collidedEnemy))
+                    if (!enemyHitCount.ContainsKey(collidedEnemy))
                     {
-                        RatManager.Instance.enemyHitCount.Add(collidedEnemy, enemyHitsToDoDamage);
+                        enemyHitCount.Add(collidedEnemy, cfgEnemyHitsToDoDamage);
                     }
 
-                    RatManager.Instance.enemyHitCount[collidedEnemy] -= 1;
+                    enemyHitCount[collidedEnemy] -= 1;
 
-                    if (RatManager.Instance.enemyHitCount[collidedEnemy] <= 0)
+                    if (enemyHitCount[collidedEnemy] <= 0)
                     {
                         collidedEnemy.HitEnemy(1, null, true);
-                        RatManager.Instance.enemyHitCount[collidedEnemy] = enemyHitsToDoDamage;
+                        enemyHitCount[collidedEnemy] = cfgEnemyHitsToDoDamage;
                     }
                 }
             }
@@ -483,25 +457,25 @@ namespace Rats
 
         void AddThreat(EnemyAI enemy, int amount = 1)
         {
-            if (enemy == null || RatManager.Instance == null) { return; }
+            if (enemy == null) { return; }
 
             timeSinceAddThreat = 0f;
 
-            if (RatManager.Instance.enemyThreatCounter.ContainsKey(enemy))
+            if (enemyThreatCounter.ContainsKey(enemy))
             {
-                RatManager.Instance.enemyThreatCounter[enemy] += amount;
+                enemyThreatCounter[enemy] += amount;
             }
             else
             {
-                RatManager.Instance.enemyThreatCounter.Add(enemy, amount);
+                enemyThreatCounter.Add(enemy, amount);
             }
 
-            int threat = RatManager.Instance.enemyThreatCounter[enemy];
+            int threat = enemyThreatCounter[enemy];
             logger.LogDebug($"{enemy.enemyType.enemyName}: {threat} threat");
 
             if (currentBehaviorState == State.Swarming) { return; }
 
-            if (RatManager.Instance.enemyThreatCounter[enemy] > threatToAttackEnemy && IsServer)
+            if (enemyThreatCounter[enemy] > cfgThreatToAttackEnemy && IsServer)
             {
                 swarmTarget = enemy.gameObject;
                 
@@ -511,25 +485,25 @@ namespace Rats
 
         void AddThreat(PlayerControllerB player, int amount = 1)
         {
-            if (player == null || RatManager.Instance == null) { return; }
+            if (player == null) { return; }
 
             timeSinceAddThreat = 0f;
 
-            if (RatManager.Instance.playerThreatCounter.ContainsKey(player))
+            if (playerThreatCounter.ContainsKey(player))
             {
-                RatManager.Instance.playerThreatCounter[player] += amount;
+                playerThreatCounter[player] += amount;
             }
             else
             {
-                RatManager.Instance.playerThreatCounter.Add(player, amount);
+                playerThreatCounter.Add(player, amount);
             }
 
-            int threat = RatManager.Instance.playerThreatCounter[player];
+            int threat = playerThreatCounter[player];
             logger.LogDebug($"{player.playerUsername}: {threat} threat");
 
             if (currentBehaviorState == State.Swarming) { return; }
 
-            if (threat > threatToAttackPlayer)
+            if (threat > cfgThreatToAttackPlayer)
             {
                 targetPlayer = player;
                 swarmTarget = player.gameObject;
@@ -540,7 +514,7 @@ namespace Rats
 
         public void FinishRunCycle() // Animation
         {
-            if (UnityEngine.Random.Range(0f, 1f) < squeakChance)
+            if (UnityEngine.Random.Range(0f, 1f) < cfgSqueakChance)
             {
                 RoundManager.PlayRandomClip(audioSource, squeakSFX);
             }

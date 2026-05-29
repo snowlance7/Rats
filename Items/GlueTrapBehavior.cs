@@ -18,6 +18,14 @@ namespace Rats.Items
 
         int glueTrapAmount;
 
+        public void Awake()
+        {
+            itemProperties.floorYOffset = 180;
+            itemProperties.rotationOffset = new Vector3(180, 0, 0);
+            itemProperties.positionOffset = new Vector3(0.2f, 0.2f, -0.25f);
+            itemProperties.meshOffset = true;
+        }
+
         public override void Start()
         {
             base.Start();
@@ -85,6 +93,14 @@ namespace Rats.Items
 
         const float minSlowTime = 1f;
         const float maxSlowTime = 2.5f;
+
+        public void Awake()
+        {
+            itemProperties.floorYOffset = 0;
+            itemProperties.rotationOffset = new Vector3(0, 0, 0);
+            itemProperties.positionOffset = new Vector3(-0.5f, 0.1f, 0f);
+            itemProperties.meshOffset = true;
+        }
 
         public override void Start()
         {

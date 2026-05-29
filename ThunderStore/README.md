@@ -15,6 +15,7 @@
 - **Rat Types:** Each rat will either defend the nest or scout the dungeon. If a player gets too close to the nest, they will damage the player.
 - **Colony Threat System:** Each time a rat sees a player or enemy, they will add 1 to a threat counter. When that reaches a threshold (100 for players and 50 for enemies by default) they will start swarming the threat.
 - **Rat Food:** If a rat finds a player corpse it will attempt to drag the corpse back to the nest. They will rip food off of enemies depending on the enemies HP. By default, player corpses give 30 food and enemies give `10 * enemyHP` food. For every 10 food brought back to the nest, it will spawn a rat.
+- **Infestation:** Each time you leave a moon, the infestation level (amount of rats) will be saved. This means when you land on the same moon later, it will spawn that many rats again.
 - **Rat Control:** You can control the rat population with traps and poison.
 
 </details>
@@ -34,6 +35,8 @@
 - Outside rats: Chance for rat nests to spawn outside as vain shrouds. Keeping these under control will require weed killer or traps.
 - More rat types?
 - More configs for performance.
+- Achievements!
+- Mutated rats (cadaver rats)
 
 ## Contact
 

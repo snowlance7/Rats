@@ -1,7 +1,9 @@
 ## 1.3.0
 - v80 Compat Fix
 - Removed Rat King (Temporarily)
+- Removed Rat Crown
 - Switched to DawnLib
+- Added infestation mechanic
 
 ## 1.2.3
 - v73 Compatibility
