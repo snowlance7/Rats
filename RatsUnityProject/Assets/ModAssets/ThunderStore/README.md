@@ -35,6 +35,8 @@
 - Outside rats: Chance for rat nests to spawn outside as vain shrouds. Keeping these under control will require weed killer or traps.
 - More rat types?
 - More configs for performance.
+- Achievements!
+- Mutated rats (cadaver rats)
 
 ## Contact
 

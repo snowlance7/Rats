@@ -27,7 +27,10 @@ namespace Rats
             try
             {
                 if (!Utils.testing) { return; }
-
+                foreach (var enemy in Utils.GetEnemies())
+                {
+                    logger.LogDebug($"{enemy.enemyType.enemyName}: {enemy.enemyType.EnemySize.ToString()}");
+                }
             }
             catch
             {

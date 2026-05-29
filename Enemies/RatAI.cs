@@ -392,8 +392,8 @@ namespace Rats
         {
             if (isDead || currentBehaviorState == State.ReturnToNest) { return; }
             if (timeSinceCollision < 1f) { return; }
-            if (collidedEnemy == null || !collidedEnemy.enemyType.canDie) { return; }
-            if (!cfgEnemyWhitelist.Contains(collidedEnemy.enemyType.name)) { return; }
+            if (collidedEnemy == null || !collidedEnemy.enemyType.canDie || collidedEnemy.enemyType.EnemySize == EnemySize.Giant) { return; }
+            //if (!cfgEnemyWhitelist.Contains(collidedEnemy.enemyType.name)) { return; } // TODO
             //if (collidedEnemy is RatKingAI) { return; }
             logger.LogDebug("Collided with: " + collidedEnemy.enemyType.enemyName);
             timeSinceCollision = 0f;
