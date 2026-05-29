@@ -9,7 +9,7 @@ using static Rats.Configs;
 
 namespace Rats.Items
 {
-    internal class RatPoisonBehavior : PhysicsProp // TODO: Make it act like weed killer and kill cadaver weeds
+    internal class RatPoisonBehavior : PhysicsProp // TODO: Make it act like weed killer and kill cadaver weeds and fill gas in company cruiser
     {
         public AudioSource audioSource = null!;
         public ParticleSystem particleSystem = null!;
@@ -24,12 +24,16 @@ namespace Rats.Items
         float currentFluid;
 
         float pourRate;
+        CadaverGrowthAI? cadaverGrowthAI;
 
         public void Awake()
         {
             itemProperties.floorYOffset = 90;
             itemProperties.rotationOffset = new Vector3(180, 180, 60);
             itemProperties.positionOffset = new Vector3(-0.65f, 0.55f, 0f);
+            itemProperties.restingRotation = new Vector3(0, 0, 90);
+            itemProperties.syncUseFunction = true; // TODO
+            itemProperties.weight = 1.2f;
         }
 
         public override void Start()
@@ -76,6 +80,14 @@ namespace Rats.Items
                     {
                         nest.AddPoisonServerRpc(pourRate * Time.deltaTime);
                     }
+                }
+                if (cadaverGrowthAI == null)
+                {
+                    cadaverGrowthAI = FindObjectOfType<CadaverGrowthAI>();
+                }
+                if (cadaverGrowthAI != null && Physics.Raycast(pourDirection.position, -Vector3.up, out var hitInfo2, 80f, 268437761, QueryTriggerInteraction.Ignore))
+                {
+                    cadaverGrowthAI.DestroyPlantAtPosition(hitInfo2.point, playEffect: true); // TODO: Test this
                 }
             }
         }
