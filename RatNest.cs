@@ -191,7 +191,7 @@ namespace Rats
         {
             if (!Utils.testing && (StartOfRound.Instance.inShipPhase || StartOfRound.Instance.shipIsLeaving)) { return; }
 
-            if (RatAI.Instances.Count < cfgMaxRats)
+            if (RatAI.Instances.Where(x => !x.isDead).Count() < cfgMaxRats)
             {
                 GameObject prefab = cfgUseJermaRats ? jermaRatPrefab : ratPrefab;
 

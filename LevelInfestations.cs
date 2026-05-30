@@ -13,6 +13,9 @@ namespace Rats
     {
         public static Dictionary<string, int> levelInfestations = new Dictionary<string, int>();
 
+        public static float currentLevelInfestationPercentage => RatAI.Instances.Where(x => !x.isDead).Count() / cfgMaxRats;
+        public static float currentLevelInfestation => RatAI.Instances.Where(x => !x.isDead).Count();
+
         public static string currentLevel = "";
         const string saveName = "RatLevelInfestations";
 
