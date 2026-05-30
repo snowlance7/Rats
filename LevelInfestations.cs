@@ -5,12 +5,13 @@ using System.Linq;
 using UnityEngine;
 using static Rats.Plugin;
 using static Rats.Configs;
+using System.Collections.Generic;
 
 namespace Rats
 {
     internal static class LevelInfestations
     {
-        public static AutoDictionary<string, int> levelInfestations = new AutoDictionary<string, int>();
+        public static Dictionary<string, int> levelInfestations = new Dictionary<string, int>();
 
         public static string currentLevel = "";
         const string saveName = "RatLevelInfestations";
@@ -19,6 +20,7 @@ namespace Rats
         {
             if (!cfgEnableInfestationSystem) { return; }
             if (currentLevel == "") { return; }
+            if (!levelInfestations.ContainsKey(currentLevel)) { levelInfestations.Add(currentLevel, 0); }
             levelInfestations[currentLevel] = Mathf.Min(RatAI.Instances.Where(x => !x.isDead).Count(), cfgMaxRats);
         }
 
@@ -26,6 +28,7 @@ namespace Rats
         {
             if (!cfgEnableInfestationSystem) { return; }
             currentLevel = StartOfRound.Instance.currentLevel.name;
+            if (!levelInfestations.ContainsKey(currentLevel)) { return; }
             int infestation = levelInfestations[currentLevel];
             if (infestation <= 0 || RatNest.nests.Count == 0) { return; }
             int ratsPerNestToSpawn = infestation / RatNest.nests.Count;
@@ -39,7 +42,7 @@ namespace Rats
         {
             if (!cfgEnableInfestationSystem) { return; }
             logger.LogDebug("Loading infestation data");
-            levelInfestations = ES3.Load<AutoDictionary<string, int>>(saveName, GameNetworkManager.Instance.currentSaveFileName);
+            levelInfestations = ES3.Load<Dictionary<string, int>>(saveName, GameNetworkManager.Instance.currentSaveFileName);
             Log();
         }
 
@@ -47,7 +50,7 @@ namespace Rats
         {
             if (!cfgEnableInfestationSystem) { return; }
             logger.LogDebug("Saving infestation data");
-            ES3.Save<AutoDictionary<string, int>>(saveName, levelInfestations, GameNetworkManager.Instance.currentSaveFileName);
+            ES3.Save<Dictionary<string, int>>(saveName, levelInfestations, GameNetworkManager.Instance.currentSaveFileName);
         }
 
         public static void ResetData()
