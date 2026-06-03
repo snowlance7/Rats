@@ -91,7 +91,9 @@ namespace Rats
             hashSpeed = Animator.StringToHash("speed");
             christmasHat.SetActive(cfgHolidayRats);
 
-            logger.LogDebug($"Rat spawned");
+            nav.SetAllValues(isOutside: false);
+
+            logger?.LogDebug($"Rat spawned");
         }
 
         public override void OnNetworkSpawn()
@@ -167,11 +169,11 @@ namespace Rats
                             closestNest.AddFood(cfgPlayerFoodAmount);
                         }
                         
-                        if (closestNest.DefenseRats.Count < cfgMaxDefenseRats)
+                        if (closestNest != null && closestNest.DefenseRats != null && closestNest.DefenseRats.Count < cfgMaxDefenseRats)
                         {
                             swarmTarget = closestNest.gameObject;
-                            SwitchToBehaviorClientRpc(State.Swarming);
                             closestNest.DefenseRats.Add(this);
+                            SwitchToBehaviorClientRpc(State.Swarming);
                         }
                         else
                         {
@@ -200,7 +202,6 @@ namespace Rats
 
                     CheckForThreatsInLOS();
 
-                    // TODO: Switch out for pathfinding lib
                     if (timeIdle > maxIdleTime)
                         targetNode = Utils.insideAINodes.GetRandom();
 
@@ -248,12 +249,12 @@ namespace Rats
 
                     break;
                 default:
-                    Plugin.logger.LogWarning("Invalid state: " + currentBehaviorState);
+                    Plugin.logger?.LogWarning("Invalid state: " + currentBehaviorState);
                     break;
             }
         }
 
-        bool CheckLineOfSightForDeadBody()
+        bool CheckLineOfSightForPlayerDeadBody()
         {
             if (!cfgRatsTakePlayerCorpses) { return false; }
 
@@ -273,25 +274,25 @@ namespace Rats
         void CheckForThreatsInLOS()
         {
             if (timeSinceAddThreat < timeToIncreaseThreat) { return; }
-            if (CheckLineOfSightForDeadBody())
+            if (CheckLineOfSightForPlayerDeadBody())
             {
                 grabbingBody = true;
                 return;
             }
             EnemyAI? enemy = CheckLineOfSightForEnemy(30);
-            if (enemy != null && enemy.enemyType.canDie)
+            if (enemy != null && enemy.enemyType.canDie && enemy.enemyType.EnemySize == EnemySize.Tiny)
             {
                 AddThreat(enemy);
             }
             PlayerControllerB? player = CheckLineOfSightForPlayer(60f, 60, 5);
-            if (player != null && PlayerIsTargetable(player))
+            if (player != null && player.isPlayerControlled)
             {
-                if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.itemProperties.name == "RatCrownItem" && !player.currentlyHeldObjectServer.isPocketed)
+                /*if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.itemProperties.name == "RatCrownItem" && !player.currentlyHeldObjectServer.isPocketed)
                 {
                     targetPlayer = player;
                     SwitchToBehaviorClientRpc(State.Swarming);
                     return;
-                }
+                }*/
 
                 AddThreat(player);
                 return;
@@ -344,8 +345,9 @@ namespace Rats
         {
             foreach (EnemyAI enemy in RoundManager.Instance.SpawnedEnemies)
             {
-                if (/*(RatKingAI.Instance != null && enemy == RatKingAI.Instance) || */!enemy.enemyType.canDie) { continue; }
-                if (CheckLineOfSightForPosition(enemy.eye.position, 60, range, 5))
+                if (enemy == null || !enemy.enemyType.canDie || enemy.enemyType.EnemySize != EnemySize.Tiny) { continue; }
+                Vector3 checkPos = enemy.eye != null ? enemy.eye.position : enemy.transform.position;
+                if (CheckLineOfSightForPosition(checkPos, 60, range, 5))
                 {
                     return enemy;
                 }
@@ -358,16 +360,6 @@ namespace Rats
             KillEnemyClientRpc();
         }
 
-        public bool PlayerIsTargetable(PlayerControllerB playerScript)
-        {
-            if (playerScript == null) { return false; }
-            if (playerScript.isPlayerDead) { return false; }
-            if (!playerScript.isPlayerControlled) { return false; }
-            if (playerScript.inAnimationWithEnemy != null) { return false; }
-            if (playerScript.sinkingValue >= 0.73f) { return false; }
-            return true;
-        }
-
         public void OnCollideWithPlayer(Collider other)
         {
             if (isDead) { return; }
@@ -375,8 +367,8 @@ namespace Rats
 
             timeSinceCollision = 0f;
             PlayerControllerB? player = other.gameObject.GetComponent<PlayerControllerB>();
-            if (!PlayerIsTargetable(player)) { return; }
-            if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.name == "RatCrownItem" && !player.currentlyHeldObjectServer.isPocketed) { return; }
+            if (player == null || !player.isPlayerControlled) { return; }
+            //if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.name == "RatCrownItem" && !player.currentlyHeldObjectServer.isPocketed) { return; }
             //rallyRat = false;
             if (currentBehaviorState == State.Swarming) // TODO: Test this
             {
@@ -392,10 +384,10 @@ namespace Rats
         {
             if (isDead || currentBehaviorState == State.ReturnToNest) { return; }
             if (timeSinceCollision < 1f) { return; }
-            if (collidedEnemy == null || !collidedEnemy.enemyType.canDie || collidedEnemy.enemyType.EnemySize == EnemySize.Giant) { return; }
+            if (collidedEnemy == null || !collidedEnemy.enemyType.canDie || collidedEnemy.enemyType.EnemySize != EnemySize.Tiny) { return; }
             //if (!cfgEnemyWhitelist.Contains(collidedEnemy.enemyType.name)) { return; } // TODO
             //if (collidedEnemy is RatKingAI) { return; }
-            logger.LogDebug("Collided with: " + collidedEnemy.enemyType.enemyName);
+            logger?.LogDebug("Collided with: " + collidedEnemy.enemyType.enemyName);
             timeSinceCollision = 0f;
 
             if (collidedEnemy.isEnemyDead)
@@ -471,7 +463,7 @@ namespace Rats
             }
 
             int threat = enemyThreatCounter[enemy];
-            logger.LogDebug($"{enemy.enemyType.enemyName}: {threat} threat");
+            logger?.LogDebug($"{enemy.enemyType.enemyName}: {threat} threat");
 
             if (currentBehaviorState == State.Swarming) { return; }
 
@@ -485,7 +477,7 @@ namespace Rats
 
         void AddThreat(PlayerControllerB player, int amount = 1)
         {
-            if (player == null) { return; }
+            if (player == null || !player.isPlayerControlled) { return; }
 
             timeSinceAddThreat = 0f;
 
@@ -499,7 +491,7 @@ namespace Rats
             }
 
             int threat = playerThreatCounter[player];
-            logger.LogDebug($"{player.playerUsername}: {threat} threat");
+            logger?.LogDebug($"{player.playerUsername}: {threat} threat");
 
             if (currentBehaviorState == State.Swarming) { return; }
 
@@ -557,7 +549,7 @@ namespace Rats
             {
                 foreach (var nest in RatNest.nests)
                 {
-                    nest?.DefenseRats.Remove(this);
+                    nest?.DefenseRats?.Remove(this);
                 }
             }
 

@@ -5,6 +5,7 @@ using Dawn;
 using Dusk;
 using GameNetcodeStuff;
 using HarmonyLib;
+using SnowyLib;
 using System.IO;
 using System.Reflection;
 using Unity.Netcode;
@@ -14,10 +15,11 @@ namespace Rats
 {
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     [BepInDependency(DawnLib.PLUGIN_GUID)]
+    [BepInDependency(SnowyLib.MyPluginInfo.PLUGIN_GUID)]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; } = null!;
-        public static ManualLogSource logger { get; private set; } = null!;
+        public static ManualLogSource? logger { get; private set; }
         public static DuskMod Mod { get; private set; } = null!;
 
         readonly Harmony harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
@@ -32,7 +34,7 @@ namespace Rats
                 Instance = this;
             }
 
-            logger = Instance.Logger;
+            logger = Utils.testing ? Instance.Logger : null;
 
             harmony.PatchAll();
 
@@ -40,9 +42,11 @@ namespace Rats
             Mod = DuskMod.RegisterMod(this, mainBundle);
             Mod.RegisterContentHandlers();
 
+            Configs.Init();
+
             InitializeNetworkBehaviours();
 
-            Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
+            logger?.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
         }
 
         public static void InitializeNetworkBehaviours()
@@ -60,7 +64,7 @@ namespace Rats
                     }
                 }
             }
-            logger.LogDebug("Finished initializing network behaviours");
+            logger?.LogDebug("Finished initializing network behaviours");
         }
     }
 }

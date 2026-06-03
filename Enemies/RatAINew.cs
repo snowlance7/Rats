@@ -143,7 +143,7 @@ namespace Rats.Enemies
             hashDie = Animator.StringToHash("die");
             hashSpeed = Animator.StringToHash("speed");
             christmasHat.SetActive(configHolidayRats.Value);
-            logger.LogDebug($"Rat spawned");
+            logger?.LogDebug($"Rat spawned");
         }
 
         public void Update()
@@ -291,7 +291,7 @@ namespace Rats.Enemies
 
                     break;
                 default:
-                    logger.LogWarning("Invalid state: " + currentBehaviorState);
+                    logger?.LogWarning("Invalid state: " + currentBehaviorState);
                     break;
             }
         }
@@ -474,7 +474,7 @@ namespace Rats.Enemies
             if (collidedEnemy == null || !collidedEnemy.enemyType.canDie) { return; }
             if (!enemyWhiteList.Contains(collidedEnemy.enemyType.name)) { return; }
             if (collidedEnemy is RatKingAI) { return; }
-            logger.LogDebug("Collided with: " + collidedEnemy.enemyType.enemyName);
+            logger?.LogDebug("Collided with: " + collidedEnemy.enemyType.enemyName);
             timeSinceCollision = 0f;
 
             if (collidedEnemy.isEnemyDead)
@@ -550,7 +550,7 @@ namespace Rats.Enemies
             }
 
             int threat = RatManager.Instance.enemyThreatCounter[enemy];
-            logger.LogDebug($"{enemy.enemyType.enemyName}: {threat} threat");
+            logger?.LogDebug($"{enemy.enemyType.enemyName}: {threat} threat");
 
             if (currentBehaviorState == State.Swarming) { return; }
 
@@ -578,7 +578,7 @@ namespace Rats.Enemies
             }
 
             int threat = RatManager.Instance.playerThreatCounter[player];
-            logger.LogDebug($"{player.playerUsername}: {threat} threat");
+            logger?.LogDebug($"{player.playerUsername}: {threat} threat");
 
             if (currentBehaviorState == State.Swarming) { return; }
 

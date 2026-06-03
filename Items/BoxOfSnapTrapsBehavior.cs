@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using static Rats.Plugin;
 using static Rats.Configs;
+using Unity.Netcode;
 
 namespace Rats.Items
 {
@@ -35,16 +36,13 @@ namespace Rats.Items
             HUDManager.Instance.ChangeControlTipMultiple(toolTips, holdingItem: true, itemProperties);
         }
 
-        public override void ItemActivate(bool used, bool buttonDown = true) // Synced TODO: Make rpcs
+        public override void ItemActivate(bool used, bool buttonDown = true)
         {
             base.ItemActivate(used, buttonDown);
 
             if (buttonDown && snapTrapAmount > 0)
             {
-                if (!Physics.Raycast(transform.position, -Vector3.up, out var hitInfo, 80f, 268437761, QueryTriggerInteraction.Ignore)) { return; }
-                GameObject.Instantiate(snapTrapPrefab, hitInfo.point, playerHeldBy.transform.rotation);
-                snapTrapAmount--;
-                SetControlTipsForItem();
+                SpawnRatTrapServerRpc();
             }
         }
 
@@ -62,6 +60,22 @@ namespace Rats.Items
         public override void LoadItemSaveData(int saveData)
         {
             snapTrapAmount = saveData;
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void SpawnRatTrapServerRpc()
+        {
+            if (!IsServer) { return; }
+            SpawnRatTrapClientRpc();
+        }
+
+        [ClientRpc]
+        public void SpawnRatTrapClientRpc()
+        {
+            if (!Physics.Raycast(transform.position, -Vector3.up, out var hitInfo, 80f, 268437761, QueryTriggerInteraction.Ignore)) { return; }
+            Instantiate(snapTrapPrefab, hitInfo.point, playerHeldBy.transform.rotation);
+            snapTrapAmount--;
+            SetControlTipsForItem();
         }
     }
 
@@ -94,9 +108,9 @@ namespace Rats.Items
         public void OnTriggerEnter(Collider other) // TODO: Test this
         {
             if (triggered) { return; }
-            Plugin.logger.LogDebug("In OnTriggerEnter()");
+            Plugin.logger?.LogDebug("In OnTriggerEnter()");
             if (!other.gameObject.TryGetComponent(out RatAICollisionDetect ratCollision)) { return; }
-            Plugin.logger.LogDebug("Got rat collision");
+            Plugin.logger?.LogDebug("Got rat collision");
             ratCollision.mainScript.KillEnemy();
             if (IsServerOrHost)
             {
@@ -127,7 +141,7 @@ namespace Rats.Items
             rb.useGravity = true;
             triggered = true;
 
-            GameObject.Destroy(this.gameObject, cfgSnapTrapsDespawnTime);
+            GameObject.Destroy(this.gameObject, cfgDespawnTime);
         }
     }
 }

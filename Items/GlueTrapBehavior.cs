@@ -91,8 +91,7 @@ namespace Rats.Items
 
         List<GameObject> ratsOnBoard = [];
 
-        const float minSlowTime = 1f;
-        const float maxSlowTime = 2.5f;
+        const float slowTime = 1f;
 
         public void Awake()
         {
@@ -114,8 +113,8 @@ namespace Rats.Items
         {
             base.ActivatePhysicsTrigger(other);
 
-            logger.LogDebug("In ActivatePhysicsTrigger()");
-            if (ratsOnBoard.Count >= cfgMaxRatsOnGlueTrap)
+            logger?.LogDebug("In ActivatePhysicsTrigger()");
+            if (ratsOnBoard.Count >= cfgMaxRatsOnGlueBoard)
             {
                 return;
             }
@@ -124,12 +123,13 @@ namespace Rats.Items
 
             if (!other.gameObject.TryGetComponent(out RatAICollisionDetect ratCollision)) { return; }
 
-            float delay = UnityEngine.Random.Range(minSlowTime, maxSlowTime);
-            StartCoroutine(KillRatCoroutine(ratCollision.mainScript, delay));
+            StartCoroutine(KillRatCoroutine(ratCollision.mainScript, slowTime));
         }
 
         IEnumerator KillRatCoroutine(RatAI rat, float delay)
         {
+            yield return null;
+            if (rat == null) { yield break; }
             float elapsedTime = 0f;
             float startSpeed = 0.5f;
 
@@ -137,15 +137,15 @@ namespace Rats.Items
             {
                 rat.nav.agent.speed = Mathf.Lerp(startSpeed, 0f, elapsedTime / delay);
                 elapsedTime += Time.deltaTime;
-                logger.LogDebug("Elapsed Time: " + elapsedTime);
+                //logger?.LogDebug("Elapsed Time: " + elapsedTime);
                 yield return null;
             }
 
-            logger.LogDebug("Finished slowing, calling rpc now");
+            logger?.LogDebug("Finished slowing, calling rpc now");
 
             rat.KillEnemyServerRpc();
             yield return new WaitForSeconds(1f);
-            logger.LogDebug("Calling AddRatToBoardClientRpc");
+            logger?.LogDebug("Calling AddRatToBoardClientRpc");
             AddRatToBoardClientRpc(rat.transform.position, rat.transform.rotation);
             rat.NetworkObject.Despawn(true);
         }
@@ -182,11 +182,11 @@ namespace Rats.Items
         [ClientRpc]
         public void AddRatToBoardClientRpc(Vector3 pos, Quaternion rot)
         {
-            logger.LogDebug("In ParentRatToBoardClientRpc()");
+            logger?.LogDebug("In ParentRatToBoardClientRpc()");
 
             GameObject prefab = cfgUseJermaRats ? RatPropJerma : RatProp;
             GameObject rat = Instantiate(prefab, pos, rot);
-            logger.LogDebug("Parenting rat to board");
+            logger?.LogDebug("Parenting rat to board");
             rat.transform.SetParent(transform);
             ratsOnBoard.Add(rat);
             SetScrapValue(ratsOnBoard.Count * cfgScrapValuePerRat);

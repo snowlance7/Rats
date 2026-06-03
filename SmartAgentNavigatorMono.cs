@@ -81,7 +81,7 @@ public class SmartAgentNavigatorMono : MonoBehaviour
     {
         if (_agentState == AgentState.NotSet)
         {
-            logger.LogError($"{this.name} is not initialized yet! Please call `SetAllValues` first.");
+            logger?.LogError($"{this.name} is not initialized yet! Please call `SetAllValues` first.");
             return false;
         }
         return _agentState == AgentState.Outside;
@@ -286,7 +286,7 @@ public class SmartAgentNavigatorMono : MonoBehaviour
         {
             action(TList);
             checkPathsRoutine = null;
-            //DawnPlugin.Logger.LogError($"{this.gameObject.name} has no points to check paths for, report this along with what was happening.");
+            //DawnPlugin.logger?.LogError($"{this.gameObject.name} has no points to check paths for, report this along with what was happening.");
             yield break;
         }
         //Debuggers.Pathfinding?.Log($"Checking paths for {listSize} objects");
@@ -295,7 +295,7 @@ public class SmartAgentNavigatorMono : MonoBehaviour
         {
             if (!checkPathsTask.IsResultReady(i))
             {
-                //DawnPlugin.Logger.LogError($"Result for task index: {i} on {this.gameObject.name} is not ready");
+                //DawnPlugin.logger?.LogError($"Result for task index: {i} on {this.gameObject.name} is not ready");
                 continue;
             }
             //Debuggers.Pathfinding?.Log($"Checking result for task index: {i}, is result ready: {checkPathsTask.IsResultReady(i)}, result: {checkPathsTask.GetResult(i)}");
@@ -525,7 +525,7 @@ public class SmartAgentNavigatorMono : MonoBehaviour
         int listSize = _roamingPointsVectorList.Count;
         if (listSize == 0)
         {
-            //DawnPlugin.Logger.LogError($"Roaming points list is empty for {this.gameObject.name}, this means that the moon has basically no nodes, and no navmesh around where this entity spawned, no idea how else this could happen, report this with more logs and a detail of what was happening");
+            //DawnPlugin.logger?.LogError($"Roaming points list is empty for {this.gameObject.name}, this means that the moon has basically no nodes, and no navmesh around where this entity spawned, no idea how else this could happen, report this with more logs and a detail of what was happening");
             yield break;
         }
         //Debuggers.Pathfinding?.Log($"Checking paths for {listSize} objects");
@@ -534,7 +534,7 @@ public class SmartAgentNavigatorMono : MonoBehaviour
         {
             if (!roamingTask.IsResultReady(i))
             {
-                //DawnPlugin.Logger.LogError($"Roaming task {i} is not ready");
+                //DawnPlugin.logger?.LogError($"Roaming task {i} is not ready");
                 continue;
             }
 

@@ -68,7 +68,7 @@ namespace Rats
 
         public void Start()
         {
-            logger.LogDebug("Rat nest spawned at: " + transform.position);
+            logger?.LogDebug("Rat nest spawned at: " + transform.position);
 
             poisonPlaneStart = poisonLiquidPlaneObj.transform.position;
             poisonPlaneEnd = poisonPlaneStart + (Vector3.up * poisonUpOffset);
@@ -146,7 +146,7 @@ namespace Rats
                 // Run one batch per interval
                 if (Time.frameCount % Mathf.CeilToInt(cfgBatchUpdateInterval / Time.deltaTime) == 0)
                 {
-                    //logger.LogDebug("Running batch");
+                    //logger?.LogDebug("Running batch");
                     RunBatch();
                 }
             }
@@ -177,7 +177,7 @@ namespace Rats
 
         public void AddFood(int amount = 1)
         {
-            if (!IsServer) { logger.LogError("Only server can call functions in RatNest"); return; }
+            if (!IsServer) { logger?.LogError("Only server can call functions in RatNest"); return; }
             food += amount;
 
             int ratsToSpawn = food / cfgFoodToSpawnRat;
@@ -205,7 +205,7 @@ namespace Rats
         public void SpawnRats(int amount)
         {
             if (amount == 0) { return; }
-            logger.LogDebug("Spawning rats from food: " + amount);
+            logger?.LogDebug("Spawning rats from food: " + amount);
 
             IEnumerator SpawnRatsCoroutine(int amount)
             {
@@ -246,7 +246,7 @@ namespace Rats
             enemyFoodPointsLeft.Add(enemy, foodAmount);
         }
 
-        public void OnNestClosed() // Animation TODO
+        public void OnNestClosed() // Animation
         {
             if (!IsServer) { return; }
             NetworkObject.Despawn(destroy: true);
@@ -267,7 +267,7 @@ namespace Rats
             float t = Mathf.Clamp01(poisonInNest / cfgPoisonToCloseNest);
 
             poisonLiquidPlaneObj.transform.position = Vector3.Lerp(poisonPlaneStart, poisonPlaneEnd, t);
-            //logger.LogDebug("PoisonInNest: " + poisonInNest);
+            //logger?.LogDebug("PoisonInNest: " + poisonInNest);
         }
 
         [ClientRpc]

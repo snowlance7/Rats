@@ -31,7 +31,7 @@ namespace Rats.Items
             itemProperties.floorYOffset = 90;
             itemProperties.rotationOffset = new Vector3(180, 180, 60);
             itemProperties.positionOffset = new Vector3(-0.65f, 0.55f, 0f);
-            itemProperties.restingRotation = new Vector3(0, 0, 90);
+            itemProperties.restingRotation = new Vector3(0, 0, 0);
             itemProperties.syncUseFunction = true; // TODO
             itemProperties.weight = 1.2f;
         }
@@ -40,8 +40,8 @@ namespace Rats.Items
         {
             base.Start();
             scanNode.subText = "";
-            currentFluid = cfgRatPoisonMaxFluid;
-            pourRate = cfgRatPoisonPourRate;
+            currentFluid = cfgMaxFluid;
+            pourRate = cfgPourRate;
         }
 
         public override void Update()

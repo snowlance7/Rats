@@ -44,7 +44,7 @@ namespace Rats
         public static void LoadData()
         {
             if (!cfgEnableInfestationSystem) { return; }
-            logger.LogDebug("Loading infestation data");
+            logger?.LogDebug("Loading infestation data");
             levelInfestations = ES3.Load<Dictionary<string, int>>(saveName, GameNetworkManager.Instance.currentSaveFileName);
             Log();
         }
@@ -52,7 +52,7 @@ namespace Rats
         public static void SaveData()
         {
             if (!cfgEnableInfestationSystem) { return; }
-            logger.LogDebug("Saving infestation data");
+            logger?.LogDebug("Saving infestation data");
             ES3.Save<Dictionary<string, int>>(saveName, levelInfestations, GameNetworkManager.Instance.currentSaveFileName);
         }
 
@@ -67,7 +67,7 @@ namespace Rats
         {
             foreach (var levelInfestation in levelInfestations)
             {
-                logger.LogDebug($"{levelInfestation.Key}: {levelInfestation.Value}");
+                logger?.LogDebug($"{levelInfestation.Key}: {levelInfestation.Value}");
             }
         }
     }
@@ -86,7 +86,7 @@ namespace Rats
             }
             catch (Exception e)
             {
-                logger.LogError(e);
+                logger?.LogError(e);
                 return;
             }
         }
@@ -102,7 +102,7 @@ namespace Rats
             }
             catch (Exception e)
             {
-                logger.LogError(e);
+                logger?.LogError(e);
                 return;
             }
         }
@@ -118,7 +118,7 @@ namespace Rats
             }
             catch (Exception e)
             {
-                logger.LogError(e);
+                logger?.LogError(e);
                 return;
             }
         }
@@ -134,7 +134,7 @@ namespace Rats
             }
             catch (Exception e)
             {
-                logger.LogError(e);
+                logger?.LogError(e);
                 return;
             }
         }
