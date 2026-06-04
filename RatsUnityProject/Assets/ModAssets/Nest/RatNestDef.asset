@@ -166,7 +166,7 @@ MonoBehaviour:
   - settingName: Threat To Attack Player
     DynamicConfigType: 1
     defaultString: 
-    defaultInt: 100
+    defaultInt: 75
     defaultFloat: 0
     defaultBool: 0
     defaultBoundedRange:
@@ -181,24 +181,6 @@ MonoBehaviour:
     defaultVector3: {x: 0, y: 0, z: 0}
     defaultColor: {r: 0, g: 0, b: 0, a: 0}
     Description: The threat level at which rats begin attacking the player
-  - settingName: High Player Threat
-    DynamicConfigType: 1
-    defaultString: 
-    defaultInt: 200
-    defaultFloat: 0
-    defaultBool: 0
-    defaultBoundedRange:
-      <Min>k__BackingField: 5
-      <Max>k__BackingField: 20
-    defaultAnimationCurve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 0
-      m_PostInfinity: 0
-      m_RotationOrder: 0
-    defaultVector3: {x: 0, y: 0, z: 0}
-    defaultColor: {r: 0, g: 0, b: 0, a: 0}
-    Description: The threat level at which rats will form kill squads to attack players
   - settingName: Threat To Attack Enemy
     DynamicConfigType: 1
     defaultString: 

@@ -5,38 +5,37 @@ namespace Rats
 {
     internal static class Configs
     {
-        public static int cfgMaxRats;
-        public static int cfgBatchGroupCount;
-        public static float cfgBatchUpdateInterval;
-        public static BoundedRange cfgRatSpawnTime = null!;
-        public static int cfgFoodToSpawnRat;
-        public static int cfgEnemyFoodPerHPPoint;
-        public static bool cfgHolidayRats;
-        public static bool cfgUseJermaRats;
-        public static int cfgThreatToAttackPlayer;
-        public static int cfgHighPlayerThreat;
-        public static int cfgThreatToAttackEnemy;
-        public static float cfgSwarmRadius;
-        public static int cfgMaxDefenseRats;
-        public static int cfgEnemyHitsToDoDamage;
-        public static int cfgPlayerFoodAmount;
-        public static float cfgSqueakChance;
-        public static bool cfgRatsTakePlayerCorpses;
-        public static bool cfgEnableInfestationSystem;
+        public static int cfgMaxRats { get; private set; }
+        public static int cfgBatchGroupCount { get; private set; }
+        public static float cfgBatchUpdateInterval { get; private set; }
+        public static BoundedRange cfgRatSpawnTime { get; private set; } = null!;
+        public static int cfgFoodToSpawnRat { get; private set; }
+        public static int cfgEnemyFoodPerHPPoint { get; private set; }
+        public static bool cfgHolidayRats { get; private set; }
+        public static bool cfgUseJermaRats { get; private set; }
+        public static int cfgThreatToAttackPlayer { get; private set; }
+        public static int cfgThreatToAttackEnemy { get; private set; }
+        public static float cfgSwarmRadius { get; private set; }
+        public static int cfgMaxDefenseRats { get; private set; }
+        public static int cfgEnemyHitsToDoDamage { get; private set; }
+        public static int cfgPlayerFoodAmount { get; private set; }
+        public static float cfgSqueakChance { get; private set; }
+        public static bool cfgRatsTakePlayerCorpses { get; private set; }
+        public static bool cfgEnableInfestationSystem { get; private set; }
 
         // RatPoison
-        public static float cfgMaxFluid;
-        public static float cfgPourRate;
-        public static float cfgPoisonToCloseNest;
+        public static float cfgMaxFluid { get; private set; }
+        public static float cfgPourRate { get; private set; }
+        public static float cfgPoisonToCloseNest { get; private set; }
 
         // GlueTrap
-        public static int cfgGlueBoardAmount;
-        public static int cfgScrapValuePerRat;
-        public static int cfgMaxRatsOnGlueBoard;
+        public static int cfgGlueBoardAmount { get; private set; }
+        public static int cfgScrapValuePerRat { get; private set; }
+        public static int cfgMaxRatsOnGlueBoard { get; private set; }
 
         // BoxOfSnapTraps
-        public static int cfgSnapTrapAmount;
-        public static float cfgDespawnTime;
+        public static int cfgSnapTrapAmount { get; private set; }
+        public static float cfgDespawnTime { get; private set; }
 
         public static void Init()
         {
@@ -54,7 +53,6 @@ namespace Rats
             cfgHolidayRats = nest.GetConfig<bool>("Holiday Rats").Value;
             cfgUseJermaRats = nest.GetConfig<bool>("Use Jerma Rats").Value;
             cfgThreatToAttackPlayer = nest.GetConfig<int>("Threat To Attack Player").Value;
-            cfgHighPlayerThreat = nest.GetConfig<int>("High Player Threat").Value;
             cfgThreatToAttackEnemy = nest.GetConfig<int>("Threat To Attack Enemy").Value;
             cfgSwarmRadius = nest.GetConfig<float>("Swarm Radius").Value;
             cfgMaxDefenseRats = nest.GetConfig<int>("Max Defense Rats").Value;

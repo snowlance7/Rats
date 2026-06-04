@@ -1,13 +1,18 @@
 ﻿using Dawn.Utils;
 using GameNetcodeStuff;
 using SnowyLib;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.Services.Authentication.Generated;
 using UnityEngine;
+using UnityEngine.Events;
+using static Dawn.Utils.SmartAgentNavigator;
 using static Rats.Configs;
 using static Rats.Plugin;
 using static Rats.RatNest;
-using static Dawn.Utils.SmartAgentNavigator;
+
+// TODO: Steal scrap items with dawnlib tags: food, candy, edible, etc
 
 namespace Rats
 {
@@ -24,11 +29,14 @@ namespace Rats
         public Transform ratMouthTransform = null!;
         public GameObject christmasHat = null!;
 
-        public Animator? animator = null!;
+        public GameObject jermaRatObj = null!;
+        public GameObject ratObj = null!;
+
+        public Animator? animator;
         public Transform eye = null!;
-        public AudioSource audioSource = null!;
-        public SmartAgentNavigator nav = null!;
-        [SerializeField] bool isJermaRat;
+        public AudioSource creatureSFX = null!;
+        public AudioSource creatureVoice = null!;
+        public SmartAgentNavigator nav = null!; // TODO: Put both meshes into the same rat obj and just enable which gameobject should be enabled based on config
 
         [HideInInspector] public bool isDead;
 
@@ -65,7 +73,9 @@ namespace Rats
         GameObject? swarmTarget;
         Vector3 swarmTargetPos;
 
-        //bool rallyRat;
+        // rallying
+        public static UnityEvent<Vector3, GameObject> RallyRats = new();
+        bool rallying;
 
         int health = 1;
 
@@ -84,6 +94,8 @@ namespace Rats
         const float timeToIncreaseThreat = 3f;
         const float maxIdleTime = 1f;
         const float distanceNeededToLoseRats = 20f;
+        const float rallyDistance = 20f;
+        const float rallyTime = 15f;
 
         public void Start()
         {
@@ -91,7 +103,12 @@ namespace Rats
             hashSpeed = Animator.StringToHash("speed");
             christmasHat.SetActive(cfgHolidayRats);
 
+            animator = cfgUseJermaRats ? null : animator;
+            ratObj.SetActive(!cfgUseJermaRats);
+            jermaRatObj.SetActive(cfgUseJermaRats);
+
             nav.SetAllValues(isOutside: false);
+            RallyRats.AddListener(ListenForRallyCall);
 
             logger?.LogDebug($"Rat spawned");
         }
@@ -128,6 +145,7 @@ namespace Rats
         {
             if (isDead || StartOfRound.Instance.allPlayersDead || inSpecialAnimation)
             {
+                nav.StopAgent(); // TODO: Test this
                 return;
             };
 
@@ -203,7 +221,7 @@ namespace Rats
                     CheckForThreatsInLOS();
 
                     if (timeIdle > maxIdleTime)
-                        targetNode = Utils.insideAINodes.GetRandom();
+                        targetNode = Instances.Count >= (cfgMaxRats - (cfgMaxRats / 4)) ? Utils.allAINodes.GetRandom() : Utils.insideAINodes.GetRandom(); // TODO: Test this
 
                     if (targetNode != null)
                         nav.DoPathingToDestination(targetNode.transform.position);
@@ -222,7 +240,7 @@ namespace Rats
 
                     if (swarmTarget.TryGetComponentInChildren(out PlayerControllerB? player))
                     {
-                        if (player == null || !player.isPlayerControlled || (timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 2f && Vector3.Distance(transform.position, player.transform.position) > distanceNeededToLoseRats))
+                        if (player == null || !player.isPlayerControlled || (!rallying && timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 2f && Vector3.Distance(transform.position, player.transform.position) > distanceNeededToLoseRats))
                         {
                             SwitchToBehaviorClientRpc((int)State.ReturnToNest);
                             return;
@@ -231,7 +249,7 @@ namespace Rats
                     else if (swarmTarget.TryGetComponentInChildren(out EnemyAICollisionDetect? enemyAICollision))
                     {
                         EnemyAI? enemy = enemyAICollision?.mainScript;
-                        if (enemy == null || enemy.isEnemyDead || (timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 1f && Vector3.Distance(transform.position, enemy.transform.position) > distanceNeededToLoseRats))
+                        if (enemy == null || enemy.isEnemyDead || (!rallying && timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 1f && Vector3.Distance(transform.position, enemy.transform.position) > distanceNeededToLoseRats))
                         {
                             SwitchToBehaviorClientRpc((int)State.ReturnToNest);
                             return;
@@ -252,6 +270,15 @@ namespace Rats
                     Plugin.logger?.LogWarning("Invalid state: " + currentBehaviorState);
                     break;
             }
+        }
+
+        public void ListenForRallyCall(Vector3 rallyPos, GameObject target)
+        {
+            if (rallying) { return; }
+            rallying =  !isDead && Utils.FastDistance(rallyPos, transform.position, rallyDistance);
+            if (!rallying) { return; }
+            swarmTarget = target;
+            SwitchToBehaviorClientRpc(State.Swarming);
         }
 
         bool CheckLineOfSightForPlayerDeadBody()
@@ -369,10 +396,10 @@ namespace Rats
             PlayerControllerB? player = other.gameObject.GetComponent<PlayerControllerB>();
             if (player == null || !player.isPlayerControlled) { return; }
             //if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.name == "RatCrownItem" && !player.currentlyHeldObjectServer.isPocketed) { return; }
-            //rallyRat = false;
+            rallying = false;
             if (currentBehaviorState == State.Swarming) // TODO: Test this
             {
-                RoundManager.PlayRandomClip(audioSource, attackSFX);
+                RoundManager.PlayRandomClip(creatureSFX, attackSFX);
 
                 if (player != localPlayer) { return; }
                 int deathAnim = UnityEngine.Random.Range(0, 2) == 1 ? 7 : 0;
@@ -387,6 +414,7 @@ namespace Rats
             if (collidedEnemy == null || !collidedEnemy.enemyType.canDie || collidedEnemy.enemyType.EnemySize != EnemySize.Tiny) { return; }
             //if (!cfgEnemyWhitelist.Contains(collidedEnemy.enemyType.name)) { return; } // TODO
             //if (collidedEnemy is RatKingAI) { return; }
+            rallying = false;
             logger?.LogDebug("Collided with: " + collidedEnemy.enemyType.enemyName);
             timeSinceCollision = 0f;
 
@@ -408,7 +436,7 @@ namespace Rats
                     RoundManager.Instance.DespawnEnemyOnServer(collidedEnemy.NetworkObject);
                 }
 
-                RoundManager.PlayRandomClip(audioSource, nibbleSFX);
+                RoundManager.PlayRandomClip(creatureSFX, nibbleSFX);
                 if (localPlayer.HasLineOfSightToPosition(transform.position))
                 {
                     localPlayer.IncreaseFearLevelOverTime(0.8f);
@@ -443,7 +471,7 @@ namespace Rats
 
             if (currentBehaviorState == State.Swarming)
             {
-                RoundManager.PlayRandomClip(audioSource, attackSFX);
+                RoundManager.PlayRandomClip(creatureSFX, attackSFX);
             }
         }
 
@@ -466,6 +494,12 @@ namespace Rats
             logger?.LogDebug($"{enemy.enemyType.enemyName}: {threat} threat");
 
             if (currentBehaviorState == State.Swarming) { return; }
+
+            if (threat > cfgThreatToAttackEnemy * 2 && !rallying && IsServer)
+            {
+                RallyCall(enemy.gameObject);
+                return;
+            }
 
             if (enemyThreatCounter[enemy] > cfgThreatToAttackEnemy && IsServer)
             {
@@ -495,6 +529,12 @@ namespace Rats
 
             if (currentBehaviorState == State.Swarming) { return; }
 
+            if (threat > cfgThreatToAttackPlayer * 2 && !rallying)
+            {
+                RallyCall(player.gameObject);
+                return;
+            }
+
             if (threat > cfgThreatToAttackPlayer)
             {
                 targetPlayer = player;
@@ -504,12 +544,41 @@ namespace Rats
             }
         }
 
+        void RallyCall(GameObject target)
+        {
+            swarmTarget = target;
+            inSpecialAnimation = true;
+            rallying = true;
+            creatureVoice.PlayOneShot(screamSFX);
+            RallyRats.Invoke(transform.position, swarmTarget);
+
+            if (cfgUseJermaRats)
+            {
+                IEnumerator InSpecialAnimationFalseRoutine()
+                {
+                    yield return null;
+                    yield return new WaitForSeconds(4.7f);
+                    inSpecialAnimation = false;
+                }
+                StartCoroutine(InSpecialAnimationFalseRoutine());
+            }
+            else
+            {
+                animator?.SetTrigger("rally");
+            }
+        }
+
         public void FinishRunCycle() // Animation
         {
             if (UnityEngine.Random.Range(0f, 1f) < cfgSqueakChance)
             {
-                RoundManager.PlayRandomClip(audioSource, squeakSFX);
+                RoundManager.PlayRandomClip(creatureSFX, squeakSFX);
             }
+        }
+
+        public void SetInSpecialAnimationFalse() // Animation
+        {
+            inSpecialAnimation = false;
         }
 
         public void HitEnemy(int force, int playerHitBy = -1)
@@ -521,7 +590,7 @@ namespace Rats
             }
 
             health -= force;
-            RoundManager.PlayRandomClip(audioSource, hitSFX);
+            RoundManager.PlayRandomClip(creatureSFX, hitSFX);
 
             if (health <= 0)
             {
@@ -578,7 +647,7 @@ namespace Rats
         [ClientRpc]
         public void PlayRallySFXClientRpc()
         {
-            audioSource.PlayOneShot(screamSFX);
+            creatureSFX.PlayOneShot(screamSFX);
         }
 
         [ClientRpc]
@@ -596,7 +665,7 @@ namespace Rats
 
             grabbingBody = false;
             returningBodyToNest = true;
-            RoundManager.PlayRandomClip(audioSource, nibbleSFX, true, 1f, -1);
+            RoundManager.PlayRandomClip(creatureSFX, nibbleSFX, true, 1f, -1);
             SwitchToBehaviorOnLocalClient(State.ReturnToNest);
         }
 

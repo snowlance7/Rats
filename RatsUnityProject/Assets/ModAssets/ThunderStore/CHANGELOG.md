@@ -1,6 +1,7 @@
 ## 1.3.1
 - Spawn weight config changes (delete config or rat nests wont spawn)
 - Small fixes
+- Added rallying rats
 
 ## 1.3.0
 - v80 Compat Fix
