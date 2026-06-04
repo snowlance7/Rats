@@ -12,62 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 466683445, guid: 1f73291e6cf64124796e048d841e7d1f, type: 3}
   m_Name: GlueTrapDef
   m_EditorClassIdentifier: 
-  _configEntries:
-  - settingName: Glue Board Amount
-    DynamicConfigType: 1
-    defaultString: 
-    defaultInt: 4
-    defaultFloat: 0
-    defaultBool: 0
-    defaultBoundedRange:
-      <Min>k__BackingField: 0
-      <Max>k__BackingField: 0
-    defaultAnimationCurve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 0
-      m_PostInfinity: 0
-      m_RotationOrder: 0
-    defaultVector3: {x: 0, y: 0, z: 0}
-    defaultColor: {r: 0, g: 0, b: 0, a: 0}
-    Description: The amount of glue boards you can place down from a glue board trap
-      item
-  - settingName: Scrap Value Per Rat
-    DynamicConfigType: 1
-    defaultString: 
-    defaultInt: 2
-    defaultFloat: 0
-    defaultBool: 0
-    defaultBoundedRange:
-      <Min>k__BackingField: 0
-      <Max>k__BackingField: 0
-    defaultAnimationCurve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 0
-      m_PostInfinity: 0
-      m_RotationOrder: 0
-    defaultVector3: {x: 0, y: 0, z: 0}
-    defaultColor: {r: 0, g: 0, b: 0, a: 0}
-    Description: The scrap value added to the glue board per rat stuck in trap
-  - settingName: Max Rats On Glue Board
-    DynamicConfigType: 1
-    defaultString: 
-    defaultInt: 5
-    defaultFloat: 0
-    defaultBool: 0
-    defaultBoundedRange:
-      <Min>k__BackingField: 0
-      <Max>k__BackingField: 0
-    defaultAnimationCurve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 0
-      m_PostInfinity: 0
-      m_RotationOrder: 0
-    defaultVector3: {x: 0, y: 0, z: 0}
-    defaultColor: {r: 0, g: 0, b: 0, a: 0}
-    Description: The maximum number of rats that can be caught on a single glue board
+  _configEntries: []
   _tags: []
   <Key>k__BackingField:
     _namespace: rats

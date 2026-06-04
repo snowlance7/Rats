@@ -1,7 +1,5 @@
-﻿using BepInEx.Logging;
-using Dawn;
-using Dawn.Utils;
-using GameNetcodeStuff;
+﻿using GameNetcodeStuff;
+using HarmonyLib;
 using SnowyLib;
 using System.Collections;
 using System.Collections.Generic;
@@ -106,7 +104,7 @@ namespace Rats
             base.OnNetworkDespawn();
         }
 
-        public void Update() // TODO: spawning rat king and spamming errors after filled with poison
+        public void Update()
         {
             timeSinceSpawnRat += Time.unscaledDeltaTime;
 
@@ -177,7 +175,7 @@ namespace Rats
 
         public void AddFood(int amount = 1)
         {
-            if (!IsServer) { logger?.LogError("Only server can call functions in RatNest"); return; }
+            if (!IsServer) { return; }
             food += amount;
 
             int ratsToSpawn = food / cfgFoodToSpawnRat;
@@ -223,16 +221,23 @@ namespace Rats
 
         public static RatNest? GetClosestNestToPosition(Vector3 position, bool checkForPath = false)
         {
-            float closestDistance = Mathf.Infinity;
+            float closestDistanceSqr = Mathf.Infinity;
             RatNest? closestNest = null;
 
             foreach (var nest in nests)
             {
-                if (nest == null || !nest.isOpen) { continue; }
-                float distance = Vector3.Distance(position, nest.transform.position);
-                if (distance >= closestDistance) { continue; }
-                if (checkForPath && !Utils.CanPathToPoint(position, nest.transform.position)) { continue; }
-                closestDistance = distance;
+                if (nest == null || !nest.isOpen)
+                    continue;
+
+                float distanceSqr = (position - nest.transform.position).sqrMagnitude;
+
+                if (distanceSqr >= closestDistanceSqr)
+                    continue;
+
+                if (checkForPath && !Utils.CanPathToPoint(position, nest.transform.position))
+                    continue;
+
+                closestDistanceSqr = distanceSqr;
                 closestNest = nest;
             }
 

@@ -1,3 +1,7 @@
+## 1.4.0
+- Rats can now steal food items
+- Small optimizations and config changes
+
 ## 1.3.1
 - Spawn weight config changes (delete config or rat nests wont spawn)
 - Small fixes

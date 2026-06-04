@@ -12,61 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 466683445, guid: 1f73291e6cf64124796e048d841e7d1f, type: 3}
   m_Name: RatPoisonDef
   m_EditorClassIdentifier: 
-  _configEntries:
-  - settingName: Max Fluid
-    DynamicConfigType: 2
-    defaultString: 
-    defaultInt: 0
-    defaultFloat: 5
-    defaultBool: 0
-    defaultBoundedRange:
-      <Min>k__BackingField: 0
-      <Max>k__BackingField: 0
-    defaultAnimationCurve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 0
-      m_PostInfinity: 0
-      m_RotationOrder: 0
-    defaultVector3: {x: 0, y: 0, z: 0}
-    defaultColor: {r: 0, g: 0, b: 0, a: 0}
-    Description: The amount of rat poison in a jug of rat poison
-  - settingName: Pour Rate
-    DynamicConfigType: 2
-    defaultString: 
-    defaultInt: 0
-    defaultFloat: 0.1
-    defaultBool: 0
-    defaultBoundedRange:
-      <Min>k__BackingField: 0
-      <Max>k__BackingField: 0
-    defaultAnimationCurve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 0
-      m_PostInfinity: 0
-      m_RotationOrder: 0
-    defaultVector3: {x: 0, y: 0, z: 0}
-    defaultColor: {r: 0, g: 0, b: 0, a: 0}
-    Description: How fast the rat poison pours out of the container
-  - settingName: Poison To Close Nest
-    DynamicConfigType: 2
-    defaultString: 
-    defaultInt: 0
-    defaultFloat: 1
-    defaultBool: 0
-    defaultBoundedRange:
-      <Min>k__BackingField: 0
-      <Max>k__BackingField: 0
-    defaultAnimationCurve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 0
-      m_PostInfinity: 0
-      m_RotationOrder: 0
-    defaultVector3: {x: 0, y: 0, z: 0}
-    defaultColor: {r: 0, g: 0, b: 0, a: 0}
-    Description: The amount of poison you need to pour in a rat nest to disable it
+  _configEntries: []
   _tags: []
   <Key>k__BackingField:
     _namespace: rats

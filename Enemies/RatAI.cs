@@ -1,10 +1,12 @@
-﻿using Dawn.Utils;
+﻿using Dawn;
+using Dawn.Utils;
 using GameNetcodeStuff;
+using HarmonyLib;
 using SnowyLib;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
-using Unity.Services.Authentication.Generated;
 using UnityEngine;
 using UnityEngine.Events;
 using static Dawn.Utils.SmartAgentNavigator;
@@ -13,14 +15,13 @@ using static Rats.Plugin;
 using static Rats.RatNest;
 
 // TODO: Steal scrap items with dawnlib tags: food, candy, edible, etc
-// TODO: Make it so they dont use elevators
-// TODO: Decrease spawn times
 
 namespace Rats
 {
     public class RatAI : NetworkBehaviour
     {
         public static List<RatAI> Instances = [];
+        public static List<GrabbableObject> StealableObjects = [];
 
         public AudioClip[] squeakSFX = null!;
         public AudioClip[] attackSFX = null!;
@@ -38,7 +39,7 @@ namespace Rats
         public Transform eye = null!;
         public AudioSource creatureSFX = null!;
         public AudioSource creatureVoice = null!;
-        public SmartAgentNavigator nav = null!; // TODO: Put both meshes into the same rat obj and just enable which gameobject should be enabled based on config
+        public SmartAgentNavigator nav = null!;
 
         [HideInInspector] public bool isDead;
 
@@ -56,17 +57,19 @@ namespace Rats
         public PlayerControllerB? targetPlayer;
         //public EnemyAI? targetEnemy;
 
+        GrabbableObject? targetObject;
+        GrabbableObject? heldObject;
+
+        DeadBodyInfo? targetBody;
         DeadBodyInfo? heldBody;
+
         bool holdingFood;
 
         int hashDie;
         int hashSpeed;
 
-        bool grabbingBody;
-        bool returningBodyToNest;
-
         float timeSinceCollision;
-        float timeSinceAddThreat;
+        float timeSinceCheck;
         float timeSinceSwitchBehavior;
         float timeIdle;
 
@@ -93,11 +96,11 @@ namespace Rats
         private Vector3 lastPosition;
         private float currentSpeed;
 
-        const float timeToIncreaseThreat = 3f;
+        const float timeToDoChecks = 3f;
         const float maxIdleTime = 1f;
         const float distanceNeededToLoseRats = 20f;
         const float rallyDistance = 20f;
-        const float rallyTime = 15f;
+        const float scentRange = 20f;
 
         public void Start()
         {
@@ -130,7 +133,7 @@ namespace Rats
         public void Update()
         {
             timeSinceCollision += Time.deltaTime;
-            timeSinceAddThreat += Time.deltaTime;
+            timeSinceCheck += Time.deltaTime;
             timeSinceSwitchBehavior += Time.deltaTime;
         }
 
@@ -145,13 +148,14 @@ namespace Rats
 
         public void DoAIInterval()
         {
+            if (!IsServer) { return; }
+
             if (isDead || StartOfRound.Instance.allPlayersDead || inSpecialAnimation)
             {
                 nav.StopAgent(); // TODO: Test this
                 return;
-            };
-
-            if (!IsServer) { return; }
+            }
+            ;
 
             switch (currentBehaviorState)
             {
@@ -183,10 +187,16 @@ namespace Rats
                             closestNest.AddFood();
                         holdingFood = false;
 
-                        if (returningBodyToNest)
+                        if (heldBody != null)
                         {
-                            DropBodyClientRpc(true);
                             closestNest.AddFood(cfgPlayerFoodAmount);
+                            DropObjectClientRpc(despawn: true);
+                        }
+
+                        if (heldObject != null)
+                        {
+                            closestNest.AddFood(Mathf.CeilToInt(heldObject.itemProperties.weight * 2.5f));
+                            DropObjectClientRpc(despawn: true);
                         }
                         
                         if (closestNest != null && closestNest.DefenseRats != null && closestNest.DefenseRats.Count < cfgMaxDefenseRats)
@@ -205,22 +215,38 @@ namespace Rats
                 case State.Scouting:
                     nav.agent.speed = 5f;
 
-                    if (grabbingBody && targetPlayer != null)
+                    if (targetBody != null)
                     {
-                        GrabbableObject deadBody = targetPlayer.deadBody.grabBodyObject;
-                        if (nav.TryDoPathingToDestination(deadBody.transform.position, out destinationResult) && destinationResult != GoToDestinationResult.Failure)
+                        if (nav.TryDoPathingToDestination(targetBody.transform.position, out destinationResult) && destinationResult != GoToDestinationResult.Failure)
                         {
                             if (destinationResult == GoToDestinationResult.Success)
                             {
-                                int limb = UnityEngine.Random.Range(0, targetPlayer.deadBody.bodyParts.Length);
-                                GrabBodyClientRpc(targetPlayer.actualClientId, limb);
-                                returningBodyToNest = true;
+                                int limb = UnityEngine.Random.Range(0, targetBody.bodyParts.Length);
+                                GrabBodyClientRpc(targetBody.playerScript.actualClientId, limb);
+                                targetBody = null;
                             }
                             return;
                         }
                     }
 
-                    CheckForThreatsInLOS();
+                    if (targetObject != null)
+                    {
+                        if (nav.TryDoPathingToDestination(targetObject.transform.position, out destinationResult) && destinationResult != GoToDestinationResult.Failure)
+                        {
+                            if (destinationResult == GoToDestinationResult.Success)
+                            {
+                                GrabObjectClientRpc(targetObject.NetworkObject);
+                                targetObject = null;
+                            }
+                            return;
+                        }
+                    }
+
+                    if (timeSinceCheck > timeToDoChecks)
+                    {
+                        timeSinceCheck = 0f;
+                        DoChecks();
+                    }
 
                     if (timeIdle > maxIdleTime)
                         targetNode = Instances.Count >= (cfgMaxRats - (cfgMaxRats / 4)) ? Utils.allAINodes.GetRandom() : Utils.insideAINodes.GetRandom(); // TODO: Test this
@@ -242,7 +268,7 @@ namespace Rats
 
                     if (swarmTarget.TryGetComponentInChildren(out PlayerControllerB? player))
                     {
-                        if (player == null || !player.isPlayerControlled || (!rallying && timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 2f && Vector3.Distance(transform.position, player.transform.position) > distanceNeededToLoseRats))
+                        if (player == null || !player.isPlayerControlled || (!rallying && timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 2f && (transform.position - player.transform.position).sqrMagnitude > distanceNeededToLoseRats * distanceNeededToLoseRats))
                         {
                             SwitchToBehaviorClientRpc((int)State.ReturnToNest);
                             return;
@@ -251,7 +277,7 @@ namespace Rats
                     else if (swarmTarget.TryGetComponentInChildren(out EnemyAICollisionDetect? enemyAICollision))
                     {
                         EnemyAI? enemy = enemyAICollision?.mainScript;
-                        if (enemy == null || enemy.isEnemyDead || (!rallying && timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 1f && Vector3.Distance(transform.position, enemy.transform.position) > distanceNeededToLoseRats))
+                        if (enemy == null || enemy.isEnemyDead || (!rallying && timeIdle > maxIdleTime && timeSinceSwitchBehavior > maxIdleTime + 1f && (transform.position - enemy.transform.position).sqrMagnitude > distanceNeededToLoseRats * distanceNeededToLoseRats))
                         {
                             SwitchToBehaviorClientRpc((int)State.ReturnToNest);
                             return;
@@ -277,15 +303,24 @@ namespace Rats
         public void ListenForRallyCall(Vector3 rallyPos, GameObject target)
         {
             if (rallying) { return; }
-            rallying =  !isDead && Utils.FastDistance(rallyPos, transform.position, rallyDistance);
+            rallying =  !isDead && (rallyPos - transform.position).sqrMagnitude < rallyDistance * rallyDistance;
             if (!rallying) { return; }
             swarmTarget = target;
             SwitchToBehaviorClientRpc(State.Swarming);
         }
 
-        bool CheckLineOfSightForPlayerDeadBody()
+        void DoChecks()
         {
-            if (!cfgRatsTakePlayerCorpses) { return false; }
+            CheckForThreatsInLOS();
+            CheckLineOfSightForPlayerDeadBody();
+            CheckForItemsToSteal();
+        }
+
+        void CheckLineOfSightForPlayerDeadBody()
+        {
+            if (!cfgRatsTakePlayerCorpses) { return; }
+
+            targetBody = null;
 
             foreach (var player in StartOfRound.Instance.allPlayerScripts)
             {
@@ -293,39 +328,52 @@ namespace Rats
                 if (deadBody == null || deadBody.deactivated) { continue; }
                 if (CheckLineOfSightForPosition(deadBody.grabBodyObject.transform.position, 60, 60, 5) && nav.CanPathToPoint(deadBody.grabBodyObject.transform.position))
                 {
-                    targetPlayer = deadBody.playerScript;
-                    return true;
+                    targetBody = deadBody;
+                    return;
                 }
             }
-            return false;
         }
 
         void CheckForThreatsInLOS()
         {
-            if (timeSinceAddThreat < timeToIncreaseThreat) { return; }
-            if (CheckLineOfSightForPlayerDeadBody())
-            {
-                grabbingBody = true;
-                return;
-            }
             EnemyAI? enemy = CheckLineOfSightForEnemy(30);
             if (enemy != null && enemy.enemyType.canDie && enemy.enemyType.EnemySize == EnemySize.Tiny)
-            {
                 AddThreat(enemy);
-            }
+
             PlayerControllerB? player = CheckLineOfSightForPlayer(60f, 60, 5);
             if (player != null && player.isPlayerControlled)
-            {
-                /*if (player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer.itemProperties.name == "RatCrownItem" && !player.currentlyHeldObjectServer.isPocketed)
-                {
-                    targetPlayer = player;
-                    SwitchToBehaviorClientRpc(State.Swarming);
-                    return;
-                }*/
-
                 AddThreat(player);
-                return;
+        }
+
+        void CheckForItemsToSteal()
+        {
+            if (targetBody != null || heldBody != null) { return; }
+            targetObject = null;
+            float closestDistance = scentRange * scentRange;
+
+            foreach (var grabbableObject in StealableObjects.ToList())
+            {
+                if (!IsObjectGrabbable(grabbableObject)) { continue; }
+
+                float distance = (transform.position - grabbableObject.transform.position).sqrMagnitude;
+                if (distance >= closestDistance) { continue; }
+
+                targetObject = grabbableObject;
+                closestDistance = distance;
             }
+        }
+
+        bool IsObjectGrabbable(GrabbableObject obj)
+        {
+            return heldObject == null
+                && heldBody == null
+                && obj != null
+                && obj.grabbable
+                && obj.grabbableToEnemies
+                && !obj.isHeld
+                && !obj.isHeldByEnemy
+                && obj.hasHitGround
+                && obj.playerHeldBy == null;
         }
 
         public bool CheckLineOfSightForPosition(Vector3 objectPosition, float width = 45f, int range = 60, float proximityAwareness = -1f, Transform? overrideEye = null)
@@ -342,10 +390,10 @@ namespace Rats
                 return false;
             }
             Transform transform = ((overrideEye != null) ? overrideEye : ((!(eye == null)) ? eye : base.transform));
-            if (Vector3.Distance(transform.position, objectPosition) < (float)range && !Physics.Linecast(transform.position, objectPosition, out var _, StartOfRound.Instance.collidersAndRoomMaskAndDefault, QueryTriggerInteraction.Ignore))
+            if ((transform.position - objectPosition).sqrMagnitude < range * range && !Physics.Linecast(transform.position, objectPosition, out var _, StartOfRound.Instance.collidersAndRoomMaskAndDefault, QueryTriggerInteraction.Ignore))
             {
                 Vector3 to = objectPosition - transform.position;
-                if (Vector3.Angle(transform.forward, to) < width || Vector3.Distance(base.transform.position, objectPosition) < proximityAwareness)
+                if (Vector3.Angle(transform.forward, to) < width || (base.transform.position - objectPosition).sqrMagnitude < proximityAwareness * proximityAwareness)
                 {
                     return true;
                 }
@@ -358,10 +406,10 @@ namespace Rats
             for (int i = 0; i < StartOfRound.Instance.allPlayerScripts.Length; i++)
             {
                 Vector3 position = StartOfRound.Instance.allPlayerScripts[i].gameplayCamera.transform.position;
-                if (Vector3.Distance(position, eye.position) < (float)range && !Physics.Linecast(eye.position, position, StartOfRound.Instance.collidersAndRoomMaskAndDefault, QueryTriggerInteraction.Ignore))
+                if ((position - eye.position).sqrMagnitude < range * range && !Physics.Linecast(eye.position, position, StartOfRound.Instance.collidersAndRoomMaskAndDefault, QueryTriggerInteraction.Ignore))
                 {
                     Vector3 to = position - eye.position;
-                    if (Vector3.Angle(eye.forward, to) < width || (proximityAwareness != -1 && Vector3.Distance(eye.position, position) < (float)proximityAwareness))
+                    if (Vector3.Angle(eye.forward, to) < width || (proximityAwareness != -1 && (eye.position - position).sqrMagnitude < proximityAwareness * proximityAwareness))
                     {
                         return StartOfRound.Instance.allPlayerScripts[i];
                     }
@@ -408,8 +456,7 @@ namespace Rats
                 player.DamagePlayer(1, true, true, CauseOfDeath.Mauling, deathAnim);
 
 
-                if (timeSinceAddThreat > timeToIncreaseThreat)
-                    AddThreat(player);
+                AddThreat(player);
             }
         }
 
@@ -468,8 +515,6 @@ namespace Rats
         {
             if (enemy == null) { return; }
 
-            timeSinceAddThreat = 0f;
-
             enemyThreatCounter[enemy] += amount;
 
             int threat = enemyThreatCounter[enemy];
@@ -494,8 +539,6 @@ namespace Rats
         void AddThreat(PlayerControllerB player, int amount = 1)
         {
             if (player == null || !player.isPlayerControlled) { return; }
-
-            timeSinceAddThreat = 0f;
 
             if (playerThreatCounter.ContainsKey(player))
             {
@@ -578,6 +621,9 @@ namespace Rats
             {
                 KillEnemy();
             }
+
+            if (heldObject != null || heldBody != null)
+                DropObjectOnLocalClient(despawn: false);
         }
 
         public void KillEnemy()
@@ -633,38 +679,71 @@ namespace Rats
         }
 
         [ClientRpc]
-        public void GrabBodyClientRpc(ulong clientId, int attachedLimbIndex)
+        public void GrabObjectClientRpc(NetworkObjectReference netRef)
         {
-            targetPlayer = PlayerFromId(clientId);
+            netRef.TryGet(out NetworkObject netObj);
+            GrabbableObject grabbableObject = netObj.GetComponent<GrabbableObject>();
+            grabbableObject.parentObject = ratMouthTransform;
+            grabbableObject.hasHitGround = false;
+            grabbableObject.isHeldByEnemy = true;
+            //grabbableObject.GrabItemFromEnemy(this);
+            grabbableObject.EnablePhysics(false);
+            HoarderBugAI.grabbableObjectsInMap.Remove(grabbableObject.gameObject);
+            heldObject = grabbableObject;
 
-            if (targetPlayer != null && targetPlayer.deadBody != null)
-            {
-                heldBody = targetPlayer.deadBody;
-                heldBody.attachedTo = ratMouthTransform;
-                heldBody.attachedLimb = targetPlayer.deadBody.bodyParts[attachedLimbIndex];
-                heldBody.matchPositionExactly = true;
-            }
-
-            grabbingBody = false;
-            returningBodyToNest = true;
             RoundManager.PlayRandomClip(creatureSFX, nibbleSFX, true, 1f, -1);
             SwitchToBehaviorOnLocalClient(State.ReturnToNest);
         }
 
         [ClientRpc]
-        public void DropBodyClientRpc(bool deactivate)
+        public void GrabBodyClientRpc(ulong clientId, int attachedLimbIndex)
         {
-            returningBodyToNest = false;
-            grabbingBody = false;
-            targetPlayer = null;
+            targetPlayer = PlayerFromId(clientId);
 
+            heldBody = targetPlayer.deadBody;
+            heldBody.attachedTo = ratMouthTransform;
+            heldBody.attachedLimb = targetPlayer.deadBody.bodyParts[attachedLimbIndex];
+            heldBody.matchPositionExactly = true;
+
+            RoundManager.PlayRandomClip(creatureSFX, nibbleSFX, true, 1f, -1);
+            SwitchToBehaviorOnLocalClient(State.ReturnToNest);
+        }
+
+        [ClientRpc]
+        public void DropObjectClientRpc(bool despawn)
+        {
+            DropObjectOnLocalClient(despawn);
+        }
+
+        public void DropObjectOnLocalClient(bool despawn)
+        {
             if (heldBody != null)
             {
                 heldBody.attachedTo = null;
                 heldBody.attachedLimb = null;
                 heldBody.matchPositionExactly = false;
-                if (deactivate) { heldBody.DeactivateBody(setActive: false); }
+                if (despawn) { heldBody.DeactivateBody(setActive: false); }
                 heldBody = null;
+            }
+            if (heldObject != null)
+            {
+                Vector3 targetFloorPosition = heldObject.transform.position.GetFloorPosition();
+                heldObject.parentObject = null;
+                heldObject.transform.SetParent(StartOfRound.Instance.propsContainer, worldPositionStays: true);
+                heldObject.EnablePhysics(enable: true);
+                heldObject.fallTime = 0f;
+                heldObject.startFallingPosition = heldObject.transform.parent.InverseTransformPoint(heldObject.transform.position);
+                heldObject.targetFloorPosition = heldObject.transform.parent.InverseTransformPoint(targetFloorPosition);
+                //heldObject.floorYRot = -1; // TODO: Test this?
+                heldObject.DiscardItemFromEnemy();
+                heldObject.isHeldByEnemy = false;
+
+                if (despawn)
+                    heldObject.NetworkObject.Despawn(destroy: true);
+                else
+                    HoarderBugAI.grabbableObjectsInMap.Add(heldObject.gameObject);
+
+                heldObject = null;
             }
         }
 
@@ -720,6 +799,47 @@ namespace Rats
             int id = playerWhoHit != null ? (int)playerWhoHit.actualClientId : -1;
             mainScript.HitEnemyServerRpc(force, id);
             return true;
+        }
+    }
+
+    [HarmonyPatch]
+    internal static class RatAIPatches
+    {
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Landmine), nameof(Landmine.SpawnExplosion))]
+        public static void Landmine_SpawnExplosion_Postfix(Vector3 explosionPosition, bool spawnExplosionEffect = false, float killRange = 1f, float damageRange = 1f, int nonLethalDamage = 50, float physicsForce = 0f, GameObject overridePrefab = null, bool goThroughCar = false)
+        {
+            if (!IsServerOrHost) { return; }
+            foreach (RatAI rat in RatAI.Instances)
+            {
+                if (rat == null || rat.isDead) { continue; }
+                float distance = Vector3.Distance(rat.transform.position, explosionPosition);
+                if (distance < damageRange)
+                {
+                    rat.HitFromExplosion(distance);
+                }
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.Start))]
+        public static void GrabbableObject_Start_Postfix(GrabbableObject __instance)
+        {
+            if (!IsServerOrHost) { return; }
+
+            var info = __instance.itemProperties.GetDawnInfo();
+
+            if (info == null || !(info.AllTags().Any(x => cfgFoodItemTags.Contains(x.ToString())) || cfgFoodItemNames.Contains(info.TypedKey.ToString()))) { return; } // TODO: Test this
+            RatAI.StealableObjects.Add(__instance);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.OnDestroy))]
+        public static void GrabbableObject_OnDestroy_Postfix(GrabbableObject __instance)
+        {
+            if (!IsServerOrHost) { return; }
+
+            RatAI.StealableObjects.Remove(__instance);
         }
     }
 }
