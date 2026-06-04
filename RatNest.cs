@@ -43,10 +43,10 @@ namespace Rats
 
         public static List<RatNest> nestsOpen => nests.Where(x => x.isOpen).ToList();
 
-        public static Dictionary<EnemyAI, int> enemyHitCount = [];
-        public static Dictionary<PlayerControllerB, int> playerThreatCounter = [];
-        public static Dictionary<EnemyAI, int> enemyThreatCounter = [];
-        public static Dictionary<EnemyAI, int> enemyFoodPointsLeft = [];
+        public static AutoDictionary<EnemyAI, int> enemyHitCount = new AutoDictionary<EnemyAI, int>(enemy => cfgEnemyHitsToDoDamage);
+        public static AutoDictionary<PlayerControllerB, int> playerThreatCounter = new AutoDictionary<PlayerControllerB, int>(player => 0);
+        public static AutoDictionary<EnemyAI, int> enemyThreatCounter = new AutoDictionary<EnemyAI, int>(enemy => 0);
+        public static AutoDictionary<EnemyAI, int> enemyFoodPointsLeft = new AutoDictionary<EnemyAI, int>(enemy => enemy.enemyType.enemyPrefab.GetComponent<EnemyAI>().enemyHP * cfgEnemyFoodPerHPPoint);
 
         public bool isOpen = true;
 
@@ -237,13 +237,6 @@ namespace Rats
             }
 
             return closestNest;
-        }
-
-        public static void AddEnemyFoodAmount(EnemyAI enemy) // TODO: add enemy blacklist/whitelist
-        {
-            int maxHP = enemy.enemyType.enemyPrefab.GetComponent<EnemyAI>().enemyHP;
-            int foodAmount = maxHP * cfgEnemyFoodPerHPPoint;
-            enemyFoodPointsLeft.Add(enemy, foodAmount);
         }
 
         public void OnNestClosed() // Animation

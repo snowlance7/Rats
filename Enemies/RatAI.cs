@@ -420,13 +420,6 @@ namespace Rats
 
             if (collidedEnemy.isEnemyDead)
             {
-                if (enemyFoodPointsLeft.ContainsKey(collidedEnemy))
-                {
-                    enemyThreatCounter.Remove(collidedEnemy);
-                    enemyHitCount.Remove(collidedEnemy);
-                    AddEnemyFoodAmount(collidedEnemy);
-                }
-
                 enemyFoodPointsLeft[collidedEnemy] -= 1;
                 holdingFood = true;
 
@@ -447,18 +440,8 @@ namespace Rats
             }
             else
             {
-                if (!enemyThreatCounter.ContainsKey(collidedEnemy))
-                {
-                    enemyThreatCounter.Add(collidedEnemy, 0);
-                }
-
                 if (enemyThreatCounter[collidedEnemy] > cfgThreatToAttackEnemy)
                 {
-                    if (!enemyHitCount.ContainsKey(collidedEnemy))
-                    {
-                        enemyHitCount.Add(collidedEnemy, cfgEnemyHitsToDoDamage);
-                    }
-
                     enemyHitCount[collidedEnemy] -= 1;
 
                     if (enemyHitCount[collidedEnemy] <= 0)
@@ -481,14 +464,7 @@ namespace Rats
 
             timeSinceAddThreat = 0f;
 
-            if (enemyThreatCounter.ContainsKey(enemy))
-            {
-                enemyThreatCounter[enemy] += amount;
-            }
-            else
-            {
-                enemyThreatCounter.Add(enemy, amount);
-            }
+            enemyThreatCounter[enemy] += amount;
 
             int threat = enemyThreatCounter[enemy];
             logger?.LogDebug($"{enemy.enemyType.enemyName}: {threat} threat");
