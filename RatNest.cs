@@ -44,7 +44,7 @@ namespace Rats
         public static List<RatNest> nestsOpen => nests.Where(x => x.isOpen).ToList();
 
         public static AutoDictionary<EnemyAI, int> enemyHitCount = new AutoDictionary<EnemyAI, int>(enemy => cfgEnemyHitsToDoDamage);
-        public static AutoDictionary<PlayerControllerB, int> playerThreatCounter = new AutoDictionary<PlayerControllerB, int>(player => 0);
+        public static AutoDictionary<PlayerControllerB, int> playerThreatCounter = new AutoDictionary<PlayerControllerB, int>(player => 0); // TODO: Have this get saved or influenced by infestation levels, or save it per moon
         public static AutoDictionary<EnemyAI, int> enemyThreatCounter = new AutoDictionary<EnemyAI, int>(enemy => 0);
         public static AutoDictionary<EnemyAI, int> enemyFoodPointsLeft = new AutoDictionary<EnemyAI, int>(enemy => enemy.enemyType.enemyPrefab.GetComponent<EnemyAI>().enemyHP * cfgEnemyFoodPerHPPoint);
 

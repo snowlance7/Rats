@@ -404,6 +404,10 @@ namespace Rats
                 if (player != localPlayer) { return; }
                 int deathAnim = UnityEngine.Random.Range(0, 2) == 1 ? 7 : 0;
                 player.DamagePlayer(1, true, true, CauseOfDeath.Mauling, deathAnim);
+
+
+                if (timeSinceAddThreat > timeToIncreaseThreat)
+                    AddThreat(player);
             }
         }
 
