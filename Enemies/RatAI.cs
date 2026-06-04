@@ -13,6 +13,8 @@ using static Rats.Plugin;
 using static Rats.RatNest;
 
 // TODO: Steal scrap items with dawnlib tags: food, candy, edible, etc
+// TODO: Make it so they dont use elevators
+// TODO: Decrease spawn times
 
 namespace Rats
 {
