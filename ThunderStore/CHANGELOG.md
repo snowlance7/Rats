@@ -1,3 +1,6 @@
+## 1.4.1
+- Config changes
+
 ## 1.4.0
 - Rats can now steal food items
 - Small optimizations and config changes

@@ -68,26 +68,26 @@ namespace Rats
             cfgFoodItemTags = Plugin.Instance.Config.Bind("Rats", "Food Item Tags", "food,edible,organic,consumable,meat,produce,ingredient,snack,perishable,corpse,garbage,ration,snack,candy,waste,carcass,rat_food", "Dawnlib tags for items rats should steal").Value.Replace(" ", "").ToLower().Split(",");
 
             // RatNest
-            cfgRatSpawnTime = Plugin.Instance.Config.Bind("RatNest", "Rat Spawn Time", new BoundedRange(10, 30), "The min/max time in seconds before a rat can spawn from a nest after the last rat was spawned").Value;
-            cfgFoodToSpawnRat = Plugin.Instance.Config.Bind("RatNest", "Food To Spawn Rat", 5, "The amount of food needed in the nest to spawn a new rat").Value;
-            cfgEnemyFoodPerHPPoint = Plugin.Instance.Config.Bind("RatNest", "Enemy Food Per HP Point", 10, "How much food points one HP will equal for enemies. ex: if 10, thumper will give 40 food points").Value;
-            cfgMaxDefenseRats = Plugin.Instance.Config.Bind("RatNest", "Max Defense Rats", 10, "The maximum number of defense rats assigned to protect the nest").Value;
-            cfgPlayerFoodAmount = Plugin.Instance.Config.Bind("RatNest", "Player Food Amount", 30, "How much food points a player corpse gives when brought to the nest").Value;
-            cfgRatsTakePlayerCorpses = Plugin.Instance.Config.Bind("RatNest", "Rats Take Player Corpses", true, "If this is true, allows rats to drag players to their nest to eat").Value;
+            cfgRatSpawnTime = Plugin.Instance.Config.Bind("Rat Nest Options", "Rat Spawn Time", new BoundedRange(10, 30), "The min/max time in seconds before a rat can spawn from a nest after the last rat was spawned").Value;
+            cfgFoodToSpawnRat = Plugin.Instance.Config.Bind("Rat Nest Options", "Food To Spawn Rat", 5, "The amount of food needed in the nest to spawn a new rat").Value;
+            cfgEnemyFoodPerHPPoint = Plugin.Instance.Config.Bind("Rat Nest Options", "Enemy Food Per HP Point", 10, "How much food points one HP will equal for enemies. ex: if 10, thumper will give 40 food points").Value;
+            cfgMaxDefenseRats = Plugin.Instance.Config.Bind("Rat Nest Options", "Max Defense Rats", 10, "The maximum number of defense rats assigned to protect the nest").Value;
+            cfgPlayerFoodAmount = Plugin.Instance.Config.Bind("Rat Nest Options", "Player Food Amount", 30, "How much food points a player corpse gives when brought to the nest").Value;
+            cfgRatsTakePlayerCorpses = Plugin.Instance.Config.Bind("Rat Nest Options", "Rats Take Player Corpses", true, "If this is true, allows rats to drag players to their nest to eat").Value;
 
             // RatPoison
-            cfgMaxFluid = Plugin.Instance.Config.Bind("RatPoison", "Max Fluid", 5f, "The amount of rat poison in a jug of rat poison").Value;
-            cfgPourRate = Plugin.Instance.Config.Bind("RatPoison", "Pour Rate", 0.1f, "How fast the rat poison pours out of the container").Value;
-            cfgPoisonToCloseNest = Plugin.Instance.Config.Bind("RatPoison", "Poison To Close Nest", 1f, "The amount of poison you need to pour in a rat nest to disable it").Value;
+            cfgMaxFluid = Plugin.Instance.Config.Bind("Rat Poison Options", "Max Fluid", 5f, "The amount of rat poison in a jug of rat poison").Value;
+            cfgPourRate = Plugin.Instance.Config.Bind("Rat Poison Options", "Pour Rate", 0.1f, "How fast the rat poison pours out of the container").Value;
+            cfgPoisonToCloseNest = Plugin.Instance.Config.Bind("Rat Poison Options", "Poison To Close Nest", 1f, "The amount of poison you need to pour in a rat nest to disable it").Value;
 
             // GlueTrap
-            cfgGlueBoardAmount = Plugin.Instance.Config.Bind("GlueTrap", "Glue Board Amount", 4, "The amount of glue boards you can place down from a glue board trap item").Value;
-            cfgScrapValuePerRat = Plugin.Instance.Config.Bind("GlueTrap", "Scrap Value Per Rat", 2, "The scrap value added to the glue board per rat stuck in trap").Value;
-            cfgMaxRatsOnGlueBoard = Plugin.Instance.Config.Bind("GlueTrap", "Max Rats On Glue Board", 5, "The maximum number of rats that can be caught on a single glue board").Value;
+            cfgGlueBoardAmount = Plugin.Instance.Config.Bind("Glue Trap Options", "Glue Board Amount", 4, "The amount of glue boards you can place down from a glue board trap item").Value;
+            cfgScrapValuePerRat = Plugin.Instance.Config.Bind("Glue Trap Options", "Scrap Value Per Rat", 2, "The scrap value added to the glue board per rat stuck in trap").Value;
+            cfgMaxRatsOnGlueBoard = Plugin.Instance.Config.Bind("Glue Trap Options", "Max Rats On Glue Board", 5, "The maximum number of rats that can be caught on a single glue board").Value;
 
             // BoxOfSnapTraps
-            cfgSnapTrapAmount = Plugin.Instance.Config.Bind("BoxOfSnapTraps", "Snap Trap Amount", 100, "The amount of snap traps that come with a Box Of Snap Traps").Value;
-            cfgDespawnTime = Plugin.Instance.Config.Bind("BoxOfSnapTraps", "Despawn Time", 65, "The time in seconds for snap traps to despawn after being triggered").Value;
+            cfgSnapTrapAmount = Plugin.Instance.Config.Bind("Box Of Snap Traps Options", "Snap Trap Amount", 100, "The amount of snap traps that come with a Box Of Snap Traps").Value;
+            cfgDespawnTime = Plugin.Instance.Config.Bind("Box Of Snap Traps Options", "Despawn Time", 65, "The time in seconds for snap traps to despawn after being triggered").Value;
         }
     }
 }
